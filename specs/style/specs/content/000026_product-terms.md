@@ -2,7 +2,7 @@
 id: "000026"
 title: Product terms stay as the product shows them
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

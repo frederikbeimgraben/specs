@@ -2,7 +2,7 @@
 id: "000008"
 title: A new spec starts as a copy of the template
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

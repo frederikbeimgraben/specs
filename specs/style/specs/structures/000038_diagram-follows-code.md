@@ -2,7 +2,7 @@
 id: "000038"
 title: A change of the structure changes the diagram
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

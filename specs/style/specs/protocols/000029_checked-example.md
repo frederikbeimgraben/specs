@@ -2,7 +2,7 @@
 id: "000029"
 title: The example of a JSON format matches its schema
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

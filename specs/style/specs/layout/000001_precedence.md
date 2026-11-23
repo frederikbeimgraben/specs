@@ -2,7 +2,7 @@
 id: "000001"
 title: A spec wins over other guidance
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

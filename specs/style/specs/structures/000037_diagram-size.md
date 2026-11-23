@@ -2,7 +2,7 @@
 id: "000037"
 title: A diagram has at most 25 elements
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

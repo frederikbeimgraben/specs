@@ -2,7 +2,7 @@
 id: "000039"
 title: A rule names the structures that it uses
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

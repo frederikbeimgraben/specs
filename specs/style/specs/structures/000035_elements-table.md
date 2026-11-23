@@ -2,7 +2,7 @@
 id: "000035"
 title: Each element of the diagram has a row in the element table
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

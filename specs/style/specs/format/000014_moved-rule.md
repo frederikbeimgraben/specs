@@ -2,7 +2,7 @@
 id: "000014"
 title: A moved rule keeps its number
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:
