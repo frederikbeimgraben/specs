@@ -1,0 +1,13 @@
+# Settings of scripts/check_specs.py. Each key is optional.
+
+# The base branch. A spec number that this branch took after your branch left it is an error.
+base_ref = "origin/main"
+
+# The folders that hold code. The check finds a § reference to a rule that does not exist.
+code_dirs = ["scripts"]
+
+# The file types of the code in code_dirs.
+code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"]
+
+# The highest count of elements in one structure diagram (000037).
+max_elements = 25
