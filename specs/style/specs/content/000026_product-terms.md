@@ -1,0 +1,19 @@
+---
+id: "000026"
+title: Product terms stay as the product shows them
+kind: style
+status: draft
+owner: frederikbeimgraben
+updated: 2026-11-23
+implementation:
+  - specs/
+scope:
+  - specs/
+---
+
+# Product terms stay as the product shows them
+
+A spec must use a term of the user interface in the form that the user interface shows, also
+in a different language. It must not translate the term.
+
+Reason: The reader must find the term in the product.
