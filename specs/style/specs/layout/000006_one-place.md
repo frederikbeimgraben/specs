@@ -2,7 +2,7 @@
 id: "000006"
 title: A rule is written in one place
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

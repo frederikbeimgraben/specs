@@ -2,7 +2,7 @@
 id: "000021"
 title: The rule text uses must and must not
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:

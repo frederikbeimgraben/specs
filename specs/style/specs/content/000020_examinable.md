@@ -2,7 +2,7 @@
 id: "000020"
 title: A rule can be examined
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-23
 implementation:
