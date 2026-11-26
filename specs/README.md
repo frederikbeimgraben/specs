@@ -22,13 +22,15 @@ specs/
   workflow/
     specs/  process
   agents/
-    work/  questions
+    work/  approval, questions
 ```
 
 ## Index
 
 | ID | Title | Status |
 | --- | --- | --- |
+| [A/work/approval/000045](agents/work/approval/000045_one-spec-per-question.md) | An agent asks for the approval of one spec in one question | draft |
+| [A/work/approval/000046](agents/work/approval/000046_show-the-whole-spec.md) | An agent shows the whole spec for its approval | draft |
 | [A/work/questions/000043](agents/work/questions/000043_ask-each-detail.md) | An agent asks the user about each open detail | draft |
 | [A/work/questions/000044](agents/work/questions/000044_follow-the-spec.md) | To follow a spec is not an assumption | draft |
 | [C/specs/content/000018](conventions/specs/content/000018_only-the-rule.md) | A spec contains only the rule | draft |
