@@ -13,7 +13,8 @@ scope:
 # An agent asks the user about each open detail
 
 An agent must ask the user about each detail that no spec settles. It must ask about one
-detail in one question. It must not make an assumption.
+detail in one question, unless the user allowed a different way. It must not make an
+assumption.
 
 Reason: A wrong assumption causes work that the user must find and undo. One detail in one
 question gives one clear answer.
