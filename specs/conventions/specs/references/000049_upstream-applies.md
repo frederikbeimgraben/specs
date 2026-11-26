@@ -2,7 +2,7 @@
 id: "000049"
 title: Each rule of a different repository applies unless a project rule replaces it
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

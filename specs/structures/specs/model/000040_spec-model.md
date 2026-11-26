@@ -2,7 +2,7 @@
 id: "000040"
 title: A spec has a front matter, a body and links to other specs
 kind: structure
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 diagram: class

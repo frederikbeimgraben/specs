@@ -2,7 +2,7 @@
 id: "000044"
 title: To follow a spec is not an assumption
 kind: agent
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation: null

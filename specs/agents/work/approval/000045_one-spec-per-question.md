@@ -2,7 +2,7 @@
 id: "000045"
 title: An agent asks for the approval of one spec in one question
 kind: agent
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

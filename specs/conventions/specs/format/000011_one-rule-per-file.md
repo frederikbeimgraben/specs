@@ -2,7 +2,7 @@
 id: "000011"
 title: One file holds one rule
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

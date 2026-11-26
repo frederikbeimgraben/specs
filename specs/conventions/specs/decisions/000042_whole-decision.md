@@ -2,7 +2,7 @@
 id: "000042"
 title: A decision spec records one decision with its alternatives
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

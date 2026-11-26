@@ -2,7 +2,7 @@
 id: "000043"
 title: An agent asks the user about each open detail
 kind: agent
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation: null

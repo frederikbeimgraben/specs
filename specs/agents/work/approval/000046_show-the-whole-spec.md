@@ -2,7 +2,7 @@
 id: "000046"
 title: An agent shows the whole spec for its approval
 kind: agent
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
