@@ -2,7 +2,7 @@
 id: "000034"
 title: The diagram is one Mermaid block of a fixed type
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

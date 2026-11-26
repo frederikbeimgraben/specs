@@ -2,7 +2,7 @@
 id: "000014"
 title: A moved rule keeps its number
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

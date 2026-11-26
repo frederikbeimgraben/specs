@@ -2,7 +2,7 @@
 id: "000024"
 title: A spec states the current rule
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

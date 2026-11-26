@@ -2,7 +2,7 @@
 id: "000019"
 title: One rule controls one thing
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

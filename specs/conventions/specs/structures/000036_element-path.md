@@ -2,7 +2,7 @@
 id: "000036"
 title: An element names the code that holds it
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

@@ -2,7 +2,7 @@
 id: "000016"
 title: The file name is number and name
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

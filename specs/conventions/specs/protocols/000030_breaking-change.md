@@ -2,7 +2,7 @@
 id: "000030"
 title: A breaking change of a format is a new protocol spec
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

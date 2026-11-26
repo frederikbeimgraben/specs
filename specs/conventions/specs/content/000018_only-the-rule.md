@@ -2,7 +2,7 @@
 id: "000018"
 title: A spec contains only the rule
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:

@@ -2,7 +2,7 @@
 id: "000003"
 title: A change goes through a pull request
 kind: workflow
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
