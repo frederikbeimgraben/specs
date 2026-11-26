@@ -24,6 +24,7 @@ these keys, in this order:
 | `status` | enum | `draft`, `approved`, `replaced` or `removed` (000010). |
 | `owner` | string | The GitHub login of the person who approves the rule. |
 | `updated` | date | The date of the last change, as `YYYY-MM-DD`. |
+| `replaced_by` | list of strings | Only with `status: replaced`: the full rule IDs of the rules of the same repository that replace this rule (000010). |
 | `replaces` | list of strings | Optional, only with `status: draft` or `approved`: the rules that this rule replaces, as full rule IDs or as references to a different repository (000047). |
 | `version` | string | Only with `kind: protocol`: the version of the format, a whole number from 1 (000030). |
 | `media_type` | string | Only with `kind: protocol`: the media type, for example `application/json`. |

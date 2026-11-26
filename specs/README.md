@@ -43,7 +43,7 @@ specs/
 | [C/specs/content/000025](conventions/specs/content/000025_ste.md) | A spec is written in ASD-STE100 | approved |
 | [C/specs/content/000026](conventions/specs/content/000026_product-terms.md) | Product terms stay as the product shows them | approved |
 | [C/specs/decisions/000042](conventions/specs/decisions/000042_whole-decision.md) | A decision spec records one decision with its alternatives | draft |
-| [C/specs/format/000008](conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | draft |
+| [C/specs/format/000008](conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | approved |
 | [C/specs/format/000009](conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | draft |
 | [C/specs/format/000010](conventions/specs/format/000010_status.md) | The status shows the approval | draft |
 | [C/specs/format/000011](conventions/specs/format/000011_one-rule-per-file.md) | One file holds one rule | draft |
@@ -53,7 +53,7 @@ specs/
 | [C/specs/format/000015](conventions/specs/format/000015_labels.md) | Labels in a rule are fixed | approved |
 | [C/specs/format/000016](conventions/specs/format/000016_file-name.md) | The file name is number and name | approved |
 | [C/specs/format/000017](conventions/specs/format/000017_section-sign-reference.md) | Code refers to a rule with the § sign | approved |
-| [C/specs/layout/000004](conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | draft |
+| [C/specs/layout/000004](conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | approved |
 | [C/specs/layout/000005](conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
 | [C/specs/layout/000007](conventions/specs/layout/000007_index.md) | The index lists every rule | approved |

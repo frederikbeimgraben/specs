@@ -51,6 +51,7 @@ KEYS = [
     "status",
     "owner",
     "updated",
+    "replaced_by",
     "replaces",
     "version",
     "media_type",
@@ -609,12 +610,28 @@ def _check_replaces(specs: list[Spec], ids: dict[str, Spec], foreign: dict[str, 
                 errors.append(f"{spec.rel}: replaces entry {entry!r} names no spec (000009)")
             elif ids[entry].meta.get("status") != "replaced":
                 errors.append(f"{spec.rel}: {entry} must have status replaced (000010)")
+            elif spec.full_id not in (ids[entry].meta.get("replaced_by") or []):
+                errors.append(f"{ids[entry].rel}: replaced_by must name {spec.full_id} (000010)")
             named.add(entry)
-    errors += [
-        f"{spec.rel}: status replaced, but no spec in force names it in replaces (000010)"
-        for spec in specs
-        if spec.meta.get("status") == "replaced" and spec.full_id not in named
-    ]
+    for spec in specs:
+        replaced_by = spec.meta.get("replaced_by")
+        if spec.meta.get("status") != "replaced":
+            if replaced_by is not None:
+                errors.append(f"{spec.rel}: replaced_by goes with status replaced only (000009)")
+            continue
+        if spec.full_id not in named:
+            errors.append(f"{spec.rel}: status replaced, but no spec in force names it in replaces (000010)")
+        if replaced_by is None:
+            continue
+        if not isinstance(replaced_by, list) or not replaced_by:
+            errors.append(f"{spec.rel}: replaced_by must be a list of rule IDs (000009)")
+            continue
+        for entry in replaced_by:
+            target = ids.get(entry)
+            if target is None:
+                errors.append(f"{spec.rel}: replaced_by entry {entry!r} names no spec of this repository (000009)")
+            elif spec.full_id not in (target.meta.get("replaces") or []) or target.meta.get("status") not in IN_FORCE:
+                errors.append(f"{spec.rel}: {entry} is not in force or does not name it in replaces (000010)")
     return errors
 
 

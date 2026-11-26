@@ -50,5 +50,6 @@ The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`. A spec 
 
 - Change the text, set `status: draft` and a new `updated`. The owner approves again.
 - If the old rule must stay readable, write a new spec. Set the old one to `status: replaced`
-  and name it in `replaces` of the new spec (000010).
+  and name it in `replaces` of the new spec. Name the new spec in `replaced_by` of the old one
+  (000010).
 - Never use a number again. A dropped rule keeps its file with `status: removed`.
