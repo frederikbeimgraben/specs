@@ -45,6 +45,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 ## Specs
 
 `specs/` holds the binding rules, one rule per file. A spec wins over a skill or a comment.
+`specs/agents/` holds the rules for agents. Read them before each task.
 A change request starts as a spec, and code starts after the owner approves it.
 Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`.
 Check: `python3 scripts/check_specs.py --write`.

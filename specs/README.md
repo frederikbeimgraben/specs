@@ -21,12 +21,16 @@ specs/
     specs/  content, decisions, format, layout, protocols, structures
   workflow/
     specs/  process
+  agents/
+    work/  questions
 ```
 
 ## Index
 
 | ID | Title | Status |
 | --- | --- | --- |
+| [A/work/questions/000043](agents/work/questions/000043_ask-each-detail.md) | An agent asks the user about each open detail | draft |
+| [A/work/questions/000044](agents/work/questions/000044_follow-the-spec.md) | To follow a spec is not an assumption | draft |
 | [C/specs/content/000018](conventions/specs/content/000018_only-the-rule.md) | A spec contains only the rule | draft |
 | [C/specs/content/000019](conventions/specs/content/000019_one-thing.md) | One rule controls one thing | draft |
 | [C/specs/content/000020](conventions/specs/content/000020_examinable.md) | A rule can be examined | draft |
