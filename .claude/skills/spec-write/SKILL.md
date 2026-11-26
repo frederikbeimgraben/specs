@@ -30,6 +30,7 @@ The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`. A spec 
    - Add `Reason:` with the cause (000022) and `Test:` with the check (000023).
    - Write ASD-STE100: active voice, at most 20 words for each instruction (000025).
    - No history, no ticket numbers, no introduction (000018, 000024).
+   - Refer to a rule of a different repository as `<host>/<owner>/<repo>:<ID>` (000047).
 8. Set `implementation: null` until code exists. Set `scope` to the paths that the rule
    controls. Each path must exist (000009).
 9. Run `python3 scripts/check_specs.py --write`. Fix each error.

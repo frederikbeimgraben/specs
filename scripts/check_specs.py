@@ -13,6 +13,7 @@ package `jsonschema` only when a protocol spec has a JSON schema file.
 Usage:
     python3 scripts/check_specs.py          check, exit 1 on a violation
     python3 scripts/check_specs.py --write  write the index of specs/README.md, then check
+    python3 scripts/check_specs.py --fetch  replace the copies in specs/upstream/, then check
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SPECS = ROOT / "specs"
+UPSTREAM = SPECS / "upstream"
 README = SPECS / "README.md"
 CONFIG = SPECS / "config.toml"
 
@@ -71,8 +73,11 @@ TEST_ENTRY = re.compile(r"^[^:\s]+:[A-Za-z_][A-Za-z0-9_.]*$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 LABEL = re.compile(r"^(Reason|Test):", re.MULTILINE)
 MUST = re.compile(r"\bmust\b")
-SECTION_REF = re.compile(rf"§((?:{PREFIXES})/[a-z0-9/-]+/[0-9]{{6}})")
-SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{PREFIXES})/[a-z0-9/-]+/)?[0-9]{{6}}\b")
+REPO = r"[a-z0-9.-]+\.[a-z]+/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+LOCAL_ID = rf"(?:{PREFIXES})/[a-z0-9/-]+/[0-9]{{6}}"
+SECTION_REF = re.compile(rf"§((?:{REPO}:)?{LOCAL_ID})")
+SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{REPO}:)?(?:{PREFIXES})/[a-z0-9/-]+/)?[0-9]{{6}}\b")
+FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LOCAL_ID})\b")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 INDEX_START = "## Index\n"
 
@@ -149,6 +154,7 @@ def _config() -> dict[str, object]:
         "code_dirs": data.get("code_dirs", []),
         "code_suffixes": set(data.get("code_suffixes", [".py", ".ts", ".js", ".go", ".rs", ".java"])),
         "max_elements": int(data.get("max_elements", 25)),
+        "upstream": data.get("upstream", {}),
     }
 
 
@@ -190,7 +196,7 @@ def load() -> tuple[list[Spec], list[str]]:
     errors: list[str] = []
     for path in sorted(SPECS.rglob("*.md")):
         rel = path.relative_to(SPECS)
-        if rel.parent == Path("."):
+        if rel.parent == Path(".") or rel.parts[0] == "upstream":
             continue
         kind = _kind_of(rel)
         if kind is None:
@@ -521,6 +527,11 @@ def _tree() -> str:
         for area in areas:
             topics = ", ".join(sorted(t.name for t in area.iterdir() if t.is_dir()))
             lines.append(f"{indent}{(area.name + '/').ljust(width)} {topics}".rstrip())
+    if UPSTREAM.is_dir():
+        repos = sorted(p.relative_to(UPSTREAM).as_posix() for p in UPSTREAM.glob("*/*/*") if p.is_dir())
+        if repos:
+            lines.append("  upstream/")
+            lines += [f"    {repo}/" for repo in repos]
     return "\n".join(lines) + "\n"
 
 
@@ -532,8 +543,109 @@ def _readme(specs: list[Spec]) -> str:
     return f"{head}\n{_index(specs)}"
 
 
-def _code_refs(ids: dict[str, Spec], config: dict[str, object]) -> list[str]:
-    """Return the `§` references in the code that name no spec (000017)."""
+def _upstream_ids(config: dict[str, object]) -> tuple[dict[str, str], list[str]]:
+    """Return the status of each rule in the copies below `specs/upstream/` (000048, 000049).
+
+    The keys are foreign references `<host>/<owner>/<repo>:<ID>`. An excluded rule has the
+    status `excluded`.
+    """
+    upstream: dict[str, dict[str, object]] = config["upstream"]  # type: ignore[assignment]
+    ids: dict[str, str] = {}
+    errors: list[str] = []
+    copies = {p.relative_to(UPSTREAM).as_posix() for p in UPSTREAM.glob("*/*/*") if p.is_dir()} if UPSTREAM.is_dir() else set()
+    for repo in sorted(copies - set(upstream)):
+        errors.append(f"specs/upstream/{repo}: no repository of this name in specs/config.toml (000048)")
+    for repo, settings in sorted(upstream.items()):
+        if not re.fullmatch(REPO, repo):
+            errors.append(f"specs/config.toml: upstream {repo!r} is not <host>/<owner>/<repo> (000047)")
+            continue
+        if not isinstance(settings, dict) or not settings.get("ref"):
+            errors.append(f"specs/config.toml: upstream {repo!r} must have ref (000048)")
+            continue
+        base = UPSTREAM / repo
+        if repo not in copies:
+            errors.append(f"specs/config.toml: upstream {repo!r} has no copy in specs/upstream/; run with --fetch (000048)")
+            continue
+        for path in sorted(base.rglob("*.md")):
+            rel = path.relative_to(base)
+            kind = _kind_of(rel)
+            if kind is None or len(kind[2].parts) != 3 or not FILE_NAME.match(path.name):
+                continue
+            parsed = _parse_front_matter(path.read_text(encoding="utf-8"))
+            status = str(parsed[0].get("status")) if parsed else ""
+            below = kind[2]
+            ids[f"{repo}:{kind[0]}/{below.parts[0]}/{below.parts[1]}/{path.name[:6]}"] = status
+        exclude = settings.get("exclude", {})
+        if not isinstance(exclude, dict):
+            errors.append(f"specs/config.toml: exclude of {repo!r} must map rule IDs to reasons (000049)")
+            continue
+        for rule, reason in exclude.items():
+            if f"{repo}:{rule}" not in ids:
+                errors.append(f"specs/config.toml: excluded rule {rule!r} is not in the copy of {repo} (000049)")
+            elif not isinstance(reason, str) or not reason.strip():
+                errors.append(f"specs/config.toml: excluded rule {rule!r} needs a reason (000049)")
+            else:
+                ids[f"{repo}:{rule}"] = "excluded"
+    return ids, errors
+
+
+def _foreign_error(where: str, ref: str, foreign: dict[str, str]) -> str | None:
+    """Return the error of one reference to a rule of a different repository, or None."""
+    status = foreign.get(ref)
+    if status is None:
+        return f"{where}: {ref} names no rule in specs/upstream/ (000047)"
+    if status == "excluded":
+        return f"{where}: {ref} names an excluded rule (000049)"
+    if status not in IN_FORCE:
+        return f"{where}: {ref} names a rule that is not in force (000049)"
+    return None
+
+
+def _spec_foreign_refs(specs: list[Spec], foreign: dict[str, str]) -> list[str]:
+    """Return the references in the specs to rules of a different repository that fail (000047)."""
+    errors: list[str] = []
+    for spec in specs:
+        for repo, rule in FOREIGN_REF.findall(INLINE_CODE.sub("", spec.body)):
+            error = _foreign_error(str(spec.rel), f"{repo}:{rule}", foreign)
+            if error:
+                errors.append(error)
+    return errors
+
+
+def fetch(config: dict[str, object]) -> list[str]:
+    """Replace each copy below `specs/upstream/` with `specs/` of its repository at `ref` (000048)."""
+    import shutil
+    import tempfile
+
+    errors: list[str] = []
+    for repo, settings in sorted(config["upstream"].items()):  # type: ignore[union-attr]
+        ref = settings.get("ref") if isinstance(settings, dict) else None
+        if not ref:
+            errors.append(f"specs/config.toml: upstream {repo!r} must have ref (000048)")
+            continue
+        with tempfile.TemporaryDirectory() as tmp:
+            steps = [
+                ["git", "init", "-q", tmp],
+                ["git", "-C", tmp, "fetch", "-q", "--depth", "1", f"https://{repo}.git", str(ref)],
+                ["git", "-C", tmp, "checkout", "-q", "FETCH_HEAD"],
+            ]
+            for step in steps:
+                if subprocess.run(step, capture_output=True, text=True).returncode != 0:
+                    errors.append(f"specs/config.toml: cannot fetch {repo} at {ref} (000048)")
+                    break
+            else:
+                source = Path(tmp) / "specs"
+                if not source.is_dir():
+                    errors.append(f"{repo} at {ref} has no specs/ folder (000048)")
+                    continue
+                target = UPSTREAM / repo
+                shutil.rmtree(target, ignore_errors=True)
+                shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream"))
+    return errors
+
+
+def _code_refs(ids: dict[str, Spec], config: dict[str, object], foreign: dict[str, str]) -> list[str]:
+    """Return the `§` references in the code that name no spec (000017, 000047)."""
     errors: list[str] = []
     suffixes = config["code_suffixes"]
     for folder in config["code_dirs"]:  # type: ignore[union-attr]
@@ -541,11 +653,13 @@ def _code_refs(ids: dict[str, Spec], config: dict[str, object]) -> list[str]:
             if not path.is_file() or path.suffix not in suffixes or "node_modules" in path.parts:  # type: ignore[operator]
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
-            errors += [
-                f"{path.relative_to(ROOT)}: §{ref} names no spec (000017)"
-                for ref in SECTION_REF.findall(text)
-                if ref not in ids
-            ]
+            for ref in SECTION_REF.findall(text):
+                if ":" in ref:
+                    error = _foreign_error(str(path.relative_to(ROOT)), ref, foreign)
+                    if error:
+                        errors.append(error)
+                elif ref not in ids:
+                    errors.append(f"{path.relative_to(ROOT)}: §{ref} names no spec (000017)")
     return errors
 
 
@@ -594,7 +708,16 @@ def _base_errors(numbers: dict[str, Path], base_ref: str) -> list[str]:
 def main(argv: list[str]) -> int:
     """Run every check. Return 1 when one fails."""
     config = _config()
+    if "--fetch" in argv:
+        fetch_errors = fetch(config)
+        for error in fetch_errors:
+            print(error)
+        if fetch_errors:
+            return 1
     specs, errors = load()
+    foreign, upstream_errors = _upstream_ids(config)
+    errors += upstream_errors
+    errors += _spec_foreign_refs(specs, foreign)
     ids = {s.full_id: s for s in specs}
     numbers: dict[str, Path] = {}
     for spec in specs:
@@ -616,7 +739,7 @@ def main(argv: list[str]) -> int:
         README.write_text(_readme(specs), encoding="utf-8")
     elif README.read_text(encoding="utf-8") != _readme(specs):
         errors.append("specs/README.md: index or tree is not current; run with --write (000007)")
-    errors += _code_refs(ids, config)
+    errors += _code_refs(ids, config, foreign)
     for error in errors:
         print(error)
     print(f"{len(specs)} specs, {len(errors)} errors")

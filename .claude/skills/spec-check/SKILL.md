@@ -10,13 +10,14 @@ description: Check the specs in specs/ and the code against them. Run the checke
 ```sh
 python3 scripts/check_specs.py          # check, exit 1 on an error
 python3 scripts/check_specs.py --write  # also write the tree and the index
+python3 scripts/check_specs.py --fetch  # replace the copies in specs/upstream/ (000048)
 pip install jsonschema                  # needed only for JSON protocol specs
 ```
 
 Each error names the file and the rule number. Read that rule in `specs/conventions/specs/` and fix
 the spec. Do not change a rule of `specs/conventions/specs/` to make the check pass.
 
-`specs/config.toml` sets `base_ref`, `code_dirs`, `code_suffixes` and `max_elements`.
+`specs/config.toml` sets `base_ref`, `code_dirs`, `code_suffixes`, `max_elements` and `upstream`.
 
 ## Review what the checker cannot see
 

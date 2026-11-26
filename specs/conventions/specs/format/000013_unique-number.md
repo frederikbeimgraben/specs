@@ -14,7 +14,8 @@ scope:
 
 # The number is the identity of a rule
 
-The number must be unique over all specs. The number is the real ID. Kind and path only make
+The number must be unique over all specs of the repository. The rules of a different
+repository keep their numbers (000047). The number is the real ID. Kind and path only make
 the ID readable. A new rule must get the highest number plus one, counted over the base branch
 and every open pull request. When two pull requests hold the same number, the pull request that
 merges later must give its specs new numbers before its merge. A number must never be used

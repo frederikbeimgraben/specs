@@ -47,7 +47,10 @@ git clone --depth 1 https://github.com/frederikbeimgraben/specs /tmp/spec-kit
 /tmp/spec-kit/install.sh <project-dir> <owner-login>
 ```
 
-The installer does not overwrite a file. For a project that has its own specs, follow the skill
+The installer does not overwrite a file. It puts the rules of the kit in
+`specs/upstream/github.com/frederikbeimgraben/specs/` and their commit in `specs/config.toml`.
+A project numbers its own rules from `000001`. It refers to a kit rule with
+`github.com/frederikbeimgraben/specs:<ID>`. For a project that has its own specs, follow the skill
 [spec-adopt](.claude/skills/spec-adopt/SKILL.md).
 
 ## Check
@@ -55,6 +58,7 @@ The installer does not overwrite a file. For a project that has its own specs, f
 ```sh
 pip install jsonschema                  # only for JSON protocol specs
 python3 scripts/check_specs.py --write  # check, and write the index in specs/README.md
+python3 scripts/check_specs.py --fetch  # replace the copies in specs/upstream/ with their ref
 ```
 
 All text in this kit follows ASD-STE100 Simplified Technical English (000025).
