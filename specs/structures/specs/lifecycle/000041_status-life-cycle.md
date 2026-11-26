@@ -4,10 +4,10 @@ title: The status of a spec moves from draft to approved, replaced or removed
 kind: structure
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-23
+updated: 2026-11-26
 diagram: state
 implementation:
-  - specs/style/specs/format/000010_status.md
+  - specs/conventions/specs/format/000010_status.md
 scope:
   - specs/
 ---
@@ -37,9 +37,9 @@ stateDiagram-v2
 | Element | Path | Meaning |
 | --- | --- | --- |
 | `draft` | specs/TEMPLATE.md | The owner did not approve the spec yet. |
-| `approved` | specs/style/specs/format/000010_status.md | The owner approved the spec. |
-| `replaced` | specs/style/specs/format/000010_status.md | A different spec, named in `replaced_by`, replaces the spec. |
-| `removed` | specs/style/specs/format/000010_status.md | The spec is not in force. The number stays taken. |
+| `approved` | specs/conventions/specs/format/000010_status.md | The owner approved the spec. |
+| `replaced` | specs/conventions/specs/format/000010_status.md | A different spec replaces the spec and names it in `replaces`. `replaced_by` names that spec. |
+| `removed` | specs/conventions/specs/format/000010_status.md | The spec is not in force. The number stays taken. |
 
 Reason: A number is never used again (000013). The diagram shows that a spec that left force
 stays out of force.

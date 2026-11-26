@@ -4,7 +4,7 @@ title: A spec has a front matter, a body and links to other specs
 kind: structure
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-23
+updated: 2026-11-26
 diagram: class
 implementation:
   - scripts/check_specs.py
@@ -47,9 +47,13 @@ classDiagram
     <<enumeration>>
     functional
     non-functional
-    style
     protocol
     structure
+    style
+    convention
+    workflow
+    agent
+    decision
   }
   class SchemaFile {
     +dialect: 2020-12
@@ -58,7 +62,8 @@ classDiagram
   FrontMatter --> Status : status
   FrontMatter --> Kind : kind
   Spec "1" *-- "0..1" SchemaFile : protocol only
-  Spec "*" --> "0..1" Spec : replaced_by
+  Spec "*" --> "*" Spec : replaces
+  Spec "*" --> "*" Spec : replaced_by
   Spec "*" --> "*" Spec : protocols, structures
 ```
 
@@ -68,8 +73,8 @@ classDiagram
 | --- | --- | --- |
 | `Spec` | scripts/check_specs.py | One spec file with its number, its full rule ID and its Markdown body. |
 | `FrontMatter` | specs/TEMPLATE.md | The YAML block at the start of a spec file (000009). |
-| `Status` | specs/style/specs/format/000010_status.md | The approval state of a spec (000010). |
-| `Kind` | specs/style/specs/layout/000004_tree.md | The type of a spec, given by its kind folder (000004). |
+| `Status` | specs/conventions/specs/format/000010_status.md | The approval state of a spec (000010). |
+| `Kind` | specs/conventions/specs/layout/000004_tree.md | The type of a spec, given by its kind folder (000004). |
 | `SchemaFile` | specs/TEMPLATE-protocol.md | The JSON Schema beside a protocol spec of a JSON format (000028). |
 
 Reason: The diagram shows in one view how the parts of a spec and the links between specs fit

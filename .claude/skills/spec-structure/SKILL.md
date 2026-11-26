@@ -5,7 +5,7 @@ description: Write or update a structure spec in specs/structures/, a UML diagra
 
 # Write a structure spec
 
-The rules are 000033 to 000039 in `specs/style/specs/structures/`.
+The rules are 000033 to 000039 in `specs/conventions/specs/structures/`.
 
 ## Steps
 

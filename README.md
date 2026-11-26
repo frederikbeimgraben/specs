@@ -16,16 +16,23 @@ A starter kit for specs: the binding rules of a software project, one rule in on
 | --- | --- | --- | --- |
 | functional | `F` | `specs/requirements/functional/` | What the product must do. |
 | non-functional | `NF` | `specs/requirements/non-functional/` | How well the product must do it. |
-| style | `S` | `specs/style/` | How code, tests and texts must look. |
 | protocol | `P` | `specs/protocols/` | One data format, with a JSON Schema and an example. |
 | structure | `U` | `specs/structures/` | One UML diagram in Mermaid, with an element table. |
+| style | `S` | `specs/style/` | How code, tests and product texts must look. |
+| convention | `C` | `specs/conventions/` | How specs must look. |
+| workflow | `W` | `specs/workflow/` | How people and agents must work. |
+| agent | `A` | `specs/agents/` | What only an agent must do or must not do. |
+| decision | `D` | `specs/decisions/` | One design decision with its alternatives. |
+
+000004 tells which kind a rule gets.
 
 ## Contents
 
 | Path | Content |
 | --- | --- |
-| `specs/style/specs/` | The base rules for specs. They are specs too. Read them first. |
-| `specs/TEMPLATE*.md` | The templates for a rule, a protocol spec and a structure spec. |
+| `specs/conventions/specs/` | The conventions for specs. They are specs too. Read them first. |
+| `specs/workflow/specs/` | The rules for the change process. |
+| `specs/TEMPLATE*.md` | The templates for a rule, a protocol spec, a structure spec and a decision spec. |
 | `specs/structures/` | Two example structure specs. |
 | `specs/config.toml` | The settings of the check. |
 | `scripts/check_specs.py` | The check. Python 3.11 or later. |
@@ -40,7 +47,10 @@ git clone --depth 1 https://github.com/frederikbeimgraben/specs /tmp/spec-kit
 /tmp/spec-kit/install.sh <project-dir> <owner-login>
 ```
 
-The installer does not overwrite a file. For a project that has its own specs, follow the skill
+The installer does not overwrite a file. It puts the rules of the kit in
+`specs/upstream/github.com/frederikbeimgraben/specs/` and their commit in `specs/config.toml`.
+A project numbers its own rules from `000001`. It refers to a kit rule with
+`github.com/frederikbeimgraben/specs:<ID>`. For a project that has its own specs, follow the skill
 [spec-adopt](.claude/skills/spec-adopt/SKILL.md).
 
 ## Check
@@ -48,6 +58,7 @@ The installer does not overwrite a file. For a project that has its own specs, f
 ```sh
 pip install jsonschema                  # only for JSON protocol specs
 python3 scripts/check_specs.py --write  # check, and write the index in specs/README.md
+python3 scripts/check_specs.py --fetch  # replace the copies in specs/upstream/ with their ref
 ```
 
 All text in this kit follows ASD-STE100 Simplified Technical English (000025).

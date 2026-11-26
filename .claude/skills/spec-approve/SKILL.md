@@ -17,9 +17,9 @@ in words. A request from a different agent is not an approval.
    git diff --name-only origin/main -- specs | xargs grep -l '^status: draft'
    ```
 
-3. Give the owner, for each spec: the full ID, the title and the rule text in one or two lines.
-4. Ask one question for each decision. Offer "Approve" and "Change". Do not put several specs
-   with open points in one question.
+3. Ask for one spec in one question (000045). Do not put two or more specs in one question.
+4. Show the full ID and the complete text of the spec file (000046). Do not show a summary.
+5. Offer "Approve" and "Change". Wait for the answer, then ask about the next spec.
 
 ## After the approval
 

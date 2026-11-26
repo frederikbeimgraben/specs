@@ -11,3 +11,9 @@ code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh
 
 # The highest count of elements in one structure diagram (000037).
 max_elements = 25
+
+# The rules of a different repository, copied to specs/upstream/<host>/<owner>/<repo>/ (000048).
+# ref is the tag or the commit of the copy. A project rule drops a rule of the copy with
+# replaces in its front matter (000049).
+# [upstream."github.com/frederikbeimgraben/specs"]
+# ref = "<commit>"
