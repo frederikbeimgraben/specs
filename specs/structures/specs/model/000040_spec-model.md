@@ -62,7 +62,7 @@ classDiagram
   FrontMatter --> Status : status
   FrontMatter --> Kind : kind
   Spec "1" *-- "0..1" SchemaFile : protocol only
-  Spec "*" --> "0..1" Spec : replaced_by
+  Spec "*" --> "*" Spec : replaces
   Spec "*" --> "*" Spec : protocols, structures
 ```
 

@@ -3,7 +3,7 @@
 
 The script checks the spec conventions in `specs/conventions/specs/`: the file name, the place in
 the tree, the front matter, the headings, the labels, `must` in the rule text, the paths,
-`replaced_by`, unique numbers, the index and every `§` reference in the code. For a protocol
+`replaces`, unique numbers, the index and every `§` reference in the code. For a protocol
 spec it also checks the sections, the schema file and the examples. For a structure spec it
 checks the Mermaid block and the element table. For a decision spec it checks the sections.
 
@@ -51,7 +51,7 @@ KEYS = [
     "status",
     "owner",
     "updated",
-    "replaced_by",
+    "replaces",
     "version",
     "media_type",
     "diagram",
@@ -247,15 +247,6 @@ def _check_meta(spec: Spec, ids: dict[str, Spec]) -> list[str]:
         errors.append(f"{rel}: status {status!r} breaks 000010")
     if not DATE.match(str(meta.get("updated"))):
         errors.append(f"{rel}: updated must be YYYY-MM-DD (000009)")
-    replaced_by = meta.get("replaced_by")
-    if (status == "replaced") != (replaced_by is not None):
-        errors.append(f"{rel}: replaced_by goes with status replaced only (000009)")
-    if isinstance(replaced_by, str):
-        target = ids.get(replaced_by)
-        if not FULL_ID.match(replaced_by) or target is None:
-            errors.append(f"{rel}: replaced_by {replaced_by!r} is no full ID of a spec (000009)")
-        elif target.meta.get("status") not in IN_FORCE:
-            errors.append(f"{rel}: replaced_by points to a rule that is not in force (000009)")
     errors += _check_kind_keys(spec)
     errors += _check_links(spec, ids, "protocols", "P", "000032")
     errors += _check_links(spec, ids, "structures", "U", "000039")
@@ -546,8 +537,7 @@ def _readme(specs: list[Spec]) -> str:
 def _upstream_ids(config: dict[str, object]) -> tuple[dict[str, str], list[str]]:
     """Return the status of each rule in the copies below `specs/upstream/` (000048, 000049).
 
-    The keys are foreign references `<host>/<owner>/<repo>:<ID>`. An excluded rule has the
-    status `excluded`.
+    The keys are foreign references `<host>/<owner>/<repo>:<ID>`.
     """
     upstream: dict[str, dict[str, object]] = config["upstream"]  # type: ignore[assignment]
     ids: dict[str, str] = {}
@@ -575,17 +565,6 @@ def _upstream_ids(config: dict[str, object]) -> tuple[dict[str, str], list[str]]
             status = str(parsed[0].get("status")) if parsed else ""
             below = kind[2]
             ids[f"{repo}:{kind[0]}/{below.parts[0]}/{below.parts[1]}/{path.name[:6]}"] = status
-        exclude = settings.get("exclude", {})
-        if not isinstance(exclude, dict):
-            errors.append(f"specs/config.toml: exclude of {repo!r} must map rule IDs to reasons (000049)")
-            continue
-        for rule, reason in exclude.items():
-            if f"{repo}:{rule}" not in ids:
-                errors.append(f"specs/config.toml: excluded rule {rule!r} is not in the copy of {repo} (000049)")
-            elif not isinstance(reason, str) or not reason.strip():
-                errors.append(f"specs/config.toml: excluded rule {rule!r} needs a reason (000049)")
-            else:
-                ids[f"{repo}:{rule}"] = "excluded"
     return ids, errors
 
 
@@ -594,11 +573,49 @@ def _foreign_error(where: str, ref: str, foreign: dict[str, str]) -> str | None:
     status = foreign.get(ref)
     if status is None:
         return f"{where}: {ref} names no rule in specs/upstream/ (000047)"
-    if status == "excluded":
-        return f"{where}: {ref} names an excluded rule (000049)"
+    if status == "replaced":
+        return f"{where}: {ref} names a rule that a project spec replaces (000049)"
     if status not in IN_FORCE:
         return f"{where}: {ref} names a rule that is not in force (000049)"
     return None
+
+
+def _check_replaces(specs: list[Spec], ids: dict[str, Spec], foreign: dict[str, str]) -> list[str]:
+    """Check `replaces` and the status `replaced` (000009, 000010, 000049).
+
+    Mark each foreign rule that a spec in force replaces with the status `replaced`.
+    """
+    errors: list[str] = []
+    named: set[str] = set()
+    for spec in specs:
+        value = spec.meta.get("replaces")
+        if value is None:
+            continue
+        if not isinstance(value, list) or not value:
+            errors.append(f"{spec.rel}: replaces must be a list of rule IDs (000009)")
+            continue
+        if spec.meta.get("status") not in IN_FORCE:
+            errors.append(f"{spec.rel}: replaces goes with status draft or approved only (000009)")
+            continue
+        for entry in value:
+            if entry == spec.full_id:
+                errors.append(f"{spec.rel}: a spec must not replace itself (000009)")
+            elif ":" in entry:
+                if foreign.get(entry) is None:
+                    errors.append(f"{spec.rel}: replaces entry {entry!r} names no rule in specs/upstream/ (000047)")
+                else:
+                    foreign[entry] = "replaced"
+            elif entry not in ids:
+                errors.append(f"{spec.rel}: replaces entry {entry!r} names no spec (000009)")
+            elif ids[entry].meta.get("status") != "replaced":
+                errors.append(f"{spec.rel}: {entry} must have status replaced (000010)")
+            named.add(entry)
+    errors += [
+        f"{spec.rel}: status replaced, but no spec in force names it in replaces (000010)"
+        for spec in specs
+        if spec.meta.get("status") == "replaced" and spec.full_id not in named
+    ]
+    return errors
 
 
 def _spec_foreign_refs(specs: list[Spec], foreign: dict[str, str]) -> list[str]:
@@ -717,8 +734,9 @@ def main(argv: list[str]) -> int:
     specs, errors = load()
     foreign, upstream_errors = _upstream_ids(config)
     errors += upstream_errors
-    errors += _spec_foreign_refs(specs, foreign)
     ids = {s.full_id: s for s in specs}
+    errors += _check_replaces(specs, ids, foreign)
+    errors += _spec_foreign_refs(specs, foreign)
     numbers: dict[str, Path] = {}
     for spec in specs:
         number = spec.path.name[:6]

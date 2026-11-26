@@ -13,8 +13,7 @@ code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh
 max_elements = 25
 
 # The rules of a different repository, copied to specs/upstream/<host>/<owner>/<repo>/ (000048).
-# ref is the tag or the commit of the copy. exclude maps a rule ID to the reason (000049).
+# ref is the tag or the commit of the copy. A project rule drops a rule of the copy with
+# replaces in its front matter (000049).
 # [upstream."github.com/frederikbeimgraben/specs"]
 # ref = "<commit>"
-# [upstream."github.com/frederikbeimgraben/specs".exclude]
-# "C/specs/content/000025" = "The specs of this project are in German."

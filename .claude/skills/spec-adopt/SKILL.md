@@ -21,7 +21,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    `specs/config.toml` gets their `ref`.
 
 2. Edit `specs/config.toml`: set `base_ref` to the base branch and `code_dirs` to the folders
-   with code. Add each kit rule that must not apply to `exclude`, with the reason (000049).
+   with code.
 3. Run `python3 scripts/check_specs.py --write`.
 4. Add the text below to `CLAUDE.md` or `AGENTS.md`.
 5. Commit and open a pull request.
@@ -34,7 +34,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    skipped.
 2. Compare each skipped file with the kit. Merge by hand.
 3. Compare the rules of the project with the kit rules in `specs/upstream/`. If a project rule
-   contradicts a kit rule, ask the owner which one applies. Exclude the kit rule, or change
+   contradicts a kit rule, ask the owner which one applies. Replace the kit rule with `replaces`, or change
    the project rule (000050).
 4. Move the project specs to the kind folders of 000004. A moved rule keeps its number (000014).
 
@@ -44,7 +44,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    commit.
 2. Run `python3 scripts/check_specs.py --fetch --write`. It replaces the copy (000048).
 3. Copy the new `scripts/check_specs.py` and the skills from the kit.
-4. Read the diff of the copy. Exclude a new rule that must not apply (000049), and fix each
+4. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (000049), and fix each
    error. Open a pull request.
 
 ## Text for CLAUDE.md
@@ -53,8 +53,8 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 ## Specs
 
 `specs/` holds the binding rules, one rule per file. A spec wins over a skill or a comment.
-`specs/upstream/` holds the rules of the kit. They apply, except the rules in `exclude` of
-`specs/config.toml`.
+`specs/upstream/` holds the rules of the kit. They apply, except a rule that a project spec
+names in `replaces`.
 `specs/agents/` holds the rules for agents. Read them before each task.
 A change request starts as a spec, and code starts after the owner approves it.
 Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`.

@@ -65,7 +65,7 @@ specs/
 | [C/specs/protocols/000032](conventions/specs/protocols/000032_protocols-key.md) | A rule names the formats that it uses | draft |
 | [C/specs/references/000047](conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | draft |
 | [C/specs/references/000048](conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | draft |
-| [C/specs/references/000049](conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless it is excluded | draft |
+| [C/specs/references/000049](conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | draft |
 | [C/specs/references/000050](conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | draft |
 | [C/specs/structures/000033](conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | draft |
 | [C/specs/structures/000034](conventions/specs/structures/000034_mermaid-diagram.md) | The diagram is one Mermaid block of a fixed type | draft |

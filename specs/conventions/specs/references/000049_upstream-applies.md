@@ -1,6 +1,6 @@
 ---
 id: "000049"
-title: Each rule of a different repository applies unless it is excluded
+title: Each rule of a different repository applies unless a project rule replaces it
 kind: convention
 status: draft
 owner: frederikbeimgraben
@@ -11,14 +11,15 @@ scope:
   - specs/
 ---
 
-# Each rule of a different repository applies unless it is excluded
+# Each rule of a different repository applies unless a project rule replaces it
 
 Each rule of a copy of 000048 with the status `draft` or `approved` must apply to the project.
-A rule that must not apply must be in `exclude` of its repository in `specs/config.toml`, with
-the reason as the value. A reference must not point to an excluded rule.
+A rule that must not apply must be in `replaces` of a project rule with the status `draft` or
+`approved`. A rule that the project drops without a new rule must be in `replaces` of a decision
+spec (000042). A reference must not point to a replaced rule.
 
-Reason: A new rule of the different repository applies after the next update. An exception is
-a decision at one place, with its reason.
+Reason: A new rule of the different repository applies after the next update. The project rule
+that replaces it holds the reason, and the owner approves it like each other rule.
 
-Test: `scripts/check_specs.py` checks that each excluded ID exists in the copy and that no
-reference points to an excluded rule.
+Test: `scripts/check_specs.py` checks that each entry of `replaces` exists in the copy and that
+no reference points to a replaced rule.
