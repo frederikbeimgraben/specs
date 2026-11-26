@@ -22,7 +22,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 3. Delete the two example specs in `specs/structures/specs/` if the project does not want them.
    Then run `python3 scripts/check_specs.py --write`.
 4. Add the text below to `CLAUDE.md` or `AGENTS.md`.
-5. Commit, open a pull request, and ask the owner to approve the rules of `specs/style/specs/`
+5. Commit, open a pull request, and ask the owner to approve the rules of `specs/conventions/specs/` and `specs/workflow/specs/`
    (skill `spec-approve`).
 6. New rules take the next free number after the kit rules.
 

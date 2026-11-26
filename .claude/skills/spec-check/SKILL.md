@@ -13,8 +13,8 @@ python3 scripts/check_specs.py --write  # also write the tree and the index
 pip install jsonschema                  # needed only for JSON protocol specs
 ```
 
-Each error names the file and the rule number. Read that rule in `specs/style/specs/` and fix
-the spec. Do not change a rule of `specs/style/specs/` to make the check pass.
+Each error names the file and the rule number. Read that rule in `specs/conventions/specs/` and fix
+the spec. Do not change a rule of `specs/conventions/specs/` to make the check pass.
 
 `specs/config.toml` sets `base_ref`, `code_dirs`, `code_suffixes` and `max_elements`.
 

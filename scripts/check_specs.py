@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Check the spec files in `specs/` and keep the index in `specs/README.md` current.
 
-The script checks the rules for specs in `specs/style/specs/`: the file name, the place in
+The script checks the spec conventions in `specs/conventions/specs/`: the file name, the place in
 the tree, the front matter, the headings, the labels, `must` in the rule text, the paths,
 `replaced_by`, unique numbers, the index and every `§` reference in the code. For a protocol
 spec it also checks the sections, the schema file and the examples. For a structure spec it
-checks the Mermaid block and the element table.
+checks the Mermaid block and the element table. For a decision spec it checks the sections.
 
 The settings are in `specs/config.toml`. The script needs Python 3.11 or later. It needs the
 package `jsonschema` only when a protocol spec has a JSON schema file.
@@ -31,12 +31,17 @@ README = SPECS / "README.md"
 CONFIG = SPECS / "config.toml"
 
 KINDS = {
-    "style": ("S", "style"),
     "requirements/functional": ("F", "functional"),
     "requirements/non-functional": ("NF", "non-functional"),
     "protocols": ("P", "protocol"),
     "structures": ("U", "structure"),
+    "style": ("S", "style"),
+    "conventions": ("C", "convention"),
+    "workflow": ("W", "workflow"),
+    "agents": ("A", "agent"),
+    "decisions": ("D", "decision"),
 }
+PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
 KEYS = [
     "id",
     "title",
@@ -59,15 +64,15 @@ STATUSES = {"draft", "approved", "replaced", "removed"}
 IN_FORCE = {"draft", "approved"}
 FILE_NAME = re.compile(r"^[0-9]{6}_[a-z0-9]+(-[a-z0-9]+)*\.md$")
 FOLDER = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-FULL_ID = re.compile(r"^(F|NF|S|P|U)(/[a-z0-9-]+)+/[0-9]{6}$")
+FULL_ID = re.compile(rf"^({PREFIXES})(/[a-z0-9-]+)+/[0-9]{{6}}$")
 VERSION = re.compile(r"^[1-9][0-9]*$")
 MEDIA_TYPE = re.compile(r"^[a-z]+/[a-z0-9.+-]+$")
 TEST_ENTRY = re.compile(r"^[^:\s]+:[A-Za-z_][A-Za-z0-9_.]*$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 LABEL = re.compile(r"^(Reason|Test):", re.MULTILINE)
 MUST = re.compile(r"\bmust\b")
-SECTION_REF = re.compile(r"§((?:F|NF|S|P|U)/[a-z0-9/-]+/[0-9]{6})")
-SPEC_SECTION_REF = re.compile(r"§ ?(?:(?:F|NF|S|P|U)/[a-z0-9/-]+/)?[0-9]{6}\b")
+SECTION_REF = re.compile(rf"§((?:{PREFIXES})/[a-z0-9/-]+/[0-9]{{6}})")
+SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{PREFIXES})/[a-z0-9/-]+/)?[0-9]{{6}}\b")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 INDEX_START = "## Index\n"
 
@@ -77,6 +82,7 @@ JSON_BLOCK = re.compile(r"^```json\n(.*?)^```", re.MULTILINE | re.DOTALL)
 FENCE = re.compile(r"^```", re.MULTILINE)
 
 STRUCTURE_SECTIONS = ["## Diagram", "## Elements"]
+DECISION_SECTIONS = ["## Context", "## Decision", "## Alternatives", "## Consequences"]
 DIAGRAMS = {
     "class": ("classDiagram",),
     "state": ("stateDiagram-v2", "stateDiagram"),
@@ -455,6 +461,13 @@ def _element_rows(section: str) -> list[tuple[str, str]] | None:
     return rows
 
 
+def _check_decision(spec: Spec) -> list[str]:
+    """Check the sections of a decision spec (000042)."""
+    if _headings(spec) != [f"# {spec.meta.get('title')}", *DECISION_SECTIONS]:
+        return [f"{spec.rel}: the body must have the # title, then {', '.join(DECISION_SECTIONS)} (000042)"]
+    return []
+
+
 def _check_body(spec: Spec, max_elements: int) -> list[str]:
     """Check the headings, the labels, `must` and the `§` signs of one spec."""
     rel = spec.rel
@@ -463,6 +476,8 @@ def _check_body(spec: Spec, max_elements: int) -> list[str]:
         errors += _check_protocol(spec)
     elif spec.prefix == "U":
         errors += _check_structure(spec, max_elements)
+    elif spec.prefix == "D":
+        errors += _check_decision(spec)
     elif _headings(spec) != [f"# {spec.meta.get('title')}"]:
         errors.append(f"{rel}: the body must have one # heading equal to the title (000011)")
     labels = LABEL.findall(spec.body)
@@ -491,7 +506,7 @@ def _tree() -> str:
     """Return the tree block of README.md from the folders."""
     lines = ["specs/"]
     groups: list[tuple[str, Path, str]] = []
-    for folder in ("style", "requirements/functional", "requirements/non-functional", "protocols", "structures"):
+    for folder in KINDS:
         base = SPECS / folder
         if base.is_dir() and any(p.is_dir() for p in base.iterdir()):
             groups.append((folder, base, "      " if "/" in folder else "    "))

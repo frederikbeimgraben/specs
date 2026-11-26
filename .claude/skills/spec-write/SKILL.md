@@ -1,15 +1,15 @@
 ---
 name: spec-write
-description: Write a new spec or change a spec in specs/ (functional, non-functional, style or protocol rule). Use for every change request before code, and when a rule must change.
+description: Write a new spec or change a spec in specs/ (functional, non-functional, protocol, style, convention, workflow, agent or decision). Use for every change request before code, and when a rule must change.
 ---
 
 # Write a spec
 
-The rules are in `specs/style/specs/`. A spec wins over this skill (000001).
+The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`. A spec wins over this skill (000001).
 
 ## Steps
 
-1. Find the kind folder (000004) and the topic folder `<area>/<topic>/`. If there is no topic
+1. Find the kind with the list in 000004, then the kind folder and the topic folder `<area>/<topic>/`. If there is no topic
    folder, make it. Use lower case and `-` (000005).
 2. Search `specs/` for a rule that already covers the change. Change that rule instead of a new
    one (000006).
@@ -21,8 +21,7 @@ The rules are in `specs/style/specs/`. A spec wins over this skill (000001).
    git ls-tree -r --name-only origin/main -- specs | grep -o '/[0-9]\{6\}_' | sort | tail -1
    ```
 
-4. Copy the template (000008): `TEMPLATE.md` for a rule, `TEMPLATE-protocol.md` for a data
-   format. For a UML diagram, use the skill `spec-structure`.
+4. Copy the template of the kind (000008). For a UML diagram, use the skill `spec-structure`.
 5. Name the file `<number>_<short-name>.md` (000016). Set `id` to the quoted number.
 6. Set `status: draft`, `owner` to the login of the approver, and `updated` to today.
 7. Write the rule text:

@@ -16,16 +16,23 @@ A starter kit for specs: the binding rules of a software project, one rule in on
 | --- | --- | --- | --- |
 | functional | `F` | `specs/requirements/functional/` | What the product must do. |
 | non-functional | `NF` | `specs/requirements/non-functional/` | How well the product must do it. |
-| style | `S` | `specs/style/` | How code, tests and texts must look. |
 | protocol | `P` | `specs/protocols/` | One data format, with a JSON Schema and an example. |
 | structure | `U` | `specs/structures/` | One UML diagram in Mermaid, with an element table. |
+| style | `S` | `specs/style/` | How code, tests and product texts must look. |
+| convention | `C` | `specs/conventions/` | How specs must look. |
+| workflow | `W` | `specs/workflow/` | How people and agents must work. |
+| agent | `A` | `specs/agents/` | What only an agent must do or must not do. |
+| decision | `D` | `specs/decisions/` | One design decision with its alternatives. |
+
+000004 tells which kind a rule gets.
 
 ## Contents
 
 | Path | Content |
 | --- | --- |
-| `specs/style/specs/` | The base rules for specs. They are specs too. Read them first. |
-| `specs/TEMPLATE*.md` | The templates for a rule, a protocol spec and a structure spec. |
+| `specs/conventions/specs/` | The conventions for specs. They are specs too. Read them first. |
+| `specs/workflow/specs/` | The rules for the change process. |
+| `specs/TEMPLATE*.md` | The templates for a rule, a protocol spec, a structure spec and a decision spec. |
 | `specs/structures/` | Two example structure specs. |
 | `specs/config.toml` | The settings of the check. |
 | `scripts/check_specs.py` | The check. Python 3.11 or later. |
