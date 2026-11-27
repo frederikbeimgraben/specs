@@ -14,12 +14,13 @@
       ];
       forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
       rev = self.rev or "dirty";
+      version = (builtins.fromTOML (builtins.readFile ./pyproject.toml)).project.version;
     in
     {
       packages = forAll (pkgs: {
         default = pkgs.python313Packages.buildPythonApplication {
           pname = "specs";
-          version = "0.1.0";
+          inherit version;
           pyproject = true;
           src = self;
           build-system = [ pkgs.python313Packages.setuptools ];

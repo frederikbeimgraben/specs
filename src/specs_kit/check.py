@@ -9,21 +9,16 @@ table. For a decision spec it checks the sections.
 
 from __future__ import annotations
 
-import json
 import re
 import subprocess
-from collections.abc import Callable, Iterable, Mapping
-from dataclasses import dataclass
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import cast
-
-import jsonschema
-from jsonschema.protocols import Validator
 
 from specs_kit.changes import write_text
+from specs_kit.context import Context, Errors, where
+from specs_kit.index import index
 from specs_kit.project import (
     IN_FORCE,
-    KINDS,
     KINDS_BY_PREFIX,
     LONG_LOCAL,
     NUMBER,
@@ -34,6 +29,7 @@ from specs_kit.project import (
     Project,
     Spec,
 )
+from specs_kit.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
 
 KEYS = (
     "id",
@@ -66,84 +62,6 @@ SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{REPO}:)?(?:{PREFIXES})/[a-z0-9/-]+/)
 FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({NUMBER})\b")
 FOREIGN_LONG_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LONG_LOCAL})\b")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
-
-PROTOCOL_SECTIONS = ("## Transport", "## Schema", "## Example", "## Compatibility")
-SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
-JSON_BLOCK = re.compile(r"^```json\n(.*?)^```", re.MULTILINE | re.DOTALL)
-FENCE = re.compile(r"^```", re.MULTILINE)
-
-STRUCTURE_SECTIONS = ("## Diagram", "## Elements")
-DECISION_SECTIONS = ("## Context", "## Decision", "## Alternatives", "## Consequences")
-DIAGRAMS: Mapping[str, tuple[str, ...]] = {
-    "class": ("classDiagram",),
-    "state": ("stateDiagram-v2", "stateDiagram"),
-    "sequence": ("sequenceDiagram",),
-    "entity": ("erDiagram",),
-    "component": ("flowchart", "graph"),
-}
-MERMAID_STYLE = re.compile(
-    r"^[ \t]*(?:(?:style|linkStyle)[ \t]+\S+[ \t]+\S|(?:classDef|click|cssClass)[ \t])|:::",
-    re.MULTILINE,
-)
-MERMAID_BLOCK = re.compile(r"^```mermaid\n(.*?)^```", re.MULTILINE | re.DOTALL)
-ELEMENTS_HEAD = "| Element | Path | Meaning |"
-NAME = r"[A-Za-z_][A-Za-z0-9_-]*"
-CLASS_LINK = r"(?:<\|--|\*--|o--|-->|<--|--\*|--o|--\|>|\.\.\|>|<\|\.\.|\.\.>|<\.\.|--|\.\.)"
-FIND_ELEMENTS: Mapping[str, tuple[re.Pattern[str], ...]] = {
-    "class": (
-        re.compile(rf"^\s*class\s+({NAME})", re.MULTILINE),
-        re.compile(
-            rf'^\s*({NAME})\s*(?:"[^"]*"\s*)?{CLASS_LINK}\s*(?:"[^"]*"\s*)?({NAME})', re.MULTILINE
-        ),
-    ),
-    "state": (
-        re.compile(rf"^\s*state\s+(?:\"[^\"]*\"\s+as\s+)?({NAME})", re.MULTILINE),
-        re.compile(rf"^\s*(\[\*\]|{NAME})\s*-->\s*(\[\*\]|{NAME})", re.MULTILINE),
-    ),
-    "sequence": (
-        re.compile(rf"^\s*(?:participant|actor)\s+({NAME})", re.MULTILINE),
-        re.compile(
-            rf"^\s*({NAME})\s*(?:-->>|->>|-->|->|--x|-x|--\)|-\))[+-]?\s*({NAME})\s*:", re.MULTILINE
-        ),
-    ),
-    "entity": (
-        re.compile(rf"^\s*({NAME})\s*\{{", re.MULTILINE),
-        re.compile(
-            rf"^\s*({NAME})\s*[|}}o][|o]?(?:--|\.\.)[|o][|{{o]?\s*({NAME})\s*:", re.MULTILINE
-        ),
-    ),
-}
-
-type Errors = tuple[str, ...]
-
-
-@dataclass(frozen=True, slots=True)
-class Context:
-    """What every check of one spec can read.
-
-    Attributes:
-        project: The project.
-        local: The specs of the project by number.
-        foreign: The status of each rule of the copies by short form. A rule that a spec in
-            force replaces has the status `replaced` (§000049).
-    """
-
-    project: Project
-    local: Mapping[str, Spec]
-    foreign: Mapping[str, str]
-
-
-def where(project: Project, spec: Spec) -> str:
-    """Return the path of a spec from the root of the project.
-
-    Args:
-        project: The project.
-        spec: The spec.
-
-    Returns:
-        The path as text.
-    """
-    return spec.path.relative_to(project.root).as_posix()
 
 
 def _paths(ctx: Context, spec: Spec, key: str) -> Errors:
@@ -348,353 +266,6 @@ def _check_links(ctx: Context, spec: Spec, key: str, prefix: str, rule: str) -> 
     )
 
 
-def _sections(body: str) -> Mapping[str, str]:
-    """Return the text below each `##` heading of a body.
-
-    Args:
-        body: The Markdown body.
-
-    Returns:
-        The text by heading.
-    """
-    parts = re.split(r"^(## .+)$", body, flags=re.MULTILINE)
-    return {parts[i]: parts[i + 1] for i in range(1, len(parts) - 1, 2)}
-
-
-def _headings(spec: Spec) -> tuple[str, ...]:
-    """Return the Markdown headings of a body, outside code blocks.
-
-    Args:
-        spec: The spec.
-
-    Returns:
-        The heading lines.
-    """
-    lines = spec.body.splitlines()
-    fences = tuple(i for i, line in enumerate(lines) if line.startswith("```"))
-    return tuple(
-        line
-        for i, line in enumerate(lines)
-        if line.startswith("#") and sum(1 for f in fences if f < i) % 2 == 0
-    )
-
-
-def schema_path(spec_path: Path) -> Path:
-    """Return the path of the schema file beside a protocol spec (§000028).
-
-    Args:
-        spec_path: The path of the protocol spec.
-
-    Returns:
-        The path of the schema file.
-    """
-    return spec_path.with_name(spec_path.name[: -len(".md")] + ".schema.json")
-
-
-def _is_json(media_type: object) -> bool:
-    """Return True for `application/json` and every `+json` media type.
-
-    Args:
-        media_type: The value of `media_type`.
-
-    Returns:
-        True for a JSON format.
-    """
-    return media_type == "application/json" or str(media_type).endswith("+json")
-
-
-def _check_plain_protocol(rel: str, schema: Path, sections: Mapping[str, str]) -> Errors:
-    """Check a protocol spec of a format that is not JSON.
-
-    Args:
-        rel: The path of the spec.
-        schema: The path that a schema file would have.
-        sections: The sections of the body.
-
-    Returns:
-        The errors.
-    """
-    return (
-        *(
-            (f"{rel}: a format that is not JSON has no schema file (000028)",)
-            if schema.exists()
-            else ()
-        ),
-        *(
-            ()
-            if re.search(r"^\|", sections.get("## Schema", ""), re.MULTILINE)
-            else (f"{rel}: ## Schema of a format that is not JSON must hold a table (000028)",)
-        ),
-    )
-
-
-def _read_schema(rel: str, schema: Path) -> dict[str, object] | str:
-    """Read the schema file of a protocol spec.
-
-    Args:
-        rel: The path of the spec.
-        schema: The path of the schema file.
-
-    Returns:
-        The schema, or the error.
-    """
-    if not schema.is_file():
-        return f"{rel}: the schema file {schema.name} is missing (000028)"
-    try:
-        data: object = json.loads(schema.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as error:
-        return f"{rel}: {schema.name} is no JSON: {error} (000028)"
-    return (
-        cast("dict[str, object]", data)
-        if isinstance(data, dict)
-        and cast("dict[str, object]", data).get("$schema") == SCHEMA_DIALECT
-        else f"{rel}: {schema.name} must set $schema to {SCHEMA_DIALECT} (000028)"
-    )
-
-
-def _check_protocol(ctx: Context, spec: Spec) -> Errors:
-    """Check the sections, the schema file and the examples of a protocol spec.
-
-    Args:
-        ctx: The context of the check.
-        spec: The spec.
-
-    Returns:
-        The errors.
-    """
-    rel = where(ctx.project, spec)
-    if _headings(spec) != (f"# {spec.title}", *PROTOCOL_SECTIONS):
-        return (
-            f"{rel}: the body must have the # title, then {', '.join(PROTOCOL_SECTIONS)} (000027)",
-        )
-    sections = _sections(spec.body)
-    example = sections.get("## Example", "")
-    if len(FENCE.findall(example)) < 2:
-        return (f"{rel}: ## Example must hold at least one code block (000029)",)
-    schema = schema_path(spec.path)
-    if not _is_json(spec.meta.get("media_type")):
-        return _check_plain_protocol(rel, schema, sections)
-    data = _read_schema(rel, schema)
-    return (data,) if isinstance(data, str) else _check_examples(rel, data, example)
-
-
-def _example_errors(rel: str, validator: Validator, number: int, block: str) -> Errors:
-    """Validate one `json` block of `## Example`.
-
-    Args:
-        rel: The path of the spec.
-        validator: The validator of the schema.
-        number: The position of the block, from 1.
-        block: The text of the block.
-
-    Returns:
-        The errors.
-    """
-    try:
-        instance = json.loads(block)
-    except json.JSONDecodeError as error:
-        return (f"{rel}: example {number} is no JSON: {error} (000029)",)
-    return tuple(
-        f"{rel}: example {number} at /{'/'.join(map(str, e.absolute_path))}: {e.message} (000029)"
-        for e in validator.iter_errors(instance)
-    )
-
-
-def _check_examples(rel: str, schema: dict[str, object], example: str) -> Errors:
-    """Validate the schema and each `json` block of `## Example` (§000028, §000029).
-
-    Args:
-        rel: The path of the spec.
-        schema: The schema.
-        example: The text of `## Example`.
-
-    Returns:
-        The errors.
-    """
-    validator_class = jsonschema.Draft202012Validator
-    try:
-        validator_class.check_schema(schema)
-    except jsonschema.SchemaError as error:
-        return (f"{rel}: the schema is no valid JSON Schema 2020-12: {error.message} (000028)",)
-    validator = validator_class(schema, format_checker=validator_class.FORMAT_CHECKER)
-    blocks = JSON_BLOCK.findall(example)
-    return (
-        tuple(
-            e for n, b in enumerate(blocks, start=1) for e in _example_errors(rel, validator, n, b)
-        )
-        if blocks
-        else (f"{rel}: ## Example has no json code block (000029)",)
-    )
-
-
-def diagram_elements(diagram: str, kind: str) -> frozenset[str]:
-    """Return the element names that a Mermaid diagram of one kind declares or connects.
-
-    Args:
-        diagram: The text of the Mermaid block.
-        kind: The diagram type.
-
-    Returns:
-        The element names.
-    """
-    text = re.sub(r"%%.*$", "", diagram, flags=re.MULTILINE)
-    found = (
-        name
-        for pattern in FIND_ELEMENTS.get(kind, ())
-        for match in cast("list[str | tuple[str, ...]]", pattern.findall(text))
-        for name in (match if isinstance(match, tuple) else (match,))
-    )
-    return frozenset(found) - {"[*]"}
-
-
-def _element_rows(section: str) -> tuple[tuple[str, str], ...] | None:
-    """Return the name and the path of each row of the element table.
-
-    Args:
-        section: The text of `## Elements`.
-
-    Returns:
-        The rows, or None without a valid table.
-    """
-    lines = tuple(ln.strip() for ln in section.splitlines() if ln.strip().startswith("|"))
-    if len(lines) < 3 or re.sub(r"\s+", " ", lines[0]) != ELEMENTS_HEAD:
-        return None
-    cells = tuple(tuple(c.strip().strip("`") for c in ln.strip("|").split("|")) for ln in lines[2:])
-    return None if any(len(c) != 3 for c in cells) else tuple((c[0], c[1]) for c in cells)
-
-
-def _check_rows(
-    ctx: Context, rel: str, rows: tuple[tuple[str, str], ...], diagram: str, kind: str
-) -> Errors:
-    """Check the element table of a structure spec against its diagram.
-
-    Args:
-        ctx: The context of the check.
-        rel: The path of the spec.
-        rows: The rows of the element table.
-        diagram: The text of the Mermaid block.
-        kind: The diagram type.
-
-    Returns:
-        The errors.
-    """
-    limit = ctx.project.config.max_elements
-    listed = frozenset(name for name, _ in rows)
-    return (
-        *(
-            (f"{rel}: {len(rows)} elements; a diagram has at most {limit} (000037)",)
-            if len(rows) > limit
-            else ()
-        ),
-        *(
-            f"{rel}: element {name!r} of the table is not in the diagram (000035)"
-            for name, _ in rows
-            if not re.search(rf"(?<![A-Za-z0-9_-]){re.escape(name)}(?![A-Za-z0-9_-])", diagram)
-        ),
-        *(
-            f"{rel}: path {path!r} of element {name!r} does not exist (000036)"
-            for name, path in rows
-            if path != "-" and not (ctx.project.root / path).exists()
-        ),
-        *(
-            f"{rel}: element {name!r} of the diagram has no row in ## Elements (000035)"
-            for name in sorted(diagram_elements(diagram, kind) - listed)
-        ),
-    )
-
-
-def _check_structure(ctx: Context, spec: Spec) -> Errors:
-    """Check the Mermaid block and the element table of a structure spec.
-
-    Args:
-        ctx: The context of the check.
-        spec: The spec.
-
-    Returns:
-        The errors.
-    """
-    rel = where(ctx.project, spec)
-    if _headings(spec) != (f"# {spec.title}", *STRUCTURE_SECTIONS):
-        return (
-            f"{rel}: the body must have the # title, then {', '.join(STRUCTURE_SECTIONS)} (000033)",
-        )
-    sections = _sections(spec.body)
-    blocks = MERMAID_BLOCK.findall(sections["## Diagram"])
-    if len(blocks) != 1 or len(FENCE.findall(sections["## Diagram"])) != 2:
-        return (f"{rel}: ## Diagram must hold exactly one mermaid code block (000034)",)
-    diagram = cast("str", blocks[0])
-    kind = str(spec.meta.get("diagram"))
-    lines = tuple(
-        ln.strip() for ln in diagram.splitlines() if ln.strip() and not ln.strip().startswith("%%")
-    )
-    first = lines[0].split()[0] if lines else ""
-    rows = _element_rows(sections["## Elements"])
-    head = (
-        *(
-            (f"{rel}: a {kind} diagram must start with {' or '.join(DIAGRAMS[kind])} (000034)",)
-            if kind in DIAGRAMS and first not in DIAGRAMS[kind]
-            else ()
-        ),
-        *(
-            (f"{rel}: the diagram must not hold styles, colors or click actions (000034)",)
-            if MERMAID_STYLE.search(diagram)
-            else ()
-        ),
-    )
-    return (
-        (*head, f"{rel}: ## Elements must hold the table {ELEMENTS_HEAD} (000035)")
-        if rows is None
-        else (*head, *_check_rows(ctx, rel, rows, diagram, kind))
-    )
-
-
-def _check_decision(ctx: Context, spec: Spec) -> Errors:
-    """Check the sections of a decision spec (§000042).
-
-    Args:
-        ctx: The context of the check.
-        spec: The spec.
-
-    Returns:
-        The errors.
-    """
-    return (
-        ()
-        if _headings(spec) == (f"# {spec.title}", *DECISION_SECTIONS)
-        else (
-            f"{where(ctx.project, spec)}: the body must have the # title, then "
-            f"{', '.join(DECISION_SECTIONS)} (000042)",
-        )
-    )
-
-
-def _check_plain(ctx: Context, spec: Spec) -> Errors:
-    """Check the headings of a spec without fixed sections.
-
-    Args:
-        ctx: The context of the check.
-        spec: The spec.
-
-    Returns:
-        The errors.
-    """
-    return (
-        ()
-        if _headings(spec) == (f"# {spec.title}",)
-        else (
-            f"{where(ctx.project, spec)}: the body must have one # heading equal to the title"
-            " (000011)",
-        )
-    )
-
-
-SECTION_CHECKS: Mapping[str, Callable[[Context, Spec], Errors]] = {
-    "P": _check_protocol,
-    "U": _check_structure,
-    "D": _check_decision,
-}
-
-
 def _check_body(ctx: Context, spec: Spec) -> Errors:
     """Check the headings, the labels, `must`, the `§` signs and the foreign references.
 
@@ -710,7 +281,7 @@ def _check_body(ctx: Context, spec: Spec) -> Errors:
     rule_text = LABEL.split(spec.body, maxsplit=1)[0]
     text = INLINE_CODE.sub("", spec.body)
     return (
-        *SECTION_CHECKS.get(spec.prefix, _check_plain)(ctx, spec),
+        *SECTION_CHECKS.get(spec.prefix, check_plain)(ctx, spec),
         *(
             ()
             if labels in ([], ["Reason"], ["Test"], ["Reason", "Test"])
@@ -1121,14 +692,14 @@ def _schema_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
     )
 
 
-def foreign_status(project: Project, specs: tuple[Spec, ...]) -> Mapping[str, str]:
+def foreign_status(specs: tuple[Spec, ...], upstream: tuple[Spec, ...]) -> Mapping[str, str]:
     """Return the status of each rule of the copies by short form (§000049).
 
     A rule that a spec of the project in force names in `replaces` gets the status `replaced`.
 
     Args:
-        project: The project.
         specs: The specs of the project.
+        upstream: The specs of the copies.
 
     Returns:
         The status by short form.
@@ -1136,141 +707,7 @@ def foreign_status(project: Project, specs: tuple[Spec, ...]) -> Mapping[str, st
     replaced = frozenset(
         e for s in specs if s.status in IN_FORCE for e in s.entries("replaces") or () if ":" in e
     )
-    return {
-        s.short: "replaced" if s.short in replaced else s.status for s in project.load_upstream()
-    }
-
-
-def _topics(area: Path) -> str:
-    """Return the topic folders of one area folder, sorted and joined.
-
-    Args:
-        area: The area folder.
-
-    Returns:
-        The names of the topics.
-    """
-    return ", ".join(sorted(t.name for t in area.iterdir() if t.is_dir()))
-
-
-def _tree_lines(base: Path, folder: str, indent: str) -> tuple[str, ...]:
-    """Return the tree lines of one kind folder.
-
-    Args:
-        base: The kind folder.
-        folder: The name of the kind folder below `specs/`.
-        indent: The indent of the area lines.
-
-    Returns:
-        The lines.
-    """
-    areas = sorted(p for p in base.iterdir() if p.is_dir())
-    width = max(len(a.name) for a in areas) + 2
-    return (
-        f"{indent[:-2]}{folder.split('/')[-1]}/",
-        *(f"{indent}{(a.name + '/').ljust(width)} {_topics(a)}".rstrip() for a in areas),
-    )
-
-
-def tree(project: Project) -> str:
-    """Return the tree block of the index from the folders.
-
-    Args:
-        project: The project.
-
-    Returns:
-        The tree text.
-    """
-    groups = tuple(
-        (folder, project.specs_dir / folder, "      " if "/" in folder else "    ")
-        for folder in KINDS
-        if (project.specs_dir / folder).is_dir()
-        and any(p.is_dir() for p in (project.specs_dir / folder).iterdir())
-    )
-    first_requirement = next((f for f, _, _ in groups if f.startswith("requirements/")), None)
-    copies = sorted(project.copies())
-    return (
-        "\n".join(
-            (
-                "specs/",
-                *(
-                    line
-                    for folder, base, indent in groups
-                    for line in (
-                        *(("  requirements/",) if folder == first_requirement else ()),
-                        *_tree_lines(base, folder, indent),
-                    )
-                ),
-                *((".specs/upstream/", *(f"  {repo}/" for repo in copies)) if copies else ()),
-            )
-        )
-        + "\n"
-    )
-
-
-def _row(spec: Spec) -> str:
-    """Return the index row of one spec, with a link from the root of the repository.
-
-    Args:
-        spec: The spec.
-
-    Returns:
-        The row.
-    """
-    folder = f".specs/upstream/{spec.repo}" if spec.repo else "specs"
-    return f"| [{spec.long}](/{folder}/{spec.rel.as_posix()}) | {spec.title} | {spec.status} |"
-
-
-def index(project: Project, specs: tuple[Spec, ...]) -> str:
-    """Return the text of `.specs/index.md` and its copy `specs/README.md` (§000007).
-
-    Args:
-        project: The project.
-        specs: The specs of the project.
-
-    Returns:
-        The whole text of the index.
-    """
-    foreign = foreign_status(project, specs)
-    upstream = tuple(s for s in project.load_upstream() if foreign.get(s.short) in IN_FORCE)
-    head = ("| ID | Title | Status |", "| --- | --- | --- |")
-    return (
-        "\n".join(
-            (
-                "# Specs",
-                "",
-                "The binding rules of this project. `specs/` holds only the rules of the",
-                "project. The command `specs check --write` writes this file to",
-                "`.specs/index.md` and to `specs/README.md`. Do not change these files by hand",
-                "(000007).",
-                "",
-                "A new spec starts with",
-                '`specs new <kind> <area>/<topic> <name> "<title>"` (000008).',
-                "",
-                "## Tree",
-                "",
-                "```",
-                tree(project).rstrip("\n"),
-                "```",
-                "",
-                "## Index",
-                "",
-                *head,
-                *(_row(s) for s in sorted(specs, key=lambda s: s.full_id)),
-                "",
-                "## Upstream",
-                "",
-                "The rules of different repositories that apply to this project (000049).",
-                "",
-                *(
-                    (*head, *(_row(s) for s in sorted(upstream, key=lambda s: s.long)))
-                    if upstream
-                    else ("No rules.",)
-                ),
-            )
-        )
-        + "\n"
-    )
+    return {s.short: "replaced" if s.short in replaced else s.status for s in upstream}
 
 
 def _read(path: Path) -> str | None:
@@ -1296,13 +733,14 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
         The count of specs and the errors.
     """
     specs, layout = project.load()
-    foreign = foreign_status(project, specs)
+    copied = project.load_upstream()
+    foreign = foreign_status(specs, copied)
     ctx = Context(project, {s.number: s for s in specs}, foreign)
-    text = index(project, specs)
+    text = index(project, specs, foreign, copied)
     if write:
         write_text(project.index_path, text)
         write_text(project.readme_path, text)
-    raw = {s.short: s.status for s in project.load_upstream()}
+    raw = {s.short: s.status for s in copied}
     return len(specs), (
         *layout,
         *_upstream_errors(project),

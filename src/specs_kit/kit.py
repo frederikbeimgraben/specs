@@ -105,7 +105,18 @@ def checkout(repo: str, ref: str) -> Generator[Path]:
     """
     with tempfile.TemporaryDirectory() as tmp:
         run_command("git", "init", "-q", tmp)
-        run_command("git", "-C", tmp, "fetch", "-q", "--depth", "1", f"https://{repo}.git", ref)
+        run_command(
+            "git",
+            "-C",
+            tmp,
+            "fetch",
+            "-q",
+            "--depth",
+            "1",
+            "--end-of-options",
+            f"https://{repo}.git",
+            ref,
+        )
         run_command("git", "-C", tmp, "checkout", "-q", "FETCH_HEAD")
         yield Path(tmp)
 
