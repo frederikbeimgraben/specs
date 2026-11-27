@@ -2,7 +2,7 @@
 id: "000088"
 title: specs lsp runs the language server
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
