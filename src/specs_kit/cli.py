@@ -177,7 +177,8 @@ def _check(
     """Run the check and print the message, the report and the changed files.
 
     `install` writes the index and `AGENTS.md` first. `init`, `update` and `add` end with
-    `install` and give their message and hints (§000066, §000067, §000068, §000083).
+    `install` and give their message and hints (§000066, §000067, §000068, §000083). The changed
+    files come before the report, so that the report is at the end (§000077).
 
     Args:
         write: True to write the index and `AGENTS.md` first.
@@ -198,11 +199,11 @@ def _check(
         mode,
         lambda: (
             "".join(f"{h}\n" for h in head)
+            + _raw_changes(changed)
             + "".join(f"{e}\n" for e in errors)
             + f"{count} specs, {len(errors)} errors\n"
-            + _raw_changes(changed)
         ),
-        lambda: Group(*(done(h) for h in head), report(count, tuple(errors)), file_list(changed)),
+        lambda: Group(*(done(h) for h in head), file_list(changed), report(count, tuple(errors))),
         lambda: (
             {**checked, "changed": data.changed(changed)}
             if message is None

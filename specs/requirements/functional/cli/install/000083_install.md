@@ -39,13 +39,13 @@ It must do these steps in this order:
    switch in `[features]` is on (000084). A file that exists must not change, also when it is
    not the same as in the kit. Remove each part whose switch is off, as 000084 tells.
 6. Write the index `specs/README.md` (000007) and the block in `AGENTS.md` (000079).
-7. Run `specs check` (000065) and print its report after its own message. End with the exit
-   code 1 when the check finds errors.
+7. Run `specs check` (000065). Print its own message, the hints, the changed files (000077)
+   and then the report of the check. End with the exit code 1 when the check finds errors.
 
 When each copy agrees with `specs.lock` and this program is the kit at the commit of
 `specs.lock`, the command must not use the network. `specs init`, `specs update` and
 `specs add` must end with these steps. The MCP server must have the tool `install`, which does
-the same and returns the hints, the report and the changed files (000074).
+the same and returns the hints, the changed files and the report (000074).
 
 Reason: One command makes a fresh clone, a changed copy or a missing file current, and writes
 each file that the check needs. Only `specs update` and `specs add` change a version, so a

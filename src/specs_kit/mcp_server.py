@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from mcp.server.mcpserver import MCPServer
 
 from specs_kit import queries
@@ -21,45 +23,43 @@ def check() -> str:
     return queries.check(Project.open())[1]
 
 
-def _installed(project: Project, head: tuple[str, ...]) -> str:
-    """Run `specs install` and return the messages, the hints, the report and the changed files.
+def _installed(project: Project, head: Callable[[], tuple[str, ...]]) -> str:
+    """Run a change and `specs install`; return the messages, the hints, the files and the report.
 
     Args:
         project: The project.
-        head: The messages before the hints.
+        head: Makes the change before `install` and returns its messages.
 
     Returns:
-        The text.
+        The text, with the report of the check at the end (§000077).
     """
-    hints = install_project(Project.open(project.root))
-    _, report = queries.check(Project.open(project.root), write=True)
-    return "".join(f"{h}\n" for h in (*head, *hints)) + report
+    with recording() as log:
+        messages = head()
+        hints = install_project(Project.open(project.root))
+        _, report = queries.check(Project.open(project.root), write=True)
+        files = "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+    return "".join(f"{h}\n" for h in (*messages, *hints)) + files + report
 
 
 @server.tool()
 def install() -> str:
     """Load the copies, write each missing file, the index and AGENTS.md, then check.
 
-    Returns the hints, the report of the check and the changed files as `<mark> <path>` lines.
+    Returns the hints, the changed files as `<mark> <path>` lines and the report of the check.
     """
-    project = Project.open()
-    with recording() as log:
-        text = _installed(project, ())
-        return text + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+    return _installed(Project.open(), tuple)
 
 
 @server.tool()
 def configure(key: str, value: str) -> str:
-    """Set one key of specs.toml, then run install. Returns the report and the changed files.
+    """Set one key of specs.toml, then run install. Returns the changed files and the report.
 
     Args:
         key: forge, base_ref, code_dirs, code_suffixes, max_elements or features.<switch>.
         value: The plain value, for example false, 25, origin/main or src,lib.
     """
     project = Project.open()
-    with recording() as log:
-        text = _installed(project, (set_value(project, key, value),))
-        return text + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+    return _installed(project, lambda: (set_value(project, key, value),))
 
 
 @server.tool()
@@ -70,9 +70,7 @@ def remove(repo: str) -> str:
         repo: The full name of the repository. The kit cannot be removed.
     """
     project = Project.open()
-    with recording() as log:
-        text = _installed(project, (f"removed {remove_repo(project, repo)}",))
-        return text + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+    return _installed(project, lambda: (f"removed {remove_repo(project, repo)}",))
 
 
 @server.tool()
