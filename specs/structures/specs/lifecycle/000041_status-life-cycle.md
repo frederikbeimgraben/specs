@@ -2,7 +2,7 @@
 id: "000041"
 title: The status of a spec moves from draft to approved, replaced or removed
 kind: structure
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-26
 diagram: state
@@ -36,7 +36,7 @@ stateDiagram-v2
 
 | Element | Path | Meaning |
 | --- | --- | --- |
-| `draft` | .specs/templates/TEMPLATE.md | The owner did not approve the spec yet. |
+| `draft` | specs/.templates/TEMPLATE.md | The owner did not approve the spec yet. |
 | `approved` | specs/conventions/specs/format/000010_status.md | The owner approved the spec. |
 | `replaced` | specs/conventions/specs/format/000010_status.md | A different spec replaces the spec and names it in `replaces`. `replaced_by` names that spec. |
 | `removed` | specs/conventions/specs/format/000010_status.md | The spec is not in force. The number stays taken. |

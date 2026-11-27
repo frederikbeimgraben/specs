@@ -1,9 +1,9 @@
 # Specs
 
-The binding rules of this project. `specs/` holds only the rules of the
-project. The command `specs check --write` writes this file to
-`.specs/index.md` and to `specs/README.md`. Do not change these files by hand
-(000007).
+The binding rules of this project. The kind folders of `specs/` hold the rules
+of the project, `specs/.upstream/` the rules of different repositories and
+`specs/.templates/` the templates. The command `specs check --write` writes
+this file. Do not change it by hand (000007).
 
 A new spec starts with
 `specs new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).
@@ -14,7 +14,7 @@ A new spec starts with
 specs/
   requirements/
     functional/
-      cli/  add, agents, check, init, list, mcp, new, output, resolve, search, settings, show, update
+      cli/  add, agents, check, init, list, mcp, migrate, new, output, resolve, search, settings, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -45,8 +45,8 @@ specs/
 | [C/specs/content/000024](/specs/conventions/specs/content/000024_current-rule.md) | A spec states the current rule | approved |
 | [C/specs/content/000025](/specs/conventions/specs/content/000025_ste.md) | A spec is written in ASD-STE100 | approved |
 | [C/specs/content/000026](/specs/conventions/specs/content/000026_product-terms.md) | Product terms stay as the product shows them | approved |
-| [C/specs/decisions/000042](/specs/conventions/specs/decisions/000042_whole-decision.md) | A decision spec records one decision with its alternatives | approved |
-| [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | approved |
+| [C/specs/decisions/000042](/specs/conventions/specs/decisions/000042_whole-decision.md) | A decision spec records one decision with its alternatives | draft |
+| [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | draft |
 | [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | approved |
 | [C/specs/format/000010](/specs/conventions/specs/format/000010_status.md) | The status shows the approval | approved |
 | [C/specs/format/000011](/specs/conventions/specs/format/000011_one-rule-per-file.md) | One file holds one rule | approved |
@@ -59,40 +59,41 @@ specs/
 | [C/specs/layout/000004](/specs/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | approved |
 | [C/specs/layout/000005](/specs/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](/specs/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
-| [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | approved |
-| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds only the rules of the project | approved |
-| [C/specs/protocols/000027](/specs/conventions/specs/protocols/000027_whole-format.md) | A protocol spec describes one whole format | approved |
+| [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | draft |
+| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds the rules of the project and the files of the kit | draft |
+| [C/specs/protocols/000027](/specs/conventions/specs/protocols/000027_whole-format.md) | A protocol spec describes one whole format | draft |
 | [C/specs/protocols/000028](/specs/conventions/specs/protocols/000028_schema-file.md) | A JSON format has a JSON Schema file beside its spec | approved |
 | [C/specs/protocols/000029](/specs/conventions/specs/protocols/000029_checked-example.md) | The example of a JSON format matches its schema | approved |
 | [C/specs/protocols/000030](/specs/conventions/specs/protocols/000030_breaking-change.md) | A breaking change of a format is a new protocol spec | approved |
 | [C/specs/protocols/000031](/specs/conventions/specs/protocols/000031_code-against-schema.md) | A test checks the output of the code against the schema | approved |
 | [C/specs/protocols/000032](/specs/conventions/specs/protocols/000032_protocols-key.md) | A rule names the formats that it uses | approved |
 | [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | approved |
-| [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | approved |
+| [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | draft |
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |
-| [C/specs/structures/000033](/specs/conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | approved |
+| [C/specs/structures/000033](/specs/conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | draft |
 | [C/specs/structures/000034](/specs/conventions/specs/structures/000034_mermaid-diagram.md) | The diagram is one Mermaid block of a fixed type | approved |
 | [C/specs/structures/000035](/specs/conventions/specs/structures/000035_elements-table.md) | Each element of the diagram has a row in the element table | approved |
 | [C/specs/structures/000036](/specs/conventions/specs/structures/000036_element-path.md) | An element names the code that holds it | approved |
 | [C/specs/structures/000037](/specs/conventions/specs/structures/000037_diagram-size.md) | A diagram has at most 25 elements | approved |
 | [C/specs/structures/000038](/specs/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
-| [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | approved |
-| [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | specs writes the rules for agents to AGENTS.md | approved |
-| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | approved |
-| [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | approved |
+| [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | draft |
+| [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | specs writes the rules for agents to AGENTS.md | draft |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | draft |
+| [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | draft |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | approved |
-| [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | approved |
+| [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | draft |
+| [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | draft |
 | [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | specs formats its output for a terminal | approved |
-| [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | approved |
+| [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | draft |
 | [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | specs prints its data as JSON | approved |
 | [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | specs resolve prints the long form of an ID | approved |
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | specs search finds rules by a text | approved |
 | [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | specs.toml holds the settings of the specs command | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | approved |
-| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update replaces a copy and its ref | approved |
+| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update replaces a copy and its ref | draft |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
 | [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | approved |
 | [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | approved |
@@ -107,8 +108,8 @@ specs/
 | [S/shared/functional/000057](/specs/style/shared/functional/000057_exhaustive-match.md) | A branch on one value is an exhaustive match | approved |
 | [S/shared/functional/000058](/specs/style/shared/functional/000058_frozen-data.md) | Data types are frozen by default | approved |
 | [S/shared/functional/000059](/specs/style/shared/functional/000059_exceptions.md) | The exceptions of the functional style are named | approved |
-| [U/specs/lifecycle/000041](/specs/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | approved |
-| [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
+| [U/specs/lifecycle/000041](/specs/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | draft |
+| [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | draft |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
 | [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |

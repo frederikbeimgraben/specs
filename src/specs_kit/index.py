@@ -1,4 +1,4 @@
-"""Write the text of the index `.specs/index.md` and its copy `specs/README.md` (§000007)."""
+"""Write the text of the index `specs/README.md` (§000007)."""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def tree(project: Project) -> str:
                         *_tree_lines(base, folder, indent),
                     )
                 ),
-                *((".specs/upstream/", *(f"  {repo}/" for repo in copies)) if copies else ()),
+                *(("  .upstream/", *(f"    {repo}/" for repo in copies)) if copies else ()),
             )
         )
         + "\n"
@@ -84,14 +84,14 @@ def row(spec: Spec) -> str:
     Returns:
         The row.
     """
-    folder = f".specs/upstream/{spec.repo}" if spec.repo else "specs"
+    folder = f"specs/.upstream/{spec.repo}" if spec.repo else "specs"
     return f"| [{spec.long}](/{folder}/{spec.rel.as_posix()}) | {spec.title} | {spec.status} |"
 
 
 def index(
     project: Project, specs: tuple[Spec, ...], foreign: Mapping[str, str], copied: tuple[Spec, ...]
 ) -> str:
-    """Return the text of `.specs/index.md` and its copy `specs/README.md` (§000007).
+    """Return the text of the index `specs/README.md` (§000007).
 
     Args:
         project: The project.
@@ -109,10 +109,10 @@ def index(
             (
                 "# Specs",
                 "",
-                "The binding rules of this project. `specs/` holds only the rules of the",
-                "project. The command `specs check --write` writes this file to",
-                "`.specs/index.md` and to `specs/README.md`. Do not change these files by hand",
-                "(000007).",
+                "The binding rules of this project. The kind folders of `specs/` hold the rules",
+                "of the project, `specs/.upstream/` the rules of different repositories and",
+                "`specs/.templates/` the templates. The command `specs check --write` writes",
+                "this file. Do not change it by hand (000007).",
                 "",
                 "A new spec starts with",
                 '`specs new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).',

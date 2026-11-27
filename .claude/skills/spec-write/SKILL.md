@@ -6,7 +6,7 @@ description: Write a new spec or change a spec in specs/ (functional, non-functi
 # Write a spec
 
 The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`, in a project below
-`.specs/upstream/github.com/frederikbeimgraben/specs/`. A spec wins over this skill (000001).
+`specs/.upstream/github.com/frederikbeimgraben/specs/`. A spec wins over this skill (000001).
 
 `specs` is the command of the kit. Run it as `nix run github:frederikbeimgraben/specs/<ref> -- <command>`, with the `ref` of the kit in `specs.toml`, or use the tools of the MCP server `specs`.
 

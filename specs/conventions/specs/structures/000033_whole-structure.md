@@ -2,13 +2,13 @@
 id: "000033"
 title: A structure spec shows one structure as one diagram
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
   - src/specs_kit/check.py
   - src/specs_kit/sections.py
-  - .specs/templates/TEMPLATE-structure.md
+  - specs/.templates/TEMPLATE-structure.md
 scope:
   - specs/
 ---

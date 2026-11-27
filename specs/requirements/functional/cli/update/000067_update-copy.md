@@ -2,7 +2,7 @@
 id: "000067"
 title: specs update replaces a copy and its ref
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -19,7 +19,7 @@ scope:
 
 # specs update replaces a copy and its ref
 
-`specs update <repo> <ref>` must replace the copy of `<repo>` below `.specs/upstream/` with the
+`specs update <repo> <ref>` must replace the copy of `<repo>` below `specs/.upstream/` with the
 `specs/` folder of `<repo>` at `<ref>`, and set `ref` in `specs.toml` to the commit of `<ref>`.
 When the table of `<repo>` has `include`, the command must copy only the folders of `include`
 (000048) and must keep `include` unchanged.
@@ -31,8 +31,10 @@ When it changed `flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it mu
 leave the shell and run `nix develop`, because a program cannot load its shell again.
 Without `<ref>`, it must take the default branch. The command must stop with an error when
 `<repo>` is not in `specs.toml`, when `<repo>` at `<ref>` has no folder of `include`, when the
-kit at `<ref>` has no `.specs/templates/`, or when `.gitlab-ci.yml` has an `include` that is
+kit at `<ref>` has no `specs/.templates/`, or when `.gitlab-ci.yml` has an `include` that is
 not a list. It must then change no file.
+
+Before it copies, the command must run the migrations of 000081.
 
 At its end, `specs update` must run `specs check --write` (000065) and print its report after
 its own message. It must end with the exit code 1 when the check finds errors.

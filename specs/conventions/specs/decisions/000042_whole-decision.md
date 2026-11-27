@@ -2,13 +2,13 @@
 id: "000042"
 title: A decision spec records one decision with its alternatives
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
   - src/specs_kit/check.py
   - src/specs_kit/sections.py
-  - .specs/templates/TEMPLATE-decision.md
+  - specs/.templates/TEMPLATE-decision.md
 scope:
   - specs/
 ---

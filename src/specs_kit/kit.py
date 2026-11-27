@@ -1,7 +1,7 @@
 """Install the kit in a project, and update the copies of different repositories.
 
 `init` replaces the old install script. `update` and `add` replace a copy below
-`.specs/upstream/` with the `specs/` folder of its repository at one commit (§000048).
+`specs/.upstream/` with the `specs/` folder of its repository at one commit (§000048).
 """
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ import json
 import re
 import subprocess
 import tempfile
+import tomllib
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from importlib import resources
@@ -17,11 +18,13 @@ from pathlib import Path
 from typing import cast
 
 from specs_kit.changes import replace_tree, write_text
+from specs_kit.migrations import contains, migrate_copy, migrate_project
 from specs_kit.project import (
     CONFIG_NAME,
     FOLDER,
     KIT_REPO,
     REPO,
+    TEMPLATES,
     Project,
     kit_rev,
     kit_source,
@@ -72,6 +75,50 @@ def run_command(*args: str, cwd: Path | None = None) -> str:
         raise KitError(
             f"{' '.join(args)} failed: {getattr(error, 'stderr', '') or error}"
         ) from error
+
+
+@contextmanager
+def kit_history() -> Generator[Path]:
+    """Fetch the history of the kit, without file contents, into a temporary folder.
+
+    Yields:
+        The folder of the clone.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        run_command("git", "init", "-q", tmp)
+        run_command(
+            "git",
+            "-C",
+            tmp,
+            "fetch",
+            "-q",
+            "--filter=blob:none",
+            "--end-of-options",
+            f"https://{KIT_REPO}.git",
+            "+refs/heads/*:refs/remotes/origin/*",
+        )
+        yield Path(tmp)
+
+
+def upstream_kit_ref(source: Path) -> str | None:
+    """Return the kit ref in `specs.toml` of a checkout of a different repository.
+
+    Args:
+        source: The root of the checkout.
+
+    Returns:
+        The ref, or None when the checkout has no `specs.toml` or no kit ref in it.
+    """
+    path = source / CONFIG_NAME
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    except tomllib.TOMLDecodeError:
+        return None
+    match data.get("upstream", {}).get(KIT_REPO, {}).get("ref"):
+        case str() as ref:
+            return ref
+        case _:
+            return None
 
 
 def latest_ref(repo: str) -> str:
@@ -287,6 +334,19 @@ def check_forge(root: Path, forge: str) -> None:
         gitlab_root_text(root)
 
 
+def _templates(source: Path) -> Path:
+    """Return the templates folder of a checkout of the kit, in the new or the old place.
+
+    Args:
+        source: The checkout of the kit.
+
+    Returns:
+        `specs/.templates/`, or `.specs/templates/` of a kit before the move.
+    """
+    new = source / "specs" / TEMPLATES
+    return new if new.is_dir() else source / ".specs" / "templates"
+
+
 def install_kit_files(source: Path, project: Project, ref: str) -> None:
     """Replace the templates, the skills, the CI file and the MCP server of the kit.
 
@@ -302,7 +362,7 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     check_forge(project.root, forge)
     data_name, target = CI_FILES[forge]
     root_text = gitlab_root_text(project.root) if forge == "gitlab" else None
-    replace_tree(source / ".specs" / "templates", project.templates_dir)
+    replace_tree(_templates(source), project.templates_dir)
     for skill in _skills(source):
         replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
     branch = project.config.base_ref.removeprefix("origin/")
@@ -389,7 +449,7 @@ def _check_repo(repo: str) -> None:
         raise KitError(f"{repo!r} is not <host>/<group>/.../<repo>")
 
 
-def update(project: Project, repo: str, ref: str | None) -> str:
+def update(project: Project, repo: str, ref: str | None) -> tuple[str, tuple[str, ...]]:
     """Update the copy of one repository. For the kit, also update its files.
 
     Args:
@@ -398,7 +458,7 @@ def update(project: Project, repo: str, ref: str | None) -> str:
         ref: The tag or the commit, or None for the default branch.
 
     Returns:
-        The commit of the new copy.
+        The commit of the new copy and the migrations that ran.
 
     Raises:
         KitError: The repository is not in `specs.toml`, or git fails.
@@ -409,7 +469,9 @@ def update(project: Project, repo: str, ref: str | None) -> str:
     return _install(project, repo, ref or latest_ref(repo), project.config.include.get(repo, ()))
 
 
-def add(project: Project, repo: str, ref: str, include: tuple[str, ...] = ()) -> str:
+def add(
+    project: Project, repo: str, ref: str, include: tuple[str, ...] = ()
+) -> tuple[str, tuple[str, ...]]:
     """Add the copy of a new repository.
 
     Args:
@@ -419,7 +481,7 @@ def add(project: Project, repo: str, ref: str, include: tuple[str, ...] = ()) ->
         include: The folders below `specs/` to copy, or empty for all.
 
     Returns:
-        The commit of the new copy.
+        The commit of the new copy and the migrations that ran.
 
     Raises:
         KitError: The repository is in `specs.toml` already, or git fails.
@@ -428,14 +490,20 @@ def add(project: Project, repo: str, ref: str, include: tuple[str, ...] = ()) ->
     if repo in project.config.upstream:
         raise KitError(f"{repo} is in specs.toml; run specs update {repo} <ref>")
     folders = normal_include(include)
-    commit = _install(project, repo, ref, folders)
+    result = _install(project, repo, ref, folders)
     if folders:
         set_include(project, repo, folders)
-    return commit
+    return result
 
 
-def _install(project: Project, repo: str, ref: str, include: tuple[str, ...]) -> str:
-    """Replace the copy of one repository and set its ref.
+def _install(
+    project: Project, repo: str, ref: str, include: tuple[str, ...]
+) -> tuple[str, tuple[str, ...]]:
+    """Run the pending migrations, replace the copy of one repository and set its ref (§000081).
+
+    For the kit, the project and each copy get the migrations that the old kit ref of the project
+    does not hold. For a different repository, its copy gets the migrations that its own kit ref
+    does not hold.
 
     Args:
         project: The project.
@@ -444,16 +512,39 @@ def _install(project: Project, repo: str, ref: str, include: tuple[str, ...]) ->
         include: The folders below `specs/` to copy, or empty for all.
 
     Returns:
-        The commit of the new copy.
+        The commit of the new copy and the descriptions of the migrations that ran.
+
+    Raises:
+        KitError: The kit is too old, or the repository uses a newer kit than the project.
     """
-    with checkout(repo, ref) as source:
+    own = project.config.upstream.get(KIT_REPO)
+    with checkout(repo, ref) as source, kit_history() as history:
         commit = run_command("git", "-C", str(source), "rev-parse", "HEAD").strip()
-        if repo == KIT_REPO and not (source / ".specs" / "templates").is_dir():
-            raise KitError(f"the kit at {commit} has no .specs/templates/; it is too old")
+        if repo == KIT_REPO and not _templates(source).is_dir():
+            raise KitError(f"the kit at {commit} has no templates; it is too old")
         if repo == KIT_REPO:
             check_forge(project.root, project.config.forge)
-        copy_rules(source, project, repo, normal_include(include))
-        set_ref(project, repo, commit)
+        theirs = None if repo == KIT_REPO else upstream_kit_ref(source)
+        if theirs and own and theirs != own and not contains(history, theirs, own):
+            raise KitError(
+                f"{repo} at {commit} needs the kit at {theirs} or later; run specs update first"
+            )
+        ran = (
+            (
+                *migrate_project(history, project.root, own),
+                *(
+                    d
+                    for other in sorted(Project.open(project.root).copies())
+                    for d in migrate_copy(history, project.upstream_dir / other, own)
+                ),
+            )
+            if repo == KIT_REPO
+            else ()
+        )
+        fresh = Project.open(project.root)
+        copy_rules(source, fresh, repo, normal_include(include))
+        copied = migrate_copy(history, fresh.upstream_dir / repo, theirs)
+        set_ref(fresh, repo, commit)
         if repo == KIT_REPO:
             install_kit_files(source, Project.open(project.root), commit)
-    return commit
+    return commit, tuple(dict.fromkeys((*ran, *copied)))

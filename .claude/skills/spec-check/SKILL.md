@@ -11,7 +11,7 @@ description: Check the specs in specs/ and the code against them. Run the checke
 
 ```sh
 specs check          # check, exit 1 on an error
-specs check --write  # also write .specs/index.md and its copy specs/README.md
+specs check --write  # also write the index specs/README.md and AGENTS.md
 ```
 
 Each error names the file and the rule number. Read that rule with `specs show <number>` and fix

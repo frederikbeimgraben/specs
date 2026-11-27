@@ -2,13 +2,13 @@
 id: "000027"
 title: A protocol spec describes one whole format
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
   - src/specs_kit/check.py
   - src/specs_kit/sections.py
-  - .specs/templates/TEMPLATE-protocol.md
+  - specs/.templates/TEMPLATE-protocol.md
 scope:
   - specs/
 ---

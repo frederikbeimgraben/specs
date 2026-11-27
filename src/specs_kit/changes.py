@@ -149,7 +149,8 @@ def _files(root: Path) -> Mapping[Path, bytes]:
 def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> None:
     """Replace the folder `target` with a copy of `source`, and record each changed file.
 
-    Without `folders`, the copy holds all of `source` except each folder `upstream`.
+    Without `folders`, the copy holds all of `source` except each folder `upstream` and each
+    hidden file or folder, for example `.upstream/` and `.templates/`.
 
     Args:
         source: The folder to copy.
@@ -160,10 +161,53 @@ def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> Non
     shutil.rmtree(target, ignore_errors=True)
     match tuple(folders):
         case ():
-            shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream"))
+            shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream", ".*"))
         case chosen:
             for folder in chosen:
                 shutil.copytree(source / folder, target / folder)
+    new = _files(target)
+    for rel in sorted({*old, *new}):
+        _compare_bytes(target / rel, old.get(rel), new.get(rel))
+
+
+def delete_file(path: Path) -> None:
+    """Delete a file when it exists, and record the change.
+
+    Args:
+        path: The file.
+    """
+    old = _content(path)
+    path.unlink(missing_ok=True)
+    _compare_bytes(path, old, None)
+
+
+def move_tree(source: Path, target: Path) -> None:
+    """Move a folder to a new place that replaces any folder there, and record each change.
+
+    Args:
+        source: The folder to move. Nothing happens when it does not exist.
+        target: The new place.
+    """
+    if not source.is_dir():
+        return
+    old = _files(source)
+    replace_tree_all(source, target)
+    shutil.rmtree(source)
+    for rel in sorted(old):
+        _compare_bytes(source / rel, old[rel], None)
+
+
+def replace_tree_all(source: Path, target: Path) -> None:
+    """Replace the folder `target` with a full copy of `source`, and record each changed file.
+
+    Args:
+        source: The folder to copy.
+        target: The folder to replace.
+    """
+    old = _files(target)
+    shutil.rmtree(target, ignore_errors=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source, target)
     new = _files(target)
     for rel in sorted({*old, *new}):
         _compare_bytes(target / rel, old.get(rel), new.get(rel))

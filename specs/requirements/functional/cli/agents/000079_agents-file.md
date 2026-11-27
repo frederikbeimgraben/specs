@@ -2,7 +2,7 @@
 id: "000079"
 title: specs writes the rules for agents to AGENTS.md
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -25,7 +25,7 @@ scope:
 `specs check --write` must write one block to `AGENTS.md` in the root of the project. The block
 must start with the line `<!-- specs:begin (written by specs check --write, do not edit) -->`
 and end with the line `<!-- specs:end -->`. Between these lines, the block must hold a short
-text that tells an agent how to use the rules, and the table of `.specs/index.md` (000007) with
+text that tells an agent how to use the rules, and the table of `specs/README.md` (000007) with
 only the A and W rules that have the status `approved`, first the rules of the project and then
 the rules of the copies (000049).
 

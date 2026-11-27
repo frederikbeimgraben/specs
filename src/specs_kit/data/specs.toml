@@ -15,7 +15,7 @@ code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh
 # The highest count of elements in one structure diagram (000037).
 max_elements = 25
 
-# The rules of a different repository, copied to .specs/upstream/<host>/<group>/.../<repo>/ (000048).
+# The rules of a different repository, copied to specs/.upstream/<host>/<group>/.../<repo>/ (000048).
 # ref is the commit of the copy. Change it with specs update or specs add.
 # include is optional: the folders below specs/ that the copy holds, for example ["style/python/"].
 # Without include, the copy holds all rules. specs add --include sets it.

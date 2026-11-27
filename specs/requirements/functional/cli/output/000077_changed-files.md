@@ -2,7 +2,7 @@
 id: "000077"
 title: specs lists the files that a command changes
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -33,7 +33,7 @@ The path must be relative to the root of the project. The list must be sorted by
 place in the code that writes a file must record it. A file that a different program writes
 for the command, for example `flake.lock` from `nix flake lock`, must be in the list too. A
 write with the same content is no change. For a copied folder, for example
-`.specs/upstream/`, the list must hold only the files that are new, changed or deleted. The
+`specs/.upstream/`, the list must hold only the files that are new, changed or deleted. The
 MCP tool `new` must return the same list as plain text.
 
 Reason: The person sees what a command did without `git status`, and a script can read the

@@ -2,7 +2,7 @@
 id: "000066"
 title: specs init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -29,8 +29,8 @@ scope:
 | --- | --- |
 | `specs.toml` | The settings, with `forge` and the `ref` of the kit. |
 | `specs/` | An empty folder for the rules of the project. |
-| `.specs/upstream/github.com/frederikbeimgraben/specs/` | The rules of the kit at the commit of the program (000048). |
-| `.specs/templates/` | The templates of the kit. |
+| `specs/.upstream/github.com/frederikbeimgraben/specs/` | The rules of the kit at the commit of the program (000048). |
+| `specs/.templates/` | The templates of the kit. |
 | `.claude/skills/spec-*` | The skills of the kit. |
 | `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` or `.forgejo/workflows/specs.yml` | The CI job for the forge, which runs `specs check` at the `ref` of the kit. On GitHub and Codeberg, it runs for each pull request and for each push to the branch of `base_ref`, for example `develop` for `origin/develop`. For Codeberg, the job runs on the hosted Forgejo Actions runner `codeberg-small`. |
 | `.gitlab-ci.yml` | Only for GitLab: the entry `- local: .gitlab/ci/specs.yml` below `include:`, if it is not there. The other content stays. |

@@ -1,32 +1,31 @@
 ---
 id: "000051"
-title: specs/ holds only the rules of the project
+title: specs/ holds the rules of the project and the files of the kit
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
   - src/specs_kit/project.py
 scope:
   - specs/
-  - .specs/
 ---
 
-# specs/ holds only the rules of the project
+# specs/ holds the rules of the project and the files of the kit
 
-`specs/` must hold only the rules of the project and the copy of the index in `README.md`
-(000007). All other files of the kit must be below `.specs/`:
+`specs/` must hold the rules of the project in its kind folders (000004). All other files of
+the kit must be in these places of `specs/`:
 
 | Path | Content |
 | --- | --- |
-| `.specs/upstream/` | The copies of the rules of different repositories (000048). |
-| `.specs/templates/` | The templates for a new spec (000008). |
-| `.specs/index.md` | The index (000007). |
+| `specs/README.md` | The index (000007). |
+| `specs/.upstream/` | The copies of the rules of different repositories (000048). |
+| `specs/.templates/` | The templates for a new spec (000008). |
 
 The settings must be in `specs.toml` in the root of the repository.
 
-Reason: A reader of `specs/` sees only the rules that the project wrote. The files of the
-kit change with `specs update` and stay out of the way.
+Reason: All files of the specs are in one folder. The hidden folders keep the files of the kit,
+which change with `specs update`, out of the way of a reader of the rules.
 
-Test: `specs check` fails for a file in `specs/` that is not below a kind folder and is not
-`README.md`.
+Test: `specs check` fails for a file in `specs/` that is not below a kind folder, not below a
+hidden folder and is not `README.md`.

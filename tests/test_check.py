@@ -33,21 +33,20 @@ def test_check_passes_after_init(kit: Kit, project: Path) -> None:
 def test_check_without_write_changes_no_file(kit: Kit, project: Path) -> None:
     """`specs check` without `--write` must not change a file."""
     _rule(project)
-    before = (project / ".specs" / "index.md").read_text(encoding="utf-8")
+    before = (project / "specs" / "README.md").read_text(encoding="utf-8")
     result = kit.run(project, "check", "--raw")
     assert result.code == 1
     assert "the index is not current" in result.out
-    assert (project / ".specs" / "index.md").read_text(encoding="utf-8") == before
+    assert (project / "specs" / "README.md").read_text(encoding="utf-8") == before
 
 
 def test_check_write_writes_index_and_copy(kit: Kit, project: Path) -> None:
-    """`specs check --write` writes the index and its exact copy."""
+    """`specs check --write` writes the index."""
     _rule(project)
     result = kit.run(project, "check", "--write", "--raw")
-    index = (project / ".specs" / "index.md").read_text(encoding="utf-8")
+    index = (project / "specs" / "README.md").read_text(encoding="utf-8")
     assert result.code == 0, result.out
     assert "S/code/names/000100" in index
-    assert (project / "specs" / "README.md").read_text(encoding="utf-8") == index
 
 
 def test_check_finds_a_rule_without_must(kit: Kit, project: Path) -> None:
@@ -78,9 +77,9 @@ def test_check_finds_a_missing_key(kit: Kit, project: Path) -> None:
     assert "front matter keys" in result.out
 
 
-def test_check_finds_a_stale_copy(kit: Kit, project: Path) -> None:
-    """`specs/README.md` must be an exact copy of the index."""
+def test_check_finds_a_stale_index(kit: Kit, project: Path) -> None:
+    """`specs check` fails when the index is not current."""
     (project / "specs" / "README.md").write_text("changed\n", encoding="utf-8")
     result = kit.run(project, "check", "--raw")
     assert result.code == 1
-    assert "not an exact copy of the index" in result.out
+    assert "the index is not current" in result.out
