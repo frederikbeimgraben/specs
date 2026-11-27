@@ -26,6 +26,7 @@ from rich.text import Text
 
 from specs_kit import queries
 from specs_kit.check import run
+from specs_kit.devshell import init_flake, update_flake
 from specs_kit.kit import KitError, add, init, update
 from specs_kit.mcp_server import serve
 from specs_kit.new import NewError, new
@@ -156,6 +157,19 @@ def _message(pretty: bool, text: str) -> int:
     return _emit(pretty, lambda: text, lambda: done(text))
 
 
+def _lines(text: str, hints: tuple[str, ...]) -> str:
+    """Return a message with its hints below it.
+
+    Args:
+        text: The message.
+        hints: The hints.
+
+    Returns:
+        The message and one hint on each line.
+    """
+    return "\n".join((text, *hints))
+
+
 def dispatch(args: argparse.Namespace) -> int:
     """Run one command.
 
@@ -171,10 +185,15 @@ def dispatch(args: argparse.Namespace) -> int:
         case "check":
             return _check(bool(args.write), pretty)
         case "init":
-            return _message(pretty, f"installed the kit in {init(Path(args.dir), args.forge).root}")
+            project = init(Path(args.dir), args.forge)
+            hints = init_flake(project.root, project.config.upstream.get(KIT_REPO) or "")
+            return _message(pretty, _lines(f"installed the kit in {project.root}", hints))
         case "update":
             target = _update_target(list(args.args))
-            return _message(pretty, f"updated to {update(Project.open(), *target)}")
+            project = Project.open()
+            commit = update(project, *target)
+            hints = update_flake(project.root, commit) if target[0] == KIT_REPO else ()
+            return _message(pretty, _lines(f"updated to {commit}", hints))
         case "add":
             commit = add(Project.open(), args.repo, args.ref, tuple(args.include))
             return _message(pretty, f"added at {commit}")

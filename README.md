@@ -50,8 +50,8 @@ nix run github:frederikbeimgraben/specs/<ref> -- <command>
 | Command | Effect |
 | --- | --- |
 | `check [--write]` | Checks the specs and the `§` references. `--write` also writes the index. |
-| `init [<dir>] [--forge github\|gitlab]` | Adds the kit to a project. |
-| `update [<ref>]` | Updates the kit: the copy of its rules, the templates, the skills, the CI file and the MCP server entry. |
+| `init [<dir>] [--forge github\|gitlab\|codeberg]` | Adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
+| `update [<ref>]` | Updates the kit: the copy of its rules, the templates, the skills, the CI file, the MCP server entry and the input `specs` in `flake.nix`. |
 | `update <repo> <ref>` | Replaces the copy of the rules of a different repository. |
 | `add <repo> <ref>` | Adds the copy of the rules of a different repository. |
 | `new <kind> <area>/<topic> <name> "<title>" [--owner <login>]` | Makes a new spec from its template, with the next number. |
@@ -62,7 +62,8 @@ nix run github:frederikbeimgraben/specs/<ref> -- <command>
 | `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `resolve`, `show`, `list`, `search` and `new`. |
 
 A project runs the command at the `ref` of the kit in `specs.toml`. `init` and `update` write
-this `ref` into the CI file and into `.mcp.json`.
+this `ref` into the CI file, into `.mcp.json` and into the input `specs` of `flake.nix`.
+With direnv, the devShell loads the new command after `specs update`.
 
 ## Add the kit to a project
 

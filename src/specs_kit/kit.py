@@ -41,7 +41,7 @@ GITLAB_ROOT = ".gitlab-ci.yml"
 GITLAB_INCLUDE = "  - local: .gitlab/ci/specs.yml"
 
 
-def _data(name: str) -> str:
+def package_data(name: str) -> str:
     """Return the text of a file of the package data.
 
     Args:
@@ -53,7 +53,7 @@ def _data(name: str) -> str:
     return resources.files("specs_kit").joinpath("data", name).read_text(encoding="utf-8")
 
 
-def _run(*args: str, cwd: Path | None = None) -> str:
+def run_command(*args: str, cwd: Path | None = None) -> str:
     """Run a command and return its output.
 
     Args:
@@ -86,7 +86,7 @@ def latest_ref(repo: str) -> str:
     Raises:
         KitError: git cannot read the repository.
     """
-    out = _run("git", "ls-remote", f"https://{repo}.git", "HEAD").split()
+    out = run_command("git", "ls-remote", f"https://{repo}.git", "HEAD").split()
     if not out:
         raise KitError(f"{repo} has no default branch")
     return out[0]
@@ -104,9 +104,9 @@ def checkout(repo: str, ref: str) -> Generator[Path]:
         The folder of the checkout.
     """
     with tempfile.TemporaryDirectory() as tmp:
-        _run("git", "init", "-q", tmp)
-        _run("git", "-C", tmp, "fetch", "-q", "--depth", "1", f"https://{repo}.git", ref)
-        _run("git", "-C", tmp, "checkout", "-q", "FETCH_HEAD")
+        run_command("git", "init", "-q", tmp)
+        run_command("git", "-C", tmp, "fetch", "-q", "--depth", "1", f"https://{repo}.git", ref)
+        run_command("git", "-C", tmp, "checkout", "-q", "FETCH_HEAD")
         yield Path(tmp)
 
 
@@ -315,7 +315,9 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     for skill in _skills(source):
         _replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
     (project.root / target).parent.mkdir(parents=True, exist_ok=True)
-    (project.root / target).write_text(_data(data_name).replace("{ref}", ref), encoding="utf-8")
+    (project.root / target).write_text(
+        package_data(data_name).replace("{ref}", ref), encoding="utf-8"
+    )
     if root_text is not None:
         (project.root / GITLAB_ROOT).write_text(root_text, encoding="utf-8")
     write_mcp(project, ref)
@@ -334,7 +336,7 @@ def detect_forge(root: Path) -> str:
         KitError: The remote names neither GitHub, GitLab nor Codeberg.
     """
     try:
-        url = _run("git", "remote", "get-url", "origin", cwd=root)
+        url = run_command("git", "remote", "get-url", "origin", cwd=root)
     except KitError:
         url = ""
     match ("gitlab" in url, "github" in url, "codeberg" in url):
@@ -373,7 +375,9 @@ def init(root: Path, forge: str | None) -> Project:
         raise KitError(f"{CONFIG_NAME} exists; run specs update")
     found = forge or detect_forge(root)
     check_forge(root, found)
-    (root / CONFIG_NAME).write_text(_data("specs.toml").replace("{forge}", found), encoding="utf-8")
+    (root / CONFIG_NAME).write_text(
+        package_data("specs.toml").replace("{forge}", found), encoding="utf-8"
+    )
     (root / "specs").mkdir(exist_ok=True)
     project = Project.open(root)
     copy_rules(source, project, KIT_REPO)
@@ -453,7 +457,7 @@ def _install(project: Project, repo: str, ref: str, include: tuple[str, ...]) ->
         The commit of the new copy.
     """
     with checkout(repo, ref) as source:
-        commit = _run("git", "-C", str(source), "rev-parse", "HEAD").strip()
+        commit = run_command("git", "-C", str(source), "rev-parse", "HEAD").strip()
         if repo == KIT_REPO and not (source / ".specs" / "templates").is_dir():
             raise KitError(f"the kit at {commit} has no .specs/templates/; it is too old")
         if repo == KIT_REPO:
