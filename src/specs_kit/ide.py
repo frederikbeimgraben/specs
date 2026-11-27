@@ -91,6 +91,19 @@ def zed_languages(suffixes: tuple[str, ...]) -> tuple[tuple[str, ...], tuple[str
     )
 
 
+def _copy_plain(source: Path, target: Path) -> None:
+    """Copy the files of a folder without their modes, so that a copy from the Nix store can change.
+
+    Args:
+        source: The folder to copy.
+        target: The folder of the copy.
+    """
+    for path in sorted(p for p in source.rglob("*") if p.is_file()):
+        copy = target / path.relative_to(source)
+        copy.parent.mkdir(parents=True, exist_ok=True)
+        copy.write_bytes(path.read_bytes())
+
+
 def _fill(folder: Path, project: Project, editor: str) -> tuple[str, ...]:
     """Write the files of the extension of one editor to an empty folder.
 
@@ -109,7 +122,7 @@ def _fill(folder: Path, project: Project, editor: str) -> tuple[str, ...]:
     match editor, built:
         case "zed", _:
             names, hints = zed_languages(tuple(sorted(project.config.code_suffixes)))
-            shutil.copytree(ZED_SOURCE, folder, dirs_exist_ok=True)
+            _copy_plain(ZED_SOURCE, folder)
             template = (ZED_SOURCE / "extension.toml").read_text(encoding="utf-8")
             listed = ", ".join(json.dumps(n) for n in names)
             (folder / "extension.toml").write_text(
