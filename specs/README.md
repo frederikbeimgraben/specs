@@ -12,6 +12,9 @@ A new spec starts with
 
 ```
 specs/
+  requirements/
+    functional/
+      cli/  add, check, init, list, mcp, new, resolve, search, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -75,9 +78,20 @@ specs/
 | [C/specs/structures/000037](/specs/conventions/specs/structures/000037_diagram-size.md) | A diagram has at most 25 elements | approved |
 | [C/specs/structures/000038](/specs/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
+| [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | draft |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | draft |
+| [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | draft |
+| [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | draft |
+| [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | draft |
+| [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | draft |
+| [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | specs resolve prints the long form of an ID | draft |
+| [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | specs search finds rules by a text | draft |
+| [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | draft |
+| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update replaces a copy and its ref | draft |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | draft |
 | [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | draft |
 | [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | draft |
+| [S/python/lint/000075](/specs/style/python/lint/000075_ruff-format.md) | ruff format changes nothing | draft |
 | [S/python/typing/000061](/specs/style/python/typing/000061_strict-types.md) | Python code is strictly typed | draft |
 | [S/python/version/000060](/specs/style/python/version/000060_python-313.md) | Python code needs Python 3.13 or later | draft |
 | [S/shared/functional/000052](/specs/style/shared/functional/000052_body-shape.md) | A function body has one shape | draft |

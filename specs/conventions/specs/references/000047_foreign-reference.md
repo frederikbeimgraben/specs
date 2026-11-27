@@ -23,8 +23,8 @@ be only the number. This is the short form:
 | Different repository | `github.com/frederikbeimgraben/specs:000012` | `github.com/frederikbeimgraben/specs:C/specs/format/000012` |
 
 Code (000017), the front matter (000009) and the text of a spec must use the short form.
-`specs resolve <ID>` must print the long form of a short or a long form. `specs show <ID>` must
-print the full text of the rule.
+`specs resolve <ID>` must print the long form of a short or a long form (000070).
+`specs show <ID>` must print the full text of the rule (000071).
 
 Reason: Two repositories can use the same number. The host, the owner and the repository make
 the reference unique. The number is the identity of a rule (000013), so the short form stays

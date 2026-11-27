@@ -20,8 +20,8 @@ change the copy and its `ref`:
 
 | Command | Effect |
 | --- | --- |
-| `specs add <repo> <ref>` | Adds the copy of a new repository. |
-| `specs update <repo> <ref>` | Replaces the copy of one repository with its rules at `<ref>`. |
+| `specs add <repo> <ref>` | Adds the copy of a new repository (000068). |
+| `specs update <repo> <ref>` | Replaces the copy of one repository with its rules at `<ref>` (000067). |
 | `specs update [<ref>]` | Does the same for the kit `github.com/frederikbeimgraben/specs`, and also replaces the templates, the skills, the CI file and the MCP server entry of the kit. Without `<ref>`, it takes the default branch. |
 
 Reason: The copy lets an agent and the check read the rules without a network. One `ref` makes
