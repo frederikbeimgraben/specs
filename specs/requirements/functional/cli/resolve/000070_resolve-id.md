@@ -2,7 +2,7 @@
 id: "000070"
 title: specs resolve prints the long form of an ID
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:

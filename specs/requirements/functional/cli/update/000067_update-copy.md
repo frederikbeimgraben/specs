@@ -2,7 +2,7 @@
 id: "000067"
 title: specs update replaces a copy and its ref
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:

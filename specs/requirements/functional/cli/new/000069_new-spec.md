@@ -2,7 +2,7 @@
 id: "000069"
 title: specs new makes a new spec from its template
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:

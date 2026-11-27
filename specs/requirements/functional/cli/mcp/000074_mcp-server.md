@@ -2,7 +2,7 @@
 id: "000074"
 title: specs mcp runs the MCP server
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
