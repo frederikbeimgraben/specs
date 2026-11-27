@@ -2,7 +2,7 @@
 id: "000076"
 title: specs formats its output for a terminal
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -28,8 +28,8 @@ When stdout is a terminal, each command of `specs` except `mcp` must print a for
 | `init`, `update`, `add`, `new` | The message with a green mark. |
 
 With the option `--raw` after the command, or when stdout is not a terminal, the command must
-print the plain text of its own spec, with no color and no table. The MCP server must always
-return the plain text.
+print the plain text of its own spec, with no color and no table. With `--json`, the command
+must print JSON (000080). The MCP server must always return the plain text.
 
 Reason: A person reads the formatted output faster. A script, the CI and an agent read the plain
 text, and it stays the same.
