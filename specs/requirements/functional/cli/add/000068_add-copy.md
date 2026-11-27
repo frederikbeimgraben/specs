@@ -19,16 +19,18 @@ scope:
 
 # specs add adds the copy of a different repository
 
-`specs add [<repo> [<ref>]] [-y]` must ask the questions of 000085, and must then copy the `specs/` folder of `<repo>` at `<ref>` to
-`specs/.upstream/<repo>/`, add `[upstream."<repo>"]` with `<ref>` as given as `ref` to
-`specs.toml`, and write the entry of `<repo>` to `specs.lock` (000082). Without `<ref>`, the
-command must take the tag with the highest version, for example `v1.10` before `v1.9`. A tag has
-a version when it has the form `1.2.3` or `v1.2.3` with one or more numbers. Without such a tag,
-it must take the name of the default branch. `<repo>` must have the form `<host>/<group>/.../<repo>` with one or more groups.
-With one or more `--include <folder>`, the command must copy only these folders below `specs/`
-and must write them as `include` to the table (000048). The command must stop with an error
-and change no file when `<repo>` is in `specs.toml` already, or when `<repo>` at `<ref>` has no
-folder of `--include`.
+`specs add [<repo> [<ref>]] [-y]` must ask the questions of 000085, and must then copy the
+`specs/` folder of `<repo>` at `<ref>` to `specs/.upstream/<repo>/`, add `[upstream."<repo>"]`
+with `<ref>` as given as `ref` to `specs.toml`, and write the entry of `<repo>` to `specs.lock`
+(000082). Without `<ref>`, the command must take or propose the tag with the highest version,
+for example `v1.10` before `v1.9`. A tag has a version when it has the form `1.2.3` or `v1.2.3`
+with one or more numbers. Without such a tag, it must take the name of the default branch.
+`<repo>` must have the form `<host>/<group>/.../<repo>` with one or more groups. With one or
+more `--include <folder>`, or with the folders of the checklist of 000085, the command must copy
+only these folders below `specs/` and must write them as `include` to the table (000048). A
+folder below a different folder of `include` must not go to `include`. The command must stop
+with an error and change no file when `<repo>` is in `specs.toml` already, or when `<repo>` at
+`<ref>` has no folder of `--include`.
 
 Before it copies, the command must run the migrations of 000081. It must stop with an error when
 this program is an older commit of the kit than the kit commit in `specs.lock`.
