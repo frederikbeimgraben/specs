@@ -138,16 +138,20 @@ def _raw_changes(changed: tuple[tuple[Mark, str], ...]) -> str:
     return "".join(f"{mark} {path}\n" for mark, path in changed)
 
 
-def _check(write: bool, pretty: bool, log: Mapping[Path, Mark]) -> int:
-    """Run the check and print the report and the changed files.
+def _check(write: bool, pretty: bool, log: Mapping[Path, Mark], head: tuple[str, ...] = ()) -> int:
+    """Run the check and print the messages, the report and the changed files.
+
+    `update` and `add` run the check with `--write` at their end and give their message as
+    `head` (§000067, §000068).
 
     Args:
         write: True to write the index first.
         pretty: True for the formatted output.
         log: The changes of the command.
+        head: The messages of the command before the check, or empty.
 
     Returns:
-        The exit code.
+        The exit code: 1 when the check finds errors.
     """
     project = Project.open()
     count, errors = run(project, write=write)
@@ -155,11 +159,12 @@ def _check(write: bool, pretty: bool, log: Mapping[Path, Mark]) -> int:
     _emit(
         pretty,
         lambda: (
-            "".join(f"{e}\n" for e in errors)
+            "".join(f"{h}\n" for h in head)
+            + "".join(f"{e}\n" for e in errors)
             + f"{count} specs, {len(errors)} errors\n"
             + _raw_changes(changed)
         ),
-        lambda: Group(report(count, tuple(errors)), file_list(changed)),
+        lambda: Group(*(done(h) for h in head), report(count, tuple(errors)), file_list(changed)),
     )
     return 1 if errors else 0
 
@@ -235,11 +240,11 @@ def _dispatch(args: argparse.Namespace, pretty: bool, log: Mapping[Path, Mark]) 
             project = Project.open()
             commit = update(project, *target)
             hints = update_flake(project.root, commit) if target[0] == KIT_REPO else ()
-            return _message(pretty, _lines(f"updated to {commit}", hints), log, project.root)
+            return _check(True, pretty, log, (_lines(f"updated to {commit}", hints),))
         case "add":
             project = Project.open()
             commit = add(project, args.repo, args.ref, tuple(args.include))
-            return _message(pretty, f"added at {commit}", log, project.root)
+            return _check(True, pretty, log, (f"added at {commit}",))
         case "new":
             project = Project.open()
             path = new(project, args.kind, args.path, args.name, args.title, args.owner)
