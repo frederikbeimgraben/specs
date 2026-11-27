@@ -2,7 +2,7 @@
 id: "000051"
 title: specs/ holds the rules of the project and the files of the kit
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:

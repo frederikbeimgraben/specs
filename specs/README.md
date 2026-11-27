@@ -60,7 +60,7 @@ specs/
 | [C/specs/layout/000005](/specs/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](/specs/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
 | [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | draft |
-| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds the rules of the project and the files of the kit | draft |
+| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds the rules of the project and the files of the kit | approved |
 | [C/specs/protocols/000027](/specs/conventions/specs/protocols/000027_whole-format.md) | A protocol spec describes one whole format | draft |
 | [C/specs/protocols/000028](/specs/conventions/specs/protocols/000028_schema-file.md) | A JSON format has a JSON Schema file beside its spec | approved |
 | [C/specs/protocols/000029](/specs/conventions/specs/protocols/000029_checked-example.md) | The example of a JSON format matches its schema | approved |
