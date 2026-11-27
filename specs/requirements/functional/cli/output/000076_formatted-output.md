@@ -2,7 +2,7 @@
 id: "000076"
 title: specs formats its output for a terminal
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
