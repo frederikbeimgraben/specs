@@ -99,7 +99,7 @@ specs/
 | [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | specs.toml holds the settings of the specs command | approved |
 | [F/cli/settings/000084](/specs/requirements/functional/cli/settings/000084_feature-switches.md) | specs.toml switches the optional parts of the kit on and off | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | approved |
-| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update resolves the refs again and replaces the copies | draft |
+| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update resolves the refs again and replaces the copies | approved |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
 | [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | approved |
 | [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | approved |
