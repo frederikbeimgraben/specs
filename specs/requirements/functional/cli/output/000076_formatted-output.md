@@ -2,9 +2,12 @@
 id: "000076"
 title: specs formats its output for a terminal
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_output.py:test_terminal_output_has_color
+  - tests/test_output.py:test_raw_output_has_no_color
 implementation:
   - src/specs_kit/cli.py
   - src/specs_kit/view.py
@@ -30,3 +33,5 @@ return the plain text.
 
 Reason: A person reads the formatted output faster. A script, the CI and an agent read the plain
 text, and it stays the same.
+
+Test: `tests/test_output.py`.

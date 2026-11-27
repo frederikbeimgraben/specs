@@ -2,9 +2,14 @@
 id: "000079"
 title: specs writes the rules for agents to AGENTS.md
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_settings.py:test_init_writes_agents_and_claude
+  - tests/test_settings.py:test_init_keeps_an_existing_claude
+  - tests/test_settings.py:test_the_block_keeps_the_text_around_it
+  - tests/test_settings.py:test_a_file_without_block_gets_it_at_the_end
 implementation:
   - src/specs_kit/agents.py
   - src/specs_kit/check.py

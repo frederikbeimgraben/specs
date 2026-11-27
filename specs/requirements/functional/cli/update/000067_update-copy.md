@@ -2,9 +2,13 @@
 id: "000067"
 title: specs update replaces a copy and its ref
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_kit.py:test_update_replaces_the_copy_and_keeps_include
+  - tests/test_kit.py:test_update_stops_for_an_unknown_repository
+  - tests/test_kit.py:test_update_of_the_kit_runs_the_check
 implementation:
   - src/specs_kit/kit.py
   - src/specs_kit/cli.py
@@ -35,3 +39,5 @@ its own message. It must end with the exit code 1 when the check finds errors.
 
 Reason: An update is one command and one diff (000048). New rules of an update can show errors
 in the project, and the index must show the new rules.
+
+Test: `tests/test_kit.py`.

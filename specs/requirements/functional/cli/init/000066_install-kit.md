@@ -2,9 +2,15 @@
 id: "000066"
 title: specs init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_kit.py:test_init_writes_the_kit_files
+  - tests/test_kit.py:test_init_ci_runs_on_the_base_branch
+  - tests/test_kit.py:test_init_keeps_an_existing_flake
+  - tests/test_kit.py:test_init_takes_the_forge_from_the_remote
+  - tests/test_kit.py:test_init_stops_when_the_kit_is_there
 implementation:
   - src/specs_kit/kit.py
   - src/specs_kit/devshell.py
@@ -54,3 +60,5 @@ program does not come from a clean commit of the kit.
 
 Reason: One command gives a project the same start as every other project. The kit never
 changes a `flake.nix` or an `.envrc` that exists, because it cannot read every form of Nix code.
+
+Test: `tests/test_kit.py`.

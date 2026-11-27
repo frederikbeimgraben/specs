@@ -2,9 +2,12 @@
 id: "000071"
 title: specs show prints the full text of a spec
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_queries.py:test_show_prints_the_full_text
+  - tests/test_queries.py:test_show_stops_for_an_unknown_id
 implementation:
   - src/specs_kit/queries.py
 scope:
@@ -17,3 +20,5 @@ scope:
 000047. It must stop with an error when no rule of the project or of a copy has this ID.
 
 Reason: An agent reads a rule of a copy with the same command as a rule of the project.
+
+Test: `tests/test_queries.py`.

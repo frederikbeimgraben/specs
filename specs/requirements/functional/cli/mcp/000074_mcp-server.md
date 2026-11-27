@@ -2,9 +2,11 @@
 id: "000074"
 title: specs mcp runs the MCP server
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_output.py:test_mcp_tools_give_the_plain_results
 implementation:
   - src/specs_kit/mcp_server.py
 scope:
@@ -19,3 +21,5 @@ same result as the command of the same name. Only `new` must write a file. `chec
 write the index.
 
 Reason: An agent uses the specs without a shell.
+
+Test: `tests/test_output.py`.
