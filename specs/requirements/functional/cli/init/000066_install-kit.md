@@ -14,8 +14,8 @@ scope:
 
 # specs init adds the kit to a project
 
-`specs init [<dir>] [--forge github|gitlab|codeberg]` must add the kit to the project in `<dir>`, or in
-the current folder. It must write these files:
+`specs init [<dir>] [--forge github|gitlab|codeberg]` must add the kit to the project in
+`<dir>`, or in the current folder. It must write these files:
 
 | File | Content |
 | --- | --- |
