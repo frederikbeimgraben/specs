@@ -47,7 +47,7 @@ The command must also give the project a devShell with the program `specs`:
 | `flake.nix` without the input `specs` | Change no file. Show the lines of the input to add. |
 | `flake.nix` without `specs.packages` | Change no file. Show the package to add to the devShell. |
 | No `.envrc` | Write `.envrc` with `use flake`, and tell to run `direnv allow`. |
-| `.envrc` without `use flake` | Change no file. Show the line to add. |
+| `.envrc` without `use flake` | Show the line to add. Add it only when the user answers yes (000085). |
 
 The line of the input must be `inputs.specs.url = "github:frederikbeimgraben/specs/<commit>";`,
 with the commit of `specs.lock`, below the comment
@@ -63,6 +63,7 @@ stop with an error and change no file when `specs.toml` exists, when the forge i
 program is an older commit of the kit than the commit of the `ref`.
 
 Reason: One command gives a project the same start as every other project. The kit never
-changes a `flake.nix` or an `.envrc` that exists, because it cannot read every form of Nix code.
+changes a `flake.nix` that exists, because it cannot read every form of Nix code, and changes an
+`.envrc` only when the user agrees.
 
 Test: `tests/test_kit.py`.
