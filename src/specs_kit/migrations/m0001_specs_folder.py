@@ -11,7 +11,7 @@ from pathlib import Path
 
 from specs_kit.changes import delete_file, move_tree
 
-COMMIT = "0000000000000000000000000000000000000000"
+COMMIT = "9f62adf517e7076b57593d5355729493cfb55a73"
 DESCRIPTION = "move .specs/ below specs/"
 
 
