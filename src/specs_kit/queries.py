@@ -10,7 +10,7 @@ class QueryError(Exception):
     """A query names no rule."""
 
 
-def _spec(project: Project, ref: str) -> Spec:
+def find(project: Project, ref: str) -> Spec:
     """Return the spec of a short or a long ID.
 
     Args:
@@ -39,7 +39,7 @@ def resolve(project: Project, ref: str) -> str:
     Returns:
         The long form.
     """
-    return _spec(project, ref).long
+    return find(project, ref).long
 
 
 def show(project: Project, ref: str) -> str:
@@ -52,7 +52,7 @@ def show(project: Project, ref: str) -> str:
     Returns:
         The text of the file.
     """
-    return _spec(project, ref).path.read_text(encoding="utf-8")
+    return find(project, ref).path.read_text(encoding="utf-8")
 
 
 def _line(spec: Spec) -> str:
