@@ -2,7 +2,7 @@
 id: "000048"
 title: The rules of a different repository are an unchanged copy
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
@@ -18,8 +18,9 @@ The rules of a different repository must be a copy of its `specs/` folder below
 `.specs/upstream/<host>/<group>/.../<repo>/`. `ref` in `specs.toml` must name the commit of the
 copy. When the table of the repository in `specs.toml` has `include`, the copy must hold only
 the folders below `specs/` that `include` names, for example `include = ["style/python/"]`, and
-no other file. A folder of `include` must be a path of kebab-case folder names below `specs/`. A person or an agent must not change a file of the copy. Only these commands must
-change the copy and its `ref`:
+no other file. A folder of `include` must be a path of kebab-case folder names below `specs/`.
+A person or an agent must not change a file of the copy. Only these commands must change the
+copy and its `ref`:
 
 | Command | Effect |
 | --- | --- |
