@@ -56,7 +56,7 @@ specs/
 | [C/specs/format/000015](/specs/conventions/specs/format/000015_labels.md) | Labels in a rule are fixed | approved |
 | [C/specs/format/000016](/specs/conventions/specs/format/000016_file-name.md) | The file name is number and name | approved |
 | [C/specs/format/000017](/specs/conventions/specs/format/000017_section-sign-reference.md) | Code refers to a rule with the § sign | approved |
-| [C/specs/layout/000004](/specs/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | draft |
+| [C/specs/layout/000004](/specs/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | approved |
 | [C/specs/layout/000005](/specs/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](/specs/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
 | [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | approved |
