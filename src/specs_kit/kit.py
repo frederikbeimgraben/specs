@@ -35,6 +35,7 @@ class KitError(Exception):
 CI_FILES: Mapping[str, tuple[str, str]] = {
     "github": ("github-workflow.yml", ".github/workflows/specs.yml"),
     "gitlab": ("gitlab-ci.yml", ".gitlab/ci/specs.yml"),
+    "codeberg": ("codeberg-workflow.yml", ".forgejo/workflows/specs.yml"),
 }
 GITLAB_ROOT = ".gitlab-ci.yml"
 GITLAB_INCLUDE = "  - local: .gitlab/ci/specs.yml"
@@ -290,7 +291,7 @@ def check_forge(root: Path, forge: str) -> None:
         KitError: The forge is unknown, or `.gitlab-ci.yml` cannot get the include.
     """
     if forge not in CI_FILES:
-        raise KitError(f"specs.toml: forge {forge!r} must be github or gitlab")
+        raise KitError(f"specs.toml: forge {forge!r} must be github, gitlab or codeberg")
     if forge == "gitlab":
         gitlab_root_text(root)
 
@@ -327,23 +328,25 @@ def detect_forge(root: Path) -> str:
         root: The root of the project.
 
     Returns:
-        `github` or `gitlab`.
+        `github`, `gitlab` or `codeberg`.
 
     Raises:
-        KitError: The remote names neither GitHub nor GitLab.
+        KitError: The remote names neither GitHub, GitLab nor Codeberg.
     """
     try:
         url = _run("git", "remote", "get-url", "origin", cwd=root)
     except KitError:
         url = ""
-    match ("gitlab" in url, "github" in url):
-        case (True, _):
+    match ("gitlab" in url, "github" in url, "codeberg" in url):
+        case (True, _, _):
             return "gitlab"
-        case (False, True):
+        case (False, True, _):
             return "github"
-        case (False, False):
+        case (False, False, True):
+            return "codeberg"
+        case (False, False, False):
             raise KitError(
-                "cannot find the forge from git remote origin; pass --forge github|gitlab"
+                "cannot find the forge from git remote origin; pass --forge github|gitlab|codeberg"
             )
 
 

@@ -2,7 +2,7 @@
 
 Usage:
     specs check [--write]
-    specs init [<dir>] [--forge github|gitlab]
+    specs init [<dir>] [--forge github|gitlab|codeberg]
     specs update [<ref>]
     specs update <repo> <ref>
     specs add <repo> <ref> [--include <folder>]...
@@ -38,7 +38,7 @@ def parser() -> argparse.ArgumentParser:
     check.add_argument("--write", action="store_true")
     start = commands.add_parser("init", help="install the kit in a project")
     start.add_argument("dir", nargs="?", default=".")
-    start.add_argument("--forge", choices=("github", "gitlab"))
+    start.add_argument("--forge", choices=("github", "gitlab", "codeberg"))
     renew = commands.add_parser("update", help="update the kit, or the copy of one repository")
     renew.add_argument("args", nargs="*", metavar="[repo] ref")
     more = commands.add_parser("add", help="add the copy of a repository")

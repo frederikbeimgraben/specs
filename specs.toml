@@ -1,6 +1,6 @@
 # Settings of the specs command (000013). Each key is optional.
 
-# github or gitlab.
+# github, gitlab or codeberg.
 forge = "github"
 
 # The base branch. A spec number that this branch took after your branch left it is an error.
