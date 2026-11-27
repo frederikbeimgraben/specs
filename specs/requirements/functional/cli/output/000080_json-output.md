@@ -21,9 +21,9 @@ scope:
 
 # specs prints its data as JSON
 
-With the option `--json` after the command, each command of `specs` except `mcp` must print
-its data as JSON, indented with two spaces, also on a terminal. `--json` and `--raw` (000076)
-must not go together.
+With the option `--json` after the command, each command of `specs` except `mcp` and `lsp` must
+print its data as JSON, indented with two spaces, also on a terminal. `--json` and `--raw`
+(000076) must not go together.
 
 | Command | JSON |
 | --- | --- |
