@@ -1,9 +1,9 @@
 # Specs
 
-The binding rules of this project. `specs/` holds only the rules of the
-project. The command `specs check --write` writes this file to
-`.specs/index.md` and to `specs/README.md`. Do not change these files by hand
-(000007).
+The binding rules of this project. The kind folders of `specs/` hold the rules
+of the project, `specs/.upstream/` the rules of different repositories and
+`specs/.templates/` the templates. The command `specs check --write` writes
+this file. Do not change it by hand (000007).
 
 A new spec starts with
 `specs new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).
@@ -14,7 +14,7 @@ A new spec starts with
 specs/
   requirements/
     functional/
-      cli/  add, agents, check, init, list, mcp, new, output, resolve, search, settings, show, update
+      cli/  add, agents, check, init, list, mcp, migrate, new, output, resolve, search, settings, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -60,7 +60,7 @@ specs/
 | [C/specs/layout/000005](/specs/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](/specs/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
 | [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | approved |
-| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds only the rules of the project | approved |
+| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds the rules of the project and the files of the kit | approved |
 | [C/specs/protocols/000027](/specs/conventions/specs/protocols/000027_whole-format.md) | A protocol spec describes one whole format | approved |
 | [C/specs/protocols/000028](/specs/conventions/specs/protocols/000028_schema-file.md) | A JSON format has a JSON Schema file beside its spec | approved |
 | [C/specs/protocols/000029](/specs/conventions/specs/protocols/000029_checked-example.md) | The example of a JSON format matches its schema | approved |
@@ -84,6 +84,7 @@ specs/
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | approved |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | approved |
+| [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | approved |
 | [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | approved |
 | [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | specs formats its output for a terminal | approved |
 | [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | approved |

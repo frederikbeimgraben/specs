@@ -9,7 +9,7 @@ from conftest import Kit
 
 LONG = "github.com/frederikbeimgraben/specs:W/specs/process/000001"
 PATH = (
-    ".specs/upstream/github.com/frederikbeimgraben/specs/workflow/specs/process/"
+    "specs/.upstream/github.com/frederikbeimgraben/specs/workflow/specs/process/"
     "000001_precedence.md"
 )
 RULE = {
@@ -63,7 +63,7 @@ def test_check_gives_errors_as_objects(kit: Kit, project: Path) -> None:
     assert checked["changed"] == []
     assert {
         "file": "specs/README.md",
-        "message": "not an exact copy of the index; run specs check --write",
+        "message": "the index is not current; run specs check --write",
         "rule": "000007",
     } in checked["errors"]
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from conftest import RULES_REPO, Kit, git, write_rule
 
-KIT = ".specs/upstream/github.com/frederikbeimgraben/specs"
+KIT = "specs/.upstream/github.com/frederikbeimgraben/specs"
 
 
 def _config(project: Path) -> dict[str, object]:
@@ -42,7 +42,7 @@ def test_init_writes_the_kit_files(kit: Kit, project: Path) -> None:
     assert _upstream(project)["github.com/frederikbeimgraben/specs"]["ref"] == kit.rev
     for name in (
         f"{KIT}/workflow/specs/process/000001_precedence.md",
-        ".specs/templates/TEMPLATE.md",
+        "specs/.templates/TEMPLATE.md",
         ".claude/skills/spec-write/SKILL.md",
         ".github/workflows/specs.yml",
         ".mcp.json",
@@ -89,10 +89,10 @@ def test_add_copies_the_rules(kit: Kit, project: Path) -> None:
     result = kit.run(project, "add", RULES_REPO, kit.rules_rev, "--raw")
     assert result.code == 0, result.out + result.err
     assert _upstream(project)[RULES_REPO]["ref"] == kit.rules_rev
-    copy = project / ".specs/upstream" / RULES_REPO
+    copy = project / "specs/.upstream" / RULES_REPO
     assert (copy / "style/python/naming/000001_snake-case.md").is_file()
     assert "example.com/team/rules:S/python/naming/000001" in (
-        project / ".specs/index.md"
+        project / "specs/README.md"
     ).read_text(encoding="utf-8")
 
 
@@ -100,7 +100,7 @@ def test_add_with_include_copies_only_the_folders(kit: Kit, project: Path) -> No
     """`specs add` with `--include` copies only these folders and writes `include`."""
     result = kit.run(project, "add", RULES_REPO, kit.rules_rev, "--include", "agents/", "--raw")
     assert result.code == 0, result.out + result.err
-    copy = project / ".specs/upstream" / RULES_REPO
+    copy = project / "specs/.upstream" / RULES_REPO
     assert (copy / "agents/work/tests/000002_run-tests.md").is_file()
     assert not (copy / "style").exists()
     assert _upstream(project)[RULES_REPO]["include"] == ["agents/"]
@@ -132,9 +132,9 @@ def test_update_replaces_the_copy_and_keeps_include(kit: Kit, project: Path) -> 
         assert result.code == 0, result.out + result.err
         assert _upstream(project)[RULES_REPO] == {"ref": rev, "include": ["agents/"]}
         assert (
-            project / ".specs/upstream" / RULES_REPO / "agents/work/tests/000003_small-commits.md"
+            project / "specs/.upstream" / RULES_REPO / "agents/work/tests/000003_small-commits.md"
         ).is_file()
-        assert f"M {'.specs/upstream/' + RULES_REPO}" not in result.out
+        assert f"M {'specs/.upstream/' + RULES_REPO}" not in result.out
     finally:
         git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
 

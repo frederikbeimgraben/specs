@@ -322,7 +322,7 @@ def _foreign_error(rel: str, ref: str, foreign: Mapping[str, str]) -> Errors:
     """
     match foreign.get(ref):
         case None:
-            return (f"{rel}: {ref} names no rule in .specs/upstream/ (000047)",)
+            return (f"{rel}: {ref} names no rule in specs/.upstream/ (000047)",)
         case "replaced":
             return (f"{rel}: {ref} names a rule that a project spec replaces (000049)",)
         case status if status in IN_FORCE:
@@ -355,7 +355,7 @@ def _replaces_entry(ctx: Context, spec: Spec, entry: str, foreign: Mapping[str, 
                 ()
                 if entry in foreign
                 else (
-                    f"{rel}: replaces entry {entry!r} names no rule in .specs/upstream/ (000047)",
+                    f"{rel}: replaces entry {entry!r} names no rule in specs/.upstream/ (000047)",
                 )
             )
         case _ if target is None:
@@ -454,7 +454,7 @@ def _check_replaces(ctx: Context, specs: tuple[Spec, ...], foreign: Mapping[str,
 
 
 def _upstream_errors(project: Project) -> Errors:
-    """Check that `specs.toml` and the copies below `.specs/upstream/` agree (§000048).
+    """Check that `specs.toml` and the copies below `specs/.upstream/` agree (§000048).
 
     Args:
         project: The project.
@@ -466,7 +466,7 @@ def _upstream_errors(project: Project) -> Errors:
     copies = project.copies()
     return (
         *(
-            f".specs/upstream/{repo}: no repository of this name in specs.toml (000048)"
+            f"specs/.upstream/{repo}: no repository of this name in specs.toml (000048)"
             for repo in sorted(copies - set(upstream))
         ),
         *(
@@ -480,7 +480,7 @@ def _upstream_errors(project: Project) -> Errors:
             if ref is None
         ),
         *(
-            f"specs.toml: upstream {repo!r} has no copy in .specs/upstream/; run specs update"
+            f"specs.toml: upstream {repo!r} has no copy in specs/.upstream/; run specs update"
             f" {repo} <ref> (000048)"
             for repo in sorted(upstream)
             if repo not in copies
@@ -515,7 +515,7 @@ def _include_errors(project: Project, repo: str, include: tuple[str, ...]) -> Er
             if not (root / f).is_dir()
         ),
         *(
-            f".specs/upstream/{repo}/{p.relative_to(root).as_posix()}: not in include of"
+            f"specs/.upstream/{repo}/{p.relative_to(root).as_posix()}: not in include of"
             f" specs.toml; run specs update {repo} <ref> (000048)"
             for p in sorted(root.rglob("*"))
             if p.is_file()
@@ -728,7 +728,7 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
 
     Args:
         project: The project.
-        write: True to write `.specs/index.md`, `specs/README.md` and `AGENTS.md`.
+        write: True to write `specs/README.md` and `AGENTS.md`.
 
     Returns:
         The count of specs and the errors.
@@ -743,7 +743,6 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     agents = merge(_read(agents_path), block(specs, upstream))
     if write:
         write_text(project.index_path, text)
-        write_text(project.readme_path, text)
         write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
     return len(specs), (
@@ -757,14 +756,7 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
         *(
             ()
             if _read(project.index_path) == text
-            else (".specs/index.md: the index is not current; run specs check --write (000007)",)
-        ),
-        *(
-            ()
-            if _read(project.readme_path) == text
-            else (
-                "specs/README.md: not an exact copy of the index; run specs check --write (000007)",
-            )
+            else ("specs/README.md: the index is not current; run specs check --write (000007)",)
         ),
         *(
             ()

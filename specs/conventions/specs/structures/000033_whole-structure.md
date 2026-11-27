@@ -8,7 +8,7 @@ updated: 2026-11-26
 implementation:
   - src/specs_kit/check.py
   - src/specs_kit/sections.py
-  - .specs/templates/TEMPLATE-structure.md
+  - specs/.templates/TEMPLATE-structure.md
 scope:
   - specs/
 ---

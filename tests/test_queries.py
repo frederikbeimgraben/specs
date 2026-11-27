@@ -29,7 +29,7 @@ def test_show_prints_the_full_text(kit: Kit, project: Path) -> None:
     """`specs show` prints the full text of the spec file."""
     path = (
         project
-        / ".specs/upstream/github.com/frederikbeimgraben/specs/workflow/specs/process"
+        / "specs/.upstream/github.com/frederikbeimgraben/specs/workflow/specs/process"
         / "000001_precedence.md"
     )
     assert kit.run(project, "show", LONG, "--raw").out == path.read_text(encoding="utf-8")

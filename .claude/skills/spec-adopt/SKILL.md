@@ -17,8 +17,8 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    ```
 
    `init` writes `specs.toml`, makes `specs/`, and puts the rules of the kit in
-   `.specs/upstream/github.com/frederikbeimgraben/specs/` as an unchanged copy (000048). It
-   copies the templates to `.specs/templates/` and the skills to `.claude/skills/`. It writes the
+   `specs/.upstream/github.com/frederikbeimgraben/specs/` as an unchanged copy (000048). It
+   copies the templates to `specs/.templates/` and the skills to `.claude/skills/`. It writes the
    CI file (`.github/workflows/specs.yml` or `.gitlab/ci/specs.yml`, included from `.gitlab-ci.yml`) and the MCP server `specs` in
    `.mcp.json`. It finds the forge in `git remote origin`. Give `--forge github` or
    `--forge gitlab` if it cannot.
@@ -35,7 +35,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 1. Move the files in `specs/` that are not rules out of `specs/` (000051). Move an old
    `specs/config.toml` to `specs.toml`.
 2. Run `init`. It stops if `specs.toml` exists. Then merge the settings by hand.
-3. Compare the rules of the project with the kit rules in `.specs/upstream/`. If a project rule
+3. Compare the rules of the project with the kit rules in `specs/.upstream/`. If a project rule
    contradicts a kit rule, ask the owner which one applies. Replace the kit rule with
    `replaces`, or change the project rule (000050).
 4. Move the project specs to the kind folders of 000004. A moved rule keeps its number (000014).
@@ -60,8 +60,8 @@ example `--include style/python/`.
 ## Specs
 
 `specs/` holds the binding rules of the project, one rule per file. A spec wins over a skill or a comment.
-`.specs/upstream/` holds the rules of different repositories. They apply, except a rule that a
-project spec names in `replaces`. `.specs/index.md` lists all rules that apply.
+`specs/.upstream/` holds the rules of different repositories. They apply, except a rule that a
+project spec names in `replaces`. `specs/README.md` lists all rules that apply.
 Rules for agents are in the kind folder `agents/`. Read them before each task.
 A change request starts as a spec, and code starts after the owner approves it.
 Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`.

@@ -287,13 +287,18 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
         case "update":
             target = _update_target(list(args.args))
             project = Project.open()
-            commit = update(project, *target)
-            hints = update_flake(project.root, commit) if target[0] == KIT_REPO else ()
+            commit, ran = update(project, *target)
+            hints = (
+                *(f"migrated: {d}" for d in ran),
+                *(update_flake(project.root, commit) if target[0] == KIT_REPO else ()),
+            )
             return _check(True, mode, log, (f"updated to {commit}", hints))
         case "add":
             project = Project.open()
-            commit = add(project, args.repo, args.ref, tuple(args.include))
-            return _check(True, mode, log, (f"added at {commit}", ()))
+            commit, ran = add(project, args.repo, args.ref, tuple(args.include))
+            return _check(
+                True, mode, log, (f"added at {commit}", tuple(f"migrated: {d}" for d in ran))
+            )
         case "new":
             project = Project.open()
             path = new(

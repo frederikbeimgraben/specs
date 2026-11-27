@@ -88,7 +88,7 @@ def test_mcp_tools_give_the_plain_results(
     from specs_kit import mcp_server
 
     (project / "specs" / "README.md").write_text("changed\n", encoding="utf-8")
-    assert "not an exact copy" in mcp_server.check()
+    assert "the index is not current" in mcp_server.check()
     assert (project / "specs" / "README.md").read_text(encoding="utf-8") == "changed\n"
     assert mcp_server.list_specs() == kit.run(project, "list", "--raw").out
     (project / "src").mkdir()

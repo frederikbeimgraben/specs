@@ -32,10 +32,9 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 
 | Path | Content |
 | --- | --- |
-| `specs/` | Only the rules of the project, and `README.md`, a copy of the index (000051). |
-| `.specs/upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (000048). |
-| `.specs/templates/` | The templates for a new spec (000008). |
-| `.specs/index.md` | The index of all rules that apply (000007). |
+| `specs/` | The rules of the project in the kind folders, and `README.md`, the index (000051). |
+| `specs/.upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (000048). |
+| `specs/.templates/` | The templates for a new spec (000008). |
 | `specs.toml` | The settings (000078). |
 | `.claude/skills/spec-*` | Skills for agents. |
 | `.mcp.json` | The MCP server `specs`. |

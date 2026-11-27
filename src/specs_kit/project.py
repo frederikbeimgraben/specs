@@ -1,7 +1,8 @@
 """The layout of a project with specs: paths, settings, rule IDs and the parsed specs.
 
-`specs/` holds only the rules of the project. `.specs/` holds the rest: the copies of different
-repositories, the templates and the index (§000004). The settings are in `specs.toml` in the
+`specs/` holds the rules of the project in its kind folders, the index `specs/README.md`, the
+copies of different repositories in `specs/.upstream/` and the templates in `specs/.templates/`
+(§000004). The settings are in `specs.toml` in the
 root of the project (§000013).
 """
 
@@ -35,6 +36,8 @@ FOLDER_BY_KIND: Mapping[str, str] = {kind: folder for folder, (_, kind) in KINDS
 PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
 STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
 IN_FORCE = frozenset({"draft", "approved"})
+UPSTREAM = ".upstream"
+TEMPLATES = ".templates"
 
 FOLDER = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 FILE_NAME = re.compile(r"^[0-9]{6}_[a-z0-9]+(-[a-z0-9]+)*\.md$")
@@ -58,7 +61,7 @@ class Config:
         code_dirs: The folders that hold code with `§` references (§000017).
         code_suffixes: The file types of the code.
         max_elements: The highest count of elements in one structure diagram.
-        upstream: The `ref` of each repository with a copy below `.specs/upstream/` (§000048).
+        upstream: The `ref` of each repository with a copy below `specs/.upstream/` (§000048).
         include: The folders of each repository that the copy holds; empty for all (§000048).
     """
 
@@ -71,6 +74,18 @@ class Config:
     max_elements: int = 25
     upstream: Mapping[str, str | None] = MappingProxyType({})
     include: Mapping[str, tuple[str, ...]] = MappingProxyType({})
+
+
+def hidden(rel: Path) -> bool:
+    """Return True for a path below a folder whose name starts with a dot.
+
+    Args:
+        rel: The path relative to `specs/`.
+
+    Returns:
+        True for a path in `specs/.upstream/`, `specs/.templates/` or a different hidden folder.
+    """
+    return any(part.startswith(".") for part in rel.parts[:-1])
 
 
 @dataclass(frozen=True, slots=True)
@@ -398,28 +413,18 @@ class Project:
         return self.root / "specs"
 
     @property
-    def dot_dir(self) -> Path:
-        """Return `.specs/`."""
-        return self.root / ".specs"
-
-    @property
     def upstream_dir(self) -> Path:
-        """Return `.specs/upstream/`."""
-        return self.dot_dir / "upstream"
+        """Return `specs/.upstream/`."""
+        return self.specs_dir / UPSTREAM
 
     @property
     def templates_dir(self) -> Path:
-        """Return `.specs/templates/`."""
-        return self.dot_dir / "templates"
+        """Return `specs/.templates/`."""
+        return self.specs_dir / TEMPLATES
 
     @property
     def index_path(self) -> Path:
-        """Return `.specs/index.md`."""
-        return self.dot_dir / "index.md"
-
-    @property
-    def readme_path(self) -> Path:
-        """Return `specs/README.md`, the copy of the index."""
+        """Return `specs/README.md`, the index."""
         return self.specs_dir / "README.md"
 
     @property
@@ -428,7 +433,7 @@ class Project:
         return self.root / CONFIG_NAME
 
     def copies(self) -> frozenset[str]:
-        """Return the repositories that have a copy below `.specs/upstream/`.
+        """Return the repositories that have a copy below `specs/.upstream/`.
 
         A copy is a folder whose path has the form of a repository and that holds a kind folder
         or `README.md`. A folder inside a copy is no copy.
@@ -450,7 +455,11 @@ class Project:
         """
         if not self.specs_dir.is_dir():
             return (), ("specs/: the folder does not exist (000004)",)
-        files = tuple(p for p in sorted(self.specs_dir.rglob("*")) if p.is_file())
+        files = tuple(
+            p
+            for p in sorted(self.specs_dir.rglob("*"))
+            if p.is_file() and not hidden(p.relative_to(self.specs_dir))
+        )
         top = tuple(
             f"specs/{p.name}: specs/ holds only rules and README.md (000004)"
             for p in files
@@ -474,7 +483,7 @@ class Project:
         )
 
     def load_upstream(self) -> tuple[Spec, ...]:
-        """Parse every rule of the copies below `.specs/upstream/`. Skip a file that is no rule.
+        """Parse every rule of the copies below `specs/.upstream/`. Skip a file that is no rule.
 
         Returns:
             The specs of the copies.
