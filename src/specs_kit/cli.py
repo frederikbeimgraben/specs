@@ -8,6 +8,7 @@ Usage:
     specs add [<repo> [<ref>]] [--include <folder>]... [--yes]
     specs configure [<key> <value>] [--yes]
     specs remove <repo>
+    specs setup-ide zed|code [--yes]
     specs new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]
     specs resolve <id>
     specs show <id>
@@ -31,7 +32,7 @@ from pathlib import Path
 from rich.console import Group, RenderableType
 from rich.text import Text
 
-from specs_kit import data, lsp, queries
+from specs_kit import data, ide, lsp, queries
 from specs_kit.ask import Ask, Cancelled, Stop, asker
 from specs_kit.changes import Mark, lines, recording
 from specs_kit.check import run
@@ -69,7 +70,10 @@ def parser() -> argparse.ArgumentParser:
     setting.add_argument("key", nargs="?", help="for example features.mcp; without it a menu")
     setting.add_argument("value", nargs="?", help="for example false, 25, origin/main or src,lib")
     commands.add_parser("remove", help="remove the copy of a repository").add_argument("repo")
-    for name in ("init", "update", "add", "configure"):
+    commands.add_parser(
+        "setup-ide", help="write the extension of the language server for an editor"
+    ).add_argument("editor", choices=("zed", "code"))
+    for name in ("init", "update", "add", "configure", "setup-ide"):
         commands.choices[name].add_argument(
             "-y",
             "--yes",
@@ -215,14 +219,17 @@ def _check(
     return 1 if errors else 0
 
 
-def _message(mode: Mode, text: str, log: Mapping[Path, Mark], root: Path) -> int:
-    """Print the message of a command that changes files, and the changed files.
+def _message(
+    mode: Mode, text: str, log: Mapping[Path, Mark], root: Path, hints: tuple[str, ...] = ()
+) -> int:
+    """Print the message of a command that changes files, its hints, and the changed files.
 
     Args:
         mode: The form of the output.
         text: The message.
         log: The changes of the command.
         root: The root of the project.
+        hints: The hints.
 
     Returns:
         The exit code 0.
@@ -230,9 +237,9 @@ def _message(mode: Mode, text: str, log: Mapping[Path, Mark], root: Path) -> int
     changed = lines(log, root)
     return _emit(
         mode,
-        lambda: f"{text}\n{_raw_changes(changed)}",
-        lambda: Group(done(text), file_list(changed)),
-        lambda: dict(data.result(text, (), None, changed)),
+        lambda: f"{_lines(text, hints)}\n{_raw_changes(changed)}",
+        lambda: Group(done(_lines(text, hints)), file_list(changed)),
+        lambda: dict(data.result(text, hints, None, changed)),
     )
 
 
@@ -334,6 +341,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             hints = (
                 *(f"migrated: {d}" for d in ran),
                 *(update_flake(project.root, kit) if kit and project.config.on("flake") else ()),
+                *(ide.refresh(Project.open(project.root)) if kit else ()),
                 *install(Project.open(project.root)),
             )
             text = "; ".join(f"updated {repo} to {commit}" for repo, commit in done)
@@ -353,6 +361,10 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             text = f"removed {remove(project, args.repo)}"
             hints = install(Project.open(project.root))
             return _check(True, mode, log, (text, hints), project.root)
+        case "setup-ide":
+            project = Project.open()
+            text, hints = ide.setup(project, args.editor, _ask(args, mode))
+            return _message(mode, text, log, project.root, hints)
         case "new":
             project = Project.open()
             path = new(

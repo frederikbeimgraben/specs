@@ -63,6 +63,7 @@ nix run github:frederikbeimgraben/specs/<commit> -- <command>
 | `show <id>` | Prints the full text of a spec. |
 | `list` | Lists every rule. |
 | `search <text>` | Lists the rules that hold a text. |
+| `setup-ide zed\|code` | Writes the extension of the language server for Zed or VS Code to `.zed/specs/` or `.vscode/specs/` (000089). |
 | `lsp` | Runs the language server on stdin and stdout. It shows the errors of the check at their line, and the rule of a reference in a hover (000088). |
 | `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search`, `new`, `configure` and `remove`. |
 

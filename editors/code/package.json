@@ -1,0 +1,29 @@
+{
+  "name": "specs",
+  "displayName": "specs",
+  "description": "The language server of the specs kit: specs lsp.",
+  "version": "0.1.0",
+  "publisher": "frederikbeimgraben",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frederikbeimgraben/specs"
+  },
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "activationEvents": [
+    "workspaceContains:specs.toml"
+  ],
+  "main": "./out/extension.js",
+  "dependencies": {
+    "vscode-languageclient": "12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.4",
+    "@types/vscode": "1.91.0"
+  }
+}

@@ -14,7 +14,7 @@ A new spec starts with
 specs/
   requirements/
     functional/
-      cli/  add, agents, check, configure, init, install, list, lsp, mcp, migrate, new, output, questions, remove, resolve, search, settings, show, update
+      cli/  add, agents, check, configure, init, install, list, lsp, mcp, migrate, new, output, questions, remove, resolve, search, settings, setup-ide, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -99,6 +99,7 @@ specs/
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | specs search finds rules by a text | approved |
 | [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | specs.toml holds the settings of the specs command | approved |
 | [F/cli/settings/000084](/specs/requirements/functional/cli/settings/000084_feature-switches.md) | specs.toml switches the optional parts of the kit on and off | approved |
+| [F/cli/setup-ide/000089](/specs/requirements/functional/cli/setup-ide/000089_setup-ide.md) | specs setup-ide adds the language server to Zed or VS Code | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | approved |
 | [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update resolves the refs again and replaces the copies | approved |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |

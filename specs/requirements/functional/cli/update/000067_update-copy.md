@@ -36,13 +36,14 @@ that `ref` names, and write the `ref`, the commit, `include` and the hash to `sp
 `include` and must keep `include`. Only a folder that the user adds (000085) changes it. The
 kit comes first.
 
-For the kit, the command must also replace the templates, the skills, the CI files of 000066
-and the entry `specs` in `.mcp.json`. A template or a skill that the user keeps (000085) must
-stay. When `flake.nix` has the input `specs` of 000066, the command must set its ref to the new
-commit of the kit and run `nix flake update specs`.
-Without this input, it must not change `flake.nix` and `flake.lock`. When it changed
-`flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it must tell to leave the shell and
-run `nix develop`, because a program cannot load its shell again.
+For the kit, the command must also replace the templates, the skills, the CI files of 000066 and
+the entry `specs` in `.mcp.json`. A template or a skill that the user keeps (000085) must stay.
+The command must write each folder of 000089 again that is in the project. The folder of VS Code
+must stay as it is when the program has no `specs.vsix`. When `flake.nix` has the input `specs`
+of 000066, the command must set its ref to the new commit of the kit and run
+`nix flake update specs`. Without this input, it must not change `flake.nix` and `flake.lock`.
+When it changed `flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it must tell to leave
+the shell and run `nix develop`, because a program cannot load its shell again.
 
 The command must stop with an error when `<repo>` is not in `specs.toml`, when this program is
 an older commit of the kit than the kit commit in `specs.lock`, when `<repo>` at `<ref>` has no
