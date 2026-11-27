@@ -388,7 +388,9 @@ def templates(source: Path) -> Path:
 
 
 def install_kit_files(source: Path, project: Project, ref: str) -> None:
-    """Replace the templates, the skills, the CI file and the MCP server of the kit.
+    """Replace the templates, and the skills, the CI file and the MCP server that are on.
+
+    The switches `skills`, `ci` and `mcp` of `[features]` choose the parts (§000084).
 
     Args:
         source: The root of the kit at `ref`.
@@ -401,18 +403,21 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     forge = project.config.forge
     check_forge(project.root, forge)
     data_name, target = CI_FILES[forge]
-    root_text = gitlab_root_text(project.root) if forge == "gitlab" else None
+    config = project.config
+    root_text = gitlab_root_text(project.root) if forge == "gitlab" and config.on("ci") else None
     replace_tree(templates(source), project.templates_dir)
-    for skill in skills(source):
+    for skill in skills(source) if config.on("skills") else ():
         replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
-    branch = project.config.base_ref.removeprefix("origin/")
-    write_text(
-        project.root / target,
-        package_data(data_name).replace("{ref}", ref).replace("{branch}", branch),
-    )
+    branch = config.base_ref.removeprefix("origin/")
+    if config.on("ci"):
+        write_text(
+            project.root / target,
+            package_data(data_name).replace("{ref}", ref).replace("{branch}", branch),
+        )
     if root_text is not None:
         write_text(project.root / GITLAB_ROOT, root_text)
-    write_mcp(project, ref)
+    if config.on("mcp"):
+        write_mcp(project, ref)
 
 
 def detect_forge(root: Path) -> str:

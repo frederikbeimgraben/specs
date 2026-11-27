@@ -36,6 +36,7 @@ FOLDER_BY_KIND: Mapping[str, str] = {kind: folder for folder, (_, kind) in KINDS
 PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
 STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
 IN_FORCE = frozenset({"draft", "approved"})
+FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
 
@@ -63,6 +64,7 @@ class Config:
         max_elements: The highest count of elements in one structure diagram.
         upstream: The `ref` of each repository with a copy below `specs/.upstream/` (§000048).
         include: The folders of each repository that the copy holds; empty for all (§000048).
+        features: The switch of each optional part of the kit (§000084).
     """
 
     base_ref: str = "origin/main"
@@ -74,6 +76,18 @@ class Config:
     max_elements: int = 25
     upstream: Mapping[str, str | None] = MappingProxyType({})
     include: Mapping[str, tuple[str, ...]] = MappingProxyType({})
+    features: Mapping[str, bool] = MappingProxyType(dict.fromkeys(FEATURES, True))
+
+    def on(self, feature: str) -> bool:
+        """Return True when the part of the kit is switched on.
+
+        Args:
+            feature: The name of the switch in `[features]`.
+
+        Returns:
+            The switch. A missing switch is on.
+        """
+        return self.features.get(feature, True)
 
 
 def hidden(rel: Path) -> bool:
@@ -339,6 +353,37 @@ def _upstream(data: Mapping[str, object]) -> Mapping[str, Mapping[str, object]]:
     return cast("Mapping[str, Mapping[str, object]]", tables)
 
 
+def _features(data: Mapping[str, object]) -> Mapping[str, bool]:
+    """Return the switches of `[features]` of `specs.toml` (§000084).
+
+    Args:
+        data: The whole file.
+
+    Returns:
+        The switch of each part. A missing switch is on.
+
+    Raises:
+        ConfigError: `features` is no table, a key is unknown or no boolean, or `claude` is on
+            and `agents` is off.
+    """
+    value = data.get("features", {})
+    table = cast("Mapping[str, object]", value) if isinstance(value, dict) else None
+    if table is None:
+        raise ConfigError("specs.toml: features must be a table [features]")
+    unknown = sorted(set(table) - set(FEATURES))
+    if unknown:
+        raise ConfigError(
+            f"specs.toml: features has no switch {', '.join(unknown)};"
+            f" the switches are {', '.join(FEATURES)}"
+        )
+    if not all(isinstance(v, bool) for v in table.values()):
+        raise ConfigError("specs.toml: each switch of features must be true or false")
+    found = {name: cast("bool", table.get(name, True)) for name in FEATURES}
+    if found["claude"] and not found["agents"]:
+        raise ConfigError("specs.toml: features.claude needs features.agents")
+    return found
+
+
 def _load_toml(path: Path) -> Mapping[str, object]:
     """Return the content of `specs.toml`, or an empty table without the file.
 
@@ -379,6 +424,7 @@ def read_config(path: Path) -> Config:
         max_elements=_number(data, "max_elements", default.max_elements),
         upstream={repo: _text(table, "ref", "") or None for repo, table in upstream.items()},
         include={repo: _texts(table, "include", ()) for repo, table in upstream.items()},
+        features=_features(data),
     )
 
 

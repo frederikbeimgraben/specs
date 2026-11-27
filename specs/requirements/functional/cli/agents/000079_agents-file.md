@@ -23,12 +23,13 @@ scope:
 
 # specs writes the rules for agents to AGENTS.md
 
-`specs install` must write one block to `AGENTS.md` in the root of the project. The block
-must start with the line `<!-- specs:begin (written by specs install, do not edit) -->`
-and end with the line `<!-- specs:end -->`. Between these lines, the block must hold a short
-text that tells an agent how to use the rules, and the table of `specs/README.md` (000007) with
-only the A and W rules that have the status `approved`, first the rules of the project and then
-the rules of the copies (000049).
+When the switch `agents` of `[features]` is on (000084), `specs install` must write one block
+to `AGENTS.md` in the root of the project. The block must start with the line
+`<!-- specs:begin (written by specs install, do not edit) -->` and end with the line
+`<!-- specs:end -->`. Between these lines, the block must hold a short text that tells an agent
+how to use the rules, and the table of `specs/README.md` (000007) with only the A and W rules
+that have the status `approved`, first the rules of the project and then the rules of the
+copies (000049).
 
 | State of `AGENTS.md` | `specs install` |
 | --- | --- |

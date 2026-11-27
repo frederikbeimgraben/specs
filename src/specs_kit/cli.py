@@ -262,7 +262,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             return _check(True, mode, log, ("installed", hints), project.root)
         case "init":
             project, commit = init(Path(args.dir), args.forge)
-            hints = (*init_flake(project.root, commit), *install(project))
+            hints = (*init_flake(project.root, commit, project.config.features), *install(project))
             text = f"installed the kit in {project.root}"
             return _check(True, mode, log, (text, hints), project.root)
         case "update":
@@ -271,7 +271,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             kit = dict(done).get(KIT_REPO)
             hints = (
                 *(f"migrated: {d}" for d in ran),
-                *(update_flake(project.root, kit) if kit else ()),
+                *(update_flake(project.root, kit) if kit and project.config.on("flake") else ()),
                 *install(Project.open(project.root)),
             )
             text = "; ".join(f"updated {repo} to {commit}" for repo, commit in done)

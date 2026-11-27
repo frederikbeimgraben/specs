@@ -35,8 +35,9 @@ It must do these steps in this order:
    (000077).
 4. Remove each entry of `specs.lock` whose repository is not in `specs.toml`.
 5. Write each file of the table of 000066 that does not exist: the templates, the skills, the
-   CI file, the entry `specs` in `.mcp.json`, `.envrc` and `CLAUDE.md`. A file that exists must
-   not change, also when it is not the same as in the kit.
+   CI file, the entry `specs` in `.mcp.json`, `.envrc` and `CLAUDE.md`, each only when its
+   switch in `[features]` is on (000084). A file that exists must not change, also when it is
+   not the same as in the kit. Remove each part whose switch is off, as 000084 tells.
 6. Write the index `specs/README.md` (000007) and the block in `AGENTS.md` (000079).
 7. Run `specs check` (000065) and print its report after its own message. End with the exit
    code 1 when the check finds errors.
