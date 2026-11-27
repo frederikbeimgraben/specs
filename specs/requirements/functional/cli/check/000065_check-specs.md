@@ -7,8 +7,8 @@ owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
   - tests/test_check.py:test_check_passes_after_init
-  - tests/test_check.py:test_check_without_write_changes_no_file
-  - tests/test_check.py:test_check_write_writes_the_index
+  - tests/test_check.py:test_check_changes_no_file
+  - tests/test_check.py:test_install_writes_the_index
   - tests/test_check.py:test_check_finds_a_rule_without_must
   - tests/test_check.py:test_check_finds_a_bad_file_name
   - tests/test_check.py:test_check_finds_a_missing_key
@@ -25,7 +25,7 @@ scope:
 # specs check checks the specs
 
 `specs check` must run every check of the conventions on the specs of the project. It must also
-check that `specs.toml` and the copies of 000048 agree, and check each `§` reference in
+check that `specs.toml`, `specs.lock` and the copies of 000048 agree (000082), and check each `§` reference in
 `code_dirs` (000017). It must print one line for each
 error, then the count of specs and errors. It must exit with 1 when it finds an error, else
 with 0. The command must not change a file and must not use the network. `specs install`

@@ -30,7 +30,7 @@ def test_check_passes_after_init(kit: Kit, project: Path) -> None:
     assert result.out.endswith("0 specs, 0 errors\n")
 
 
-def test_check_without_write_changes_no_file(kit: Kit, project: Path) -> None:
+def test_check_changes_no_file(kit: Kit, project: Path) -> None:
     """`specs check` must not change a file."""
     _rule(project)
     before = (project / "specs" / "README.md").read_text(encoding="utf-8")
@@ -40,7 +40,7 @@ def test_check_without_write_changes_no_file(kit: Kit, project: Path) -> None:
     assert (project / "specs" / "README.md").read_text(encoding="utf-8") == before
 
 
-def test_check_write_writes_the_index(kit: Kit, project: Path) -> None:
+def test_install_writes_the_index(kit: Kit, project: Path) -> None:
     """`specs install` writes the index."""
     _rule(project)
     result = kit.run(project, "install", "--raw")
