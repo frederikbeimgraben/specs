@@ -16,9 +16,9 @@ scope:
 
 The rules of a different repository must be a copy of its `specs/` folder below
 `specs/.upstream/<host>/<group>/.../<repo>/`. `ref` in `specs.toml` must name a tag, a branch or
-a commit, and `specs.lock` must hold the commit of the copy (000082). When the table of the repository in `specs.toml` has `include`, the copy must hold only
-the folders below `specs/` that `include` names, for example `include = ["style/python/"]`, and
-no other file. A folder of `include` must be a path of kebab-case folder names below `specs/`.
+a commit, and `specs.lock` must hold the commit of the copy (000082). When the table of the
+repository in `specs.toml` has `include`, the copy must hold only the folders below `specs/` that
+`include` names, for example `include = ["style/python/"]`, and no other file. A folder of `include` must be a path of kebab-case folder names below `specs/`.
 The copy must not hold the hidden folders of the repository, for example `specs/.upstream/`.
 When the repository uses an older kit, the copy must hold its rules after the migrations of
 000081, and else no change. A person or an agent must not change a file of the copy. Only these
