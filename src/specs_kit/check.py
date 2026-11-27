@@ -20,6 +20,7 @@ from typing import cast
 import jsonschema
 from jsonschema.protocols import Validator
 
+from specs_kit.changes import write_text
 from specs_kit.project import (
     IN_FORCE,
     KINDS,
@@ -1299,9 +1300,8 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     ctx = Context(project, {s.number: s for s in specs}, foreign)
     text = index(project, specs)
     if write:
-        project.dot_dir.mkdir(parents=True, exist_ok=True)
-        project.index_path.write_text(text, encoding="utf-8")
-        project.readme_path.write_text(text, encoding="utf-8")
+        write_text(project.index_path, text)
+        write_text(project.readme_path, text)
     raw = {s.short: s.status for s in project.load_upstream()}
     return len(specs), (
         *layout,

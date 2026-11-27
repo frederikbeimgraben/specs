@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
 import subprocess
 import tempfile
 from collections.abc import Generator, Mapping
@@ -17,6 +16,7 @@ from importlib import resources
 from pathlib import Path
 from typing import cast
 
+from specs_kit.changes import replace_tree, write_text
 from specs_kit.project import (
     CONFIG_NAME,
     FOLDER,
@@ -110,23 +110,6 @@ def checkout(repo: str, ref: str) -> Generator[Path]:
         yield Path(tmp)
 
 
-def _replace_tree(source: Path, target: Path, include: tuple[str, ...] = ()) -> None:
-    """Replace the folder `target` with a copy of `source`, without an `upstream/` folder.
-
-    Args:
-        source: The folder to copy.
-        target: The folder to replace.
-        include: The folders of `source` to copy, or empty for all of `source`.
-    """
-    shutil.rmtree(target, ignore_errors=True)
-    match include:
-        case ():
-            shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream"))
-        case _:
-            for folder in include:
-                shutil.copytree(source / folder, target / folder)
-
-
 def normal_include(include: tuple[str, ...]) -> tuple[str, ...]:
     """Return the folders of `include` without a slash at the start or the end, sorted.
 
@@ -165,7 +148,7 @@ def copy_rules(source: Path, project: Project, repo: str, include: tuple[str, ..
         raise KitError(f"{repo} has no specs/ folder")
     if missing:
         raise KitError(f"{repo} has no folder specs/{', specs/'.join(missing)}")
-    _replace_tree(source / "specs", project.upstream_dir / repo, include)
+    replace_tree(source / "specs", project.upstream_dir / repo, include)
 
 
 def set_ref(project: Project, repo: str, ref: str) -> None:
@@ -184,9 +167,7 @@ def set_ref(project: Project, repo: str, ref: str) -> None:
         if pattern.search(text)
         else f'{text.rstrip()}\n\n{header}\nref = "{ref}"\n'.lstrip()
     )
-    project.config_path.write_text(
-        updated if updated.endswith("\n") else f"{updated}\n", encoding="utf-8"
-    )
+    write_text(project.config_path, updated if updated.endswith("\n") else f"{updated}\n")
 
 
 def set_include(project: Project, repo: str, include: tuple[str, ...]) -> None:
@@ -200,7 +181,8 @@ def set_include(project: Project, repo: str, include: tuple[str, ...]) -> None:
     text = project.config_path.read_text(encoding="utf-8")
     header = f'[upstream."{repo}"]'
     entry = "include = [" + ", ".join(f'"{f}/"' for f in include) + "]"
-    project.config_path.write_text(
+    write_text(
+        project.config_path,
         re.sub(
             rf"^({re.escape(header)}\n(?:(?!\[).*\n)*?ref = .*)$",
             lambda m: f"{m.group(1)}\n{entry}",
@@ -208,7 +190,6 @@ def set_include(project: Project, repo: str, include: tuple[str, ...]) -> None:
             count=1,
             flags=re.MULTILINE,
         ),
-        encoding="utf-8",
     )
 
 
@@ -243,9 +224,8 @@ def write_mcp(project: Project, ref: str) -> None:
         "command": "nix",
         "args": ["run", f"github:{KIT_REPO.split('/', 1)[1]}/{ref}", "--", "mcp"],
     }
-    path.write_text(
-        json.dumps({**data, "mcpServers": {**servers, "specs": server}}, indent=2) + "\n",
-        encoding="utf-8",
+    write_text(
+        path, json.dumps({**data, "mcpServers": {**servers, "specs": server}}, indent=2) + "\n"
     )
 
 
@@ -311,15 +291,12 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     check_forge(project.root, forge)
     data_name, target = CI_FILES[forge]
     root_text = gitlab_root_text(project.root) if forge == "gitlab" else None
-    _replace_tree(source / ".specs" / "templates", project.templates_dir)
+    replace_tree(source / ".specs" / "templates", project.templates_dir)
     for skill in _skills(source):
-        _replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
-    (project.root / target).parent.mkdir(parents=True, exist_ok=True)
-    (project.root / target).write_text(
-        package_data(data_name).replace("{ref}", ref), encoding="utf-8"
-    )
+        replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
+    write_text(project.root / target, package_data(data_name).replace("{ref}", ref))
     if root_text is not None:
-        (project.root / GITLAB_ROOT).write_text(root_text, encoding="utf-8")
+        write_text(project.root / GITLAB_ROOT, root_text)
     write_mcp(project, ref)
 
 
@@ -375,9 +352,7 @@ def init(root: Path, forge: str | None) -> Project:
         raise KitError(f"{CONFIG_NAME} exists; run specs update")
     found = forge or detect_forge(root)
     check_forge(root, found)
-    (root / CONFIG_NAME).write_text(
-        package_data("specs.toml").replace("{forge}", found), encoding="utf-8"
-    )
+    write_text(root / CONFIG_NAME, package_data("specs.toml").replace("{forge}", found))
     (root / "specs").mkdir(exist_ok=True)
     project = Project.open(root)
     copy_rules(source, project, KIT_REPO)

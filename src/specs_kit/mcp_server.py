@@ -5,6 +5,7 @@ from __future__ import annotations
 from mcp.server.mcpserver import MCPServer
 
 from specs_kit import queries
+from specs_kit.changes import lines, recording
 from specs_kit.new import new as new_spec
 from specs_kit.project import Project
 
@@ -55,7 +56,7 @@ def search(text: str) -> str:
 
 @server.tool()
 def new(kind: str, path: str, name: str, title: str, owner: str | None = None) -> str:
-    """Create a new spec from its template and return its path.
+    """Create a new spec from its template and return the created file as `A <path>`.
 
     Args:
         kind: The kind name or letter, for example convention or C.
@@ -65,7 +66,9 @@ def new(kind: str, path: str, name: str, title: str, owner: str | None = None) -
         owner: The login of the owner. Without it, git config <forge>.user.
     """
     project = Project.open()
-    return new_spec(project, kind, path, name, title, owner).relative_to(project.root).as_posix()
+    with recording() as log:
+        new_spec(project, kind, path, name, title, owner)
+        return "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
 
 
 def serve() -> int:

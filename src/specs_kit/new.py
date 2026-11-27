@@ -8,6 +8,7 @@ import subprocess
 from collections.abc import Mapping
 from pathlib import Path
 
+from specs_kit.changes import write_text
 from specs_kit.check import git_numbers
 from specs_kit.project import FOLDER, FOLDER_BY_KIND, KINDS_BY_PREFIX, Project
 
@@ -145,6 +146,5 @@ def new(project: Project, kind: str, path: str, name: str, title: str, owner: st
         login,
         datetime.date.today().isoformat(),
     )
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(text, encoding="utf-8")
+    write_text(target, text)
     return target

@@ -10,6 +10,7 @@ import os
 import re
 from pathlib import Path
 
+from specs_kit.changes import watching, write_text
 from specs_kit.kit import KitError, package_data, run_command
 
 FLAKE = "flake.nix"
@@ -50,7 +51,7 @@ def _envrc(root: Path) -> tuple[str, ...]:
     path = root / ENVRC
     match (path.is_file(), path.is_file() and "use flake" in path.read_text(encoding="utf-8")):
         case (False, _):
-            path.write_text("use flake\n", encoding="utf-8")
+            write_text(path, "use flake\n")
             return ("hint: run direnv allow to load the devShell with direnv",)
         case (True, False):
             return (f"hint: add the line use flake to {ENVRC} to load the devShell with direnv",)
@@ -74,11 +75,12 @@ def init_flake(root: Path, ref: str) -> tuple[str, ...]:
     path = root / FLAKE
     match path.is_file():
         case False:
-            path.write_text(package_data(FLAKE).replace("{ref}", ref), encoding="utf-8")
+            write_text(path, package_data(FLAKE).replace("{ref}", ref))
             hints = _envrc(root)
             if _git_repo(root):
                 run_command("git", "add", "--", FLAKE, ENVRC, cwd=root)
-            run_command("nix", "flake", "lock", cwd=root)
+            with watching(root / LOCK):
+                run_command("nix", "flake", "lock", cwd=root)
             if _git_repo(root):
                 run_command("git", "add", "--", LOCK, cwd=root)
             return hints
@@ -117,10 +119,9 @@ def update_flake(root: Path, ref: str) -> tuple[str, ...]:
         case False:
             return ()
         case True:
-            path.write_text(
-                INPUT.sub(f'"github:frederikbeimgraben/specs/{ref}"', text), encoding="utf-8"
-            )
-            run_command("nix", "flake", "update", "specs", cwd=root)
+            write_text(path, INPUT.sub(f'"github:frederikbeimgraben/specs/{ref}"', text))
+            with watching(root / LOCK):
+                run_command("nix", "flake", "update", "specs", cwd=root)
             return (
                 ("hint: exit this shell and run nix develop to use the new specs",)
                 if os.environ.get("IN_NIX_SHELL") and not os.environ.get("DIRENV_DIR")
