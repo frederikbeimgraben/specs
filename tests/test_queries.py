@@ -50,6 +50,17 @@ def test_list_prints_one_line_for_each_rule(kit: Kit, project: Path) -> None:
     assert all(len(line.split("\t")) == 4 for line in lines)
 
 
+def test_list_filters_by_kind(kit: Kit, project: Path) -> None:
+    """`specs list <kind>` prints only the rules of this kind, for a name or a letter."""
+    by_letter = kit.run(project, "list", "A", "--raw").out
+    assert by_letter == kit.run(project, "list", "agent", "--raw").out
+    assert by_letter
+    assert all(line.startswith("A\t") for line in by_letter.splitlines())
+    unknown = kit.run(project, "list", "nothing", "--raw")
+    assert unknown.code == 1
+    assert "unknown kind" in unknown.err
+
+
 def test_search_ignores_the_case(kit: Kit, project: Path) -> None:
     """`specs search` finds rules by title or body, and case does not change the result."""
     upper = kit.run(project, "search", "ASSUMPTION", "--raw").out

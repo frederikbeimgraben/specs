@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from specs_kit.check import run
-from specs_kit.project import Project, Spec
+from specs_kit.new import kind_name
+from specs_kit.project import KINDS_BY_PREFIX, Project, Spec
 
 
 class QueryError(Exception):
@@ -67,16 +68,33 @@ def _line(spec: Spec) -> str:
     return f"{spec.prefix}\t{spec.short}\t{spec.status}\t{spec.title}"
 
 
-def listing(project: Project) -> str:
-    """Return one line for each rule of the project and of the copies.
+def rules(project: Project, kind: str | None = None) -> tuple[Spec, ...]:
+    """Return the rules of the project and of the copies, optionally of one kind (§000072).
 
     Args:
         project: The project.
+        kind: The kind name or the kind letter, or None for all kinds.
+
+    Returns:
+        The rules.
+    """
+    wanted = None if kind is None else kind_name(kind)
+    return tuple(
+        s for s in project.all_specs() if wanted is None or KINDS_BY_PREFIX.get(s.prefix) == wanted
+    )
+
+
+def listing(project: Project, kind: str | None = None) -> str:
+    """Return one line for each rule of the project and of the copies, optionally of one kind.
+
+    Args:
+        project: The project.
+        kind: The kind name or the kind letter, or None for all kinds.
 
     Returns:
         The lines.
     """
-    return "".join(f"{_line(s)}\n" for s in project.all_specs())
+    return "".join(f"{_line(s)}\n" for s in rules(project, kind))
 
 
 def matches(project: Project, text: str) -> tuple[Spec, ...]:

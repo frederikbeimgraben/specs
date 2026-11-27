@@ -9,7 +9,7 @@ Usage:
     specs new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]
     specs resolve <id>
     specs show <id>
-    specs list
+    specs list [<kind>]
     specs search <text>
     specs mcp
 
@@ -67,7 +67,9 @@ def parser() -> argparse.ArgumentParser:
     )
     commands.add_parser("resolve", help="print the long form of a rule ID").add_argument("id")
     commands.add_parser("show", help="print the full text of a spec").add_argument("id")
-    commands.add_parser("list", help="list every rule")
+    commands.add_parser("list", help="list every rule, or the rules of one kind").add_argument(
+        "kind", nargs="?", help="a kind name or a kind letter"
+    )
     commands.add_parser("search", help="list the rules that hold a text").add_argument("text")
     for name, sub in commands.choices.items():
         if name != "mcp":
@@ -316,10 +318,10 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             )
         case "list":
             project = Project.open()
-            specs = project.all_specs()
+            specs = queries.rules(project, args.kind)
             return _emit(
                 mode,
-                lambda: queries.listing(project),
+                lambda: queries.listing(project, args.kind),
                 lambda: table(specs),
                 lambda: [data.rule(project, s) for s in specs],
             )
