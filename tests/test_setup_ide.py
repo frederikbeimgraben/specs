@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import json
+import stat
 import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from conftest import Kit, Result, git
+
+from specs_kit import ide
+from specs_kit.project import Project
 
 
 def _run(kit: Kit, project: Path, *args: str, vsix: Path | None = None) -> Result:
@@ -93,3 +98,27 @@ def test_update_writes_the_folder_again(kit: Kit, project: Path) -> None:
     result = kit.run(project, "update", "kit", kit.rev, "--raw")
     assert result.code == 0, result.out + result.err
     assert server.read_text(encoding="utf-8") == before
+
+
+def test_a_read_only_source_gives_files_that_can_change(
+    project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A source in the Nix store is read-only; the folder in the project must stay writable."""
+    source = tmp_path / "store"
+    for path in sorted(p for p in ide.ZED_SOURCE.rglob("*") if p.is_file()):
+        copy = source / path.relative_to(ide.ZED_SOURCE)
+        copy.parent.mkdir(parents=True, exist_ok=True)
+        copy.write_bytes(path.read_bytes())
+    for path in sorted(source.rglob("*"), reverse=True):
+        path.chmod(0o555 if path.is_dir() else 0o444)
+    source.chmod(0o555)
+    monkeypatch.setattr(ide, "ZED_SOURCE", source)
+    monkeypatch.chdir(project)
+    try:
+        ide.write(Project.open(project), "zed")
+    finally:
+        for path in (source, *source.rglob("*")):
+            path.chmod(0o755)
+    folder = project / ".zed" / "specs"
+    assert '"Markdown"' in (folder / "extension.toml").read_text(encoding="utf-8")
+    assert all(p.stat().st_mode & stat.S_IWUSR for p in (folder, *folder.rglob("*")))
