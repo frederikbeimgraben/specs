@@ -2,7 +2,7 @@
 id: "000068"
 title: specs add adds the copy of a different repository
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
