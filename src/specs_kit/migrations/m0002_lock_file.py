@@ -13,7 +13,7 @@ from pathlib import Path
 from specs_kit.lock import LOCK_NAME, Locked, tree_hash, write_lock
 from specs_kit.project import UPSTREAM, read_config
 
-COMMIT = "0000000000000000000000000000000000000000"
+COMMIT = "a7f306dd3e7a5b99ba02d69337f0439583691ba7"
 DESCRIPTION = "write specs.lock from the commits in specs.toml"
 
 
