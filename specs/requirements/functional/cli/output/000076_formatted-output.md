@@ -2,7 +2,7 @@
 id: "000076"
 title: specs formats its output for a terminal
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -26,7 +26,7 @@ output:
 | `list`, `search` | A table with the columns of 000072, with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
-| `init`, `update`, `add`, `new` | The message with a green mark. |
+| `init`, `update`, `add`, `new`, `setup-ide` | The message with a green mark. |
 
 With the option `--raw` after the command, or when stdout is not a terminal, the command must
 print the plain text of its own spec, with no color and no table. With `--json`, the command

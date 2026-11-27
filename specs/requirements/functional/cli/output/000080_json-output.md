@@ -2,7 +2,7 @@
 id: "000080"
 title: specs prints its data as JSON
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -31,7 +31,7 @@ print its data as JSON, indented with two spaces, also on a terminal. `--json` a
 | `resolve` | The rule object. |
 | `show` | `long`, `path`, `meta` with the front matter as an object, and `body` with the text after the front matter. |
 | `check` | `specs` with the count of specs, `errors`, and `changed` (000077). |
-| `init`, `update`, `add`, `new` | `message`, `hints`, `check` with `specs` and `errors` or `null`, and `changed`. |
+| `init`, `update`, `add`, `new`, `setup-ide` | `message`, `hints`, `check` with `specs` and `errors` or `null`, and `changed`. |
 
 A rule object must hold `kind` (the kind letter), `id` (the short form of 000047), `long` (the
 long form), `status`, `title` and `path`. An error object must hold `file`, `line` (a whole
