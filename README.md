@@ -20,7 +20,7 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 | non-functional | `NF` | `specs/requirements/non-functional/` | How well the product must do it. |
 | protocol | `P` | `specs/protocols/` | One data format, with a JSON Schema and an example. |
 | structure | `U` | `specs/structures/` | One UML diagram in Mermaid, with an element table. |
-| style | `S` | `specs/style/` | How code, tests and product texts must look. |
+| style | `S` | `specs/style/` | How code and tests must look. |
 | convention | `C` | `specs/conventions/` | How specs must look. |
 | workflow | `W` | `specs/workflow/` | How people and agents must work. |
 | agent | `A` | `specs/agents/` | What only an agent must do or must not do. |
@@ -36,10 +36,11 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 | `.specs/upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (000048). |
 | `.specs/templates/` | The templates for a new spec (000008). |
 | `.specs/index.md` | The index of all rules that apply (000007). |
-| `specs.toml` | The settings. |
+| `specs.toml` | The settings (000078). |
 | `.claude/skills/spec-*` | Skills for agents. |
 | `.mcp.json` | The MCP server `specs`. |
-| `.github/workflows/specs.yml` or `.gitlab/ci/specs.yml`, included from `.gitlab-ci.yml` | The CI job. |
+| `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` (included from `.gitlab-ci.yml`) or `.forgejo/workflows/specs.yml` | The CI job. |
+| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `specs` at the `ref` of the kit (000066). |
 
 ## Commands
 

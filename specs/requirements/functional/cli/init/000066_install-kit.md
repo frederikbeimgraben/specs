@@ -2,12 +2,13 @@
 id: "000066"
 title: specs init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
   - src/specs_kit/kit.py
   - src/specs_kit/devshell.py
+  - src/specs_kit/cli.py
   - src/specs_kit/data/
 scope:
   - src/specs_kit/
@@ -25,7 +26,7 @@ scope:
 | `.specs/upstream/github.com/frederikbeimgraben/specs/` | The rules of the kit at the commit of the program (000048). |
 | `.specs/templates/` | The templates of the kit. |
 | `.claude/skills/spec-*` | The skills of the kit. |
-| `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` or `.forgejo/workflows/specs.yml` | The CI job for the forge, which runs `specs check` at the `ref` of the kit. For Codeberg, the job runs on the hosted Forgejo Actions runner `codeberg-small`. |
+| `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` or `.forgejo/workflows/specs.yml` | The CI job for the forge, which runs `specs check` at the `ref` of the kit. On GitHub and Codeberg, it runs for each pull request and for each push to the branch of `base_ref`, for example `develop` for `origin/develop`. For Codeberg, the job runs on the hosted Forgejo Actions runner `codeberg-small`. |
 | `.gitlab-ci.yml` | Only for GitLab: the entry `- local: .gitlab/ci/specs.yml` below `include:`, if it is not there. The other content stays. |
 | `.mcp.json` | The MCP server `specs` at the `ref` of the kit. Other servers stay. |
 
@@ -42,6 +43,9 @@ The command must also give the project a devShell with the program `specs`:
 The line of the input must be `inputs.specs.url = "github:frederikbeimgraben/specs/<ref>";`,
 below the comment `# The specs command of the kit. The ref must be the ref in specs.toml.`.
 The input `specs` must not follow the input `nixpkgs` of the project.
+
+At its end, the command must run `specs check --write` (000065) and print its report after its
+own message. It must end with the exit code 1 when the check finds errors.
 
 Without `--forge`, the command must take the forge from `git remote origin`. It must stop with
 an error and change no file when `specs.toml` exists, when the forge is unknown, when

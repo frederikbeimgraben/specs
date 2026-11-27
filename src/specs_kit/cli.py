@@ -138,7 +138,13 @@ def _raw_changes(changed: tuple[tuple[Mark, str], ...]) -> str:
     return "".join(f"{mark} {path}\n" for mark, path in changed)
 
 
-def _check(write: bool, pretty: bool, log: Mapping[Path, Mark], head: tuple[str, ...] = ()) -> int:
+def _check(
+    write: bool,
+    pretty: bool,
+    log: Mapping[Path, Mark],
+    head: tuple[str, ...] = (),
+    root: Path | None = None,
+) -> int:
     """Run the check and print the messages, the report and the changed files.
 
     `update` and `add` run the check with `--write` at their end and give their message as
@@ -149,11 +155,12 @@ def _check(write: bool, pretty: bool, log: Mapping[Path, Mark], head: tuple[str,
         pretty: True for the formatted output.
         log: The changes of the command.
         head: The messages of the command before the check, or empty.
+        root: The root of the project, or None to search from the current folder.
 
     Returns:
         The exit code: 1 when the check finds errors.
     """
-    project = Project.open()
+    project = Project.open(root)
     count, errors = run(project, write=write)
     changed = lines(log, project.root)
     _emit(
@@ -234,7 +241,7 @@ def _dispatch(args: argparse.Namespace, pretty: bool, log: Mapping[Path, Mark]) 
             project = init(Path(args.dir), args.forge)
             hints = init_flake(project.root, project.config.upstream.get(KIT_REPO) or "")
             text = _lines(f"installed the kit in {project.root}", hints)
-            return _message(pretty, text, log, project.root)
+            return _check(True, pretty, log, (text,), project.root)
         case "update":
             target = _update_target(list(args.args))
             project = Project.open()
