@@ -56,7 +56,7 @@ def show(project: Project, ref: str) -> str:
 
 
 def _line(spec: Spec) -> str:
-    """Return one line of a list: short form, kind letter, status and title.
+    """Return one line of a list: kind letter, short form, status and title.
 
     Args:
         spec: The spec.
@@ -64,7 +64,7 @@ def _line(spec: Spec) -> str:
     Returns:
         The line.
     """
-    return f"{spec.short}\t{spec.prefix}\t{spec.status}\t{spec.title}"
+    return f"{spec.prefix}\t{spec.short}\t{spec.status}\t{spec.title}"
 
 
 def listing(project: Project) -> str:
