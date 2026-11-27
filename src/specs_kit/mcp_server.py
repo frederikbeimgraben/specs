@@ -39,7 +39,7 @@ def show(ref: str) -> str:
 
 @server.tool(name="list")
 def list_specs() -> str:
-    """Return one line per rule of the project and of the copies: ID, kind, status, title."""
+    """Return one line per rule of the project and of the copies: kind, ID, status, title."""
     return queries.listing(Project.open())
 
 
