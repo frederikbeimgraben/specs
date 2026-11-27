@@ -26,6 +26,7 @@
           dependencies = with pkgs.python313Packages; [
             jsonschema
             mcp
+            rich
           ];
           makeWrapperArgs = [
             "--set"
@@ -56,6 +57,7 @@
             (pkgs.python313.withPackages (ps: [
               ps.jsonschema
               ps.mcp
+              ps.rich
             ]))
             pkgs.ruff
             pkgs.basedpyright

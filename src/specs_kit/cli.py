@@ -18,7 +18,11 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
+
+from rich.console import RenderableType
+from rich.text import Text
 
 from specs_kit import queries
 from specs_kit.check import run
@@ -26,6 +30,7 @@ from specs_kit.kit import KitError, add, init, update
 from specs_kit.mcp_server import serve
 from specs_kit.new import NewError, new
 from specs_kit.project import KIT_REPO, Project
+from specs_kit.view import console, done, report, spec_text, table
 
 
 def parser() -> argparse.ArgumentParser:
@@ -55,6 +60,11 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("show", help="print the full text of a spec").add_argument("id")
     commands.add_parser("list", help="list every rule")
     commands.add_parser("search", help="list the rules that hold a text").add_argument("text")
+    for name, sub in commands.choices.items():
+        if name != "mcp":
+            sub.add_argument(
+                "--raw", action="store_true", help="print plain text, also without a terminal"
+            )
     commands.add_parser("mcp", help="run the MCP server on stdin and stdout")
     return root
 
@@ -82,31 +92,68 @@ def _update_target(args: list[str]) -> tuple[str, str | None]:
             raise KitError("usage: specs update [<repo>] [<ref>]")
 
 
-def _check(write: bool) -> int:
+def _pretty(args: argparse.Namespace) -> bool:
+    """Return True for the formatted output (§000076).
+
+    Args:
+        args: The parsed command line.
+
+    Returns:
+        True without `--raw` when stdout is a terminal.
+    """
+    return not bool(getattr(args, "raw", False)) and sys.stdout.isatty()
+
+
+def _emit(pretty: bool, raw: Callable[[], str], view: Callable[[], RenderableType]) -> int:
+    """Print the formatted or the plain output.
+
+    Args:
+        pretty: True for the formatted output.
+        raw: The plain text.
+        view: The formatted output.
+
+    Returns:
+        The exit code 0.
+    """
+    match pretty:
+        case True:
+            console().print(view())
+        case False:
+            text = raw()
+            sys.stdout.write(text if text.endswith("\n") or not text else f"{text}\n")
+    return 0
+
+
+def _check(write: bool, pretty: bool) -> int:
     """Run the check and print the report.
 
     Args:
         write: True to write the index first.
+        pretty: True for the formatted output.
 
     Returns:
         The exit code.
     """
     count, errors = run(Project.open(), write=write)
-    print("".join(f"{e}\n" for e in errors) + f"{count} specs, {len(errors)} errors")
+    _emit(
+        pretty,
+        lambda: "".join(f"{e}\n" for e in errors) + f"{count} specs, {len(errors)} errors",
+        lambda: report(count, tuple(errors)),
+    )
     return 1 if errors else 0
 
 
-def _print(text: str) -> int:
-    """Print a text without an extra newline.
+def _message(pretty: bool, text: str) -> int:
+    """Print the message of a command that changes files.
 
     Args:
-        text: The text.
+        pretty: True for the formatted output.
+        text: The message.
 
     Returns:
         The exit code 0.
     """
-    sys.stdout.write(text if text.endswith("\n") or not text else f"{text}\n")
-    return 0
+    return _emit(pretty, lambda: text, lambda: done(text))
 
 
 def dispatch(args: argparse.Namespace) -> int:
@@ -119,29 +166,39 @@ def dispatch(args: argparse.Namespace) -> int:
         The exit code.
     """
     command: str = args.command
+    pretty = _pretty(args)
     match command:
         case "check":
-            return _check(bool(args.write))
+            return _check(bool(args.write), pretty)
         case "init":
-            return _print(f"installed the kit in {init(Path(args.dir), args.forge).root}")
+            return _message(pretty, f"installed the kit in {init(Path(args.dir), args.forge).root}")
         case "update":
-            return _print(f"updated to {update(Project.open(), *_update_target(list(args.args)))}")
+            target = _update_target(list(args.args))
+            return _message(pretty, f"updated to {update(Project.open(), *target)}")
         case "add":
-            return _print(
-                f"added at {add(Project.open(), args.repo, args.ref, tuple(args.include))}"
-            )
+            commit = add(Project.open(), args.repo, args.ref, tuple(args.include))
+            return _message(pretty, f"added at {commit}")
         case "new":
-            return _print(
-                str(new(Project.open(), args.kind, args.path, args.name, args.title, args.owner))
-            )
+            path = new(Project.open(), args.kind, args.path, args.name, args.title, args.owner)
+            return _message(pretty, str(path))
         case "resolve":
-            return _print(queries.resolve(Project.open(), args.id))
+            long = queries.resolve(Project.open(), args.id)
+            return _emit(pretty, lambda: long, lambda: Text(long, style="bold cyan"))
         case "show":
-            return _print(queries.show(Project.open(), args.id))
+            text = queries.show(Project.open(), args.id)
+            return _emit(pretty, lambda: text, lambda: spec_text(text))
         case "list":
-            return _print(queries.listing(Project.open()))
+            project = Project.open()
+            return _emit(
+                pretty, lambda: queries.listing(project), lambda: table(project.all_specs())
+            )
         case "search":
-            return _print(queries.search(Project.open(), args.text))
+            project = Project.open()
+            return _emit(
+                pretty,
+                lambda: queries.search(project, args.text),
+                lambda: table(queries.matches(project, args.text)),
+            )
         case "mcp":
             return serve()
         case _:
