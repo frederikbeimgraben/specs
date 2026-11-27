@@ -2,7 +2,7 @@
 id: "000072"
 title: specs list prints every rule
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
@@ -14,6 +14,12 @@ scope:
 # specs list prints every rule
 
 `specs list` must print one line for each rule of the project, then one line for each rule of
-the copies. A line must hold the long form, the status and the title, separated by tabs.
+the copies. A line must hold the short form (000047), the kind letter, the status and the title,
+in this order and separated by tabs. For example:
 
-Reason: An agent sees all rules in one call.
+```text
+000060	S	approved	Python code needs Python 3.13 or later
+```
+
+Reason: An agent sees all rules in one call. The short form is the form that code and specs
+use, and the kind letter tells the kind without the long path.
