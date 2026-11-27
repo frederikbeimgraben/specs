@@ -7,6 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
   - src/specs_kit/kit.py
+  - src/specs_kit/cli.py
 scope:
   - src/specs_kit/
 ---
@@ -21,5 +22,9 @@ and must write them as `include` to the table (000048). The command must stop wi
 and change no file when `<repo>` is in `specs.toml` already, or when `<repo>` at `<ref>` has no
 folder of `--include`.
 
+At its end, `specs add` must run `specs check --write` (000065) and print its report after its
+own message. It must end with the exit code 1 when the check finds errors.
+
 Reason: A project takes the rules of a different repository, or only the rules that it needs,
-with one command (000048).
+with one command (000048). The new rules can show errors in the project, and the index must
+show them.

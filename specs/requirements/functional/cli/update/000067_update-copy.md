@@ -7,6 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
   - src/specs_kit/kit.py
+  - src/specs_kit/cli.py
   - src/specs_kit/devshell.py
 scope:
   - src/specs_kit/
@@ -29,4 +30,8 @@ Without `<ref>`, it must take the default branch. The command must stop with an 
 kit at `<ref>` has no `.specs/templates/`, or when `.gitlab-ci.yml` has an `include` that is
 not a list. It must then change no file.
 
-Reason: An update is one command and one diff (000048).
+At its end, `specs update` must run `specs check --write` (000065) and print its report after
+its own message. It must end with the exit code 1 when the check finds errors.
+
+Reason: An update is one command and one diff (000048). New rules of an update can show errors
+in the project, and the index must show the new rules.
