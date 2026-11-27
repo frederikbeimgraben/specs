@@ -4,27 +4,31 @@ title: A new spec starts as a copy of the template
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
-  - specs/TEMPLATE.md
-  - specs/TEMPLATE-protocol.md
-  - specs/TEMPLATE-structure.md
-  - specs/TEMPLATE-decision.md
+  - .specs/templates/TEMPLATE.md
+  - .specs/templates/TEMPLATE-protocol.md
+  - .specs/templates/TEMPLATE-structure.md
+  - .specs/templates/TEMPLATE-decision.md
 scope:
   - specs/
 ---
 
 # A new spec starts as a copy of the template
 
-A new spec must start as a copy of its template:
+A new spec must start as a copy of its template in `.specs/templates/`:
 
 | Kind | Template |
 | --- | --- |
-| `functional`, `non-functional`, `style`, `convention`, `workflow`, `agent` | `specs/TEMPLATE.md` |
-| `protocol` | `specs/TEMPLATE-protocol.md` |
-| `structure` | `specs/TEMPLATE-structure.md` |
-| `decision` | `specs/TEMPLATE-decision.md` |
+| `functional`, `non-functional`, `style`, `convention`, `workflow`, `agent` | `.specs/templates/TEMPLATE.md` |
+| `protocol` | `.specs/templates/TEMPLATE-protocol.md` |
+| `structure` | `.specs/templates/TEMPLATE-structure.md` |
+| `decision` | `.specs/templates/TEMPLATE-decision.md` |
 
-Reason: The template holds the keys in the correct order and the fixed sections.
+`specs new <kind> <area>/<topic> <name> "<title>"` must make the copy (000069). It sets the number,
+the title, the kind, the owner and the date.
 
-Test: `scripts/check_specs.py` checks the result.
+Reason: The template holds the keys in the correct order and the fixed sections. The command
+gives the next free number (000013), so that nobody must count by hand.
+
+Test: `specs check` checks the result.

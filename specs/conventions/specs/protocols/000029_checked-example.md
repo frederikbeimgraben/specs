@@ -4,9 +4,9 @@ title: The example of a JSON format matches its schema
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -20,5 +20,4 @@ other code blocks, for example the headers of a request in an `http` block.
 Reason: A receiver copies the example first. An example that CI checks cannot drift from the
 schema.
 
-Test: `scripts/check_specs.py` validates every `json` code block of `## Example`. It needs the
-Python package `jsonschema`.
+Test: `specs check` validates every `json` code block of `## Example`.

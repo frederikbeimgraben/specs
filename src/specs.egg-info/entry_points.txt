@@ -1,0 +1,2 @@
+[console_scripts]
+specs = specs_kit.cli:main

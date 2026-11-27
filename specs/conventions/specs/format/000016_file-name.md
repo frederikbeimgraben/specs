@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -22,4 +22,4 @@ Example: `000024_every-vote-is-secret.md`.
 
 Reason: The files of a topic sort by number, and the name tells the content without a tool.
 
-Test: `scripts/check_specs.py`: the file name matches `^[0-9]{6}_[a-z0-9]+(-[a-z0-9]+)*\.md$`.
+Test: `specs check`: the file name matches `^[0-9]{6}_[a-z0-9]+(-[a-z0-9]+)*\.md$`.

@@ -21,8 +21,8 @@ The rules are 000033 to 000039 in `specs/conventions/specs/structures/`.
    | `entity` | `erDiagram` | Tables, columns, foreign keys. |
    | `component` | `flowchart` | Services, modules and their connections. |
 
-3. Copy `specs/TEMPLATE-structure.md` to `specs/structures/<area>/<topic>/<number>_<name>.md`.
-   Get the number as in the skill `spec-write`.
+3. Run `specs new structure <area>/<topic> <name> "<title>"`. It copies
+   `.specs/templates/TEMPLATE-structure.md` and gives the number (000008).
 4. Read the code. Draw what the code does now, not a plan (000038). For a plan, set
    `status: draft` and `implementation: null`.
 5. Write the diagram:
@@ -33,8 +33,8 @@ The rules are 000033 to 000039 in `specs/conventions/specs/structures/`.
    code (or `-` for an external part) and one sentence of meaning (000035, 000036).
 7. Write the rule text: which part of the code must agree with the diagram. Use `must`.
 8. Put the element paths, or their folders, in `implementation` (000036).
-9. Add the full ID to `structures` of each rule that depends on the structure (000039).
-10. Run `python3 scripts/check_specs.py --write`. Fix each error.
+9. Add the number to `structures` of each rule that depends on the structure (000039).
+10. Run `specs check --write`. Fix each error.
 11. Look at the diagram in the GitHub preview of the pull request. GitHub draws Mermaid blocks.
 
 ## Keep a structure spec current

@@ -4,7 +4,7 @@ title: A change goes through a pull request
 kind: workflow
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - specs/
 scope:
@@ -16,9 +16,9 @@ scope:
 A change to a spec must follow these steps:
 
 1. Find the topic folder. If there is none, make it.
-2. Copy the template and give the rule its number (000013).
+2. Make the spec with `specs new` (000008). It gives the rule its number (000013).
 3. Set `status: draft` and set `updated` to the current date.
-4. Update the index with `python3 scripts/check_specs.py --write`.
+4. Update the index with `specs check --write` (000007).
 5. Open a pull request. The owner sets `approved` (000010).
 6. Before the merge, bring the branch up to the base branch and run the check again.
 

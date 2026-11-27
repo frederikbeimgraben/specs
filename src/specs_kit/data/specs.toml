@@ -1,0 +1,19 @@
+# Settings of the specs command (000013). Each key is optional.
+
+# github or gitlab.
+forge = "{forge}"
+
+# The base branch. A spec number that this branch took after your branch left it is an error.
+base_ref = "origin/main"
+
+# The folders that hold code. The check finds a § reference to a rule that does not exist.
+code_dirs = []
+
+# The file types of the code in code_dirs.
+code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"]
+
+# The highest count of elements in one structure diagram (000037).
+max_elements = 25
+
+# The rules of a different repository, copied to .specs/upstream/<host>/<owner>/<repo>/ (000048).
+# ref is the commit of the copy. Change it with specs update or specs add.

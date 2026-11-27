@@ -21,4 +21,4 @@ and `implementation: null`.
 Reason: A diagram that does not show the code is wrong after the next change, and nobody sees
 it.
 
-Test: Review. `scripts/check_specs.py` finds an element path that does not exist.
+Test: Review. `specs check` finds an element path that does not exist.

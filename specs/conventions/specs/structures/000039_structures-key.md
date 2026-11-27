@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -20,4 +20,4 @@ the key `structures`. Each entry must name a structure spec that is in force.
 Reason: A reader of a rule finds the structure that the rule talks about. A tool finds every
 rule that a change of the structure affects.
 
-Test: `scripts/check_specs.py` checks every entry of `structures`.
+Test: `specs check` checks every entry of `structures`.

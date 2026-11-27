@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -28,4 +28,4 @@ All other changes are breaking changes.
 
 Reason: A receiver that names the ID of a format must find the same contract later.
 
-Test: Review. `scripts/check_specs.py` checks the form of `version`.
+Test: Review. `specs check` checks the form of `version`.

@@ -1,0 +1,6 @@
+specs:
+  image: nixos/nix:latest
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - nix --extra-experimental-features "nix-command flakes" run github:frederikbeimgraben/specs/{ref} -- check
