@@ -23,12 +23,13 @@ scope:
 
 # specs init adds the kit to a project
 
-`specs init [<dir>] [--forge github|gitlab|codeberg]` must add the kit to the project in
-`<dir>`, or in the current folder. It must write these files:
+`specs init [<dir>] [--forge github|gitlab|codeberg] [-y]` must add the kit to the project in
+`<dir>`, or in the current folder. First it must ask the questions of 000085, and it must write
+the answers to `specs.toml`. It must write these files:
 
 | File | Content |
 | --- | --- |
-| `specs.toml` | The settings, with `forge` and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in 000068. |
+| `specs.toml` | The settings, with the answers of 000085 and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in 000068. |
 | `specs.lock` | The commit that this `ref` names, and the hash of the copy of the kit (000082). |
 | `specs/` | An empty folder for the rules of the project. |
 | `specs/.upstream/github.com/frederikbeimgraben/specs/` | The rules of the kit at this commit (000048). |
@@ -46,7 +47,7 @@ The command must also give the project a devShell with the program `specs`:
 | `flake.nix` without the input `specs` | Change no file. Show the lines of the input to add. |
 | `flake.nix` without `specs.packages` | Change no file. Show the package to add to the devShell. |
 | No `.envrc` | Write `.envrc` with `use flake`, and tell to run `direnv allow`. |
-| `.envrc` without `use flake` | Change no file. Show the line to add. |
+| `.envrc` without `use flake` | Show the line to add. Add it only when the user answers yes (000085). |
 
 The line of the input must be `inputs.specs.url = "github:frederikbeimgraben/specs/<commit>";`,
 with the commit of `specs.lock`, below the comment
@@ -56,12 +57,13 @@ The input `specs` must not follow the input `nixpkgs` of the project.
 The command must write only the parts whose switch in `[features]` is on (000084). At its end,
 it must do the steps of `specs install` (000083).
 
-Without `--forge`, the command must take the forge from `git remote origin`. It must stop with
-an error and change no file when `specs.toml` exists, when the forge is unknown, when
+Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must
+stop with an error and change no file when `specs.toml` exists, when the forge is unknown, when
 `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when this
 program is an older commit of the kit than the commit of the `ref`.
 
 Reason: One command gives a project the same start as every other project. The kit never
-changes a `flake.nix` or an `.envrc` that exists, because it cannot read every form of Nix code.
+changes a `flake.nix` that exists, because it cannot read every form of Nix code, and changes an
+`.envrc` only when the user agrees.
 
 Test: `tests/test_kit.py`.

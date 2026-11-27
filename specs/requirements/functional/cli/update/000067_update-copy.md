@@ -20,7 +20,8 @@ scope:
 
 # specs update resolves the refs again and replaces the copies
 
-`specs update [<repo> [<ref>]]` must update the copies below `specs/.upstream/` (000048):
+`specs update [<repo> [<ref>]] [-y]` must update the copies below `specs/.upstream/` (000048),
+after the questions of 000085:
 
 | Form | Effect |
 | --- | --- |
@@ -32,11 +33,13 @@ scope:
 For each repository, the command must replace the copy with the `specs/` folder at the commit
 that `ref` names, and write the `ref`, the commit, `include` and the hash to `specs.lock`
 (000082). When the table of `<repo>` has `include`, the command must copy only the folders of
-`include` and must keep `include` unchanged. The kit comes first.
+`include` and must keep `include`. Only a folder that the user adds (000085) changes it. The
+kit comes first.
 
 For the kit, the command must also replace the templates, the skills, the CI files of 000066
-and the entry `specs` in `.mcp.json`. When `flake.nix` has the input `specs` of 000066, the
-command must set its ref to the new commit of the kit and run `nix flake update specs`.
+and the entry `specs` in `.mcp.json`. A template or a skill that the user keeps (000085) must
+stay. When `flake.nix` has the input `specs` of 000066, the command must set its ref to the new
+commit of the kit and run `nix flake update specs`.
 Without this input, it must not change `flake.nix` and `flake.lock`. When it changed
 `flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it must tell to leave the shell and
 run `nix develop`, because a program cannot load its shell again.
