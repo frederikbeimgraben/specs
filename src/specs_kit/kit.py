@@ -331,6 +331,8 @@ def _install(project: Project, repo: str, ref: str) -> str:
     """
     with checkout(repo, ref) as source:
         commit = _run("git", "-C", str(source), "rev-parse", "HEAD").strip()
+        if repo == KIT_REPO and not (source / ".specs" / "templates").is_dir():
+            raise KitError(f"the kit at {commit} has no .specs/templates/; it is too old")
         copy_rules(source, project, repo)
         set_ref(project, repo, commit)
         if repo == KIT_REPO:
