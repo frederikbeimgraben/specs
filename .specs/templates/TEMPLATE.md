@@ -5,8 +5,6 @@ kind: functional
 status: draft
 owner: your-github-login
 updated: YYYY-MM-DD
-tests:
-  - "tests/test_example.py:test_example_rule"
 implementation: null
 scope:
   - src/example

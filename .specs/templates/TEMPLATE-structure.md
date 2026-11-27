@@ -6,8 +6,7 @@ status: draft
 owner: your-github-login
 updated: YYYY-MM-DD
 diagram: class
-implementation:
-  - src/example
+implementation: null
 scope:
   - src/example
 ---
@@ -35,8 +34,8 @@ classDiagram
 
 | Element | Path | Meaning |
 | --- | --- | --- |
-| `Order` | src/example | One order of one customer. |
-| `Line` | src/example | One product and its quantity in an order. |
+| `Order` | - | One order of one customer. |
+| `Line` | - | One product and its quantity in an order. |
 
 Reason: The cause of the rule.
 

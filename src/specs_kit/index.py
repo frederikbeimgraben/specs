@@ -115,7 +115,7 @@ def index(
                 "(000007).",
                 "",
                 "A new spec starts with",
-                '`specs new <kind> <area>/<topic> <name> "<title>"` (000008).',
+                '`specs new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).',
                 "",
                 "## Tree",
                 "",

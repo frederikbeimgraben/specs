@@ -6,7 +6,7 @@ Usage:
     specs update [<ref>]
     specs update <repo> <ref>
     specs add <repo> <ref> [--include <folder>]...
-    specs new <kind> <area>/<topic> <name> "<title>" [--owner <login>]
+    specs new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]
     specs resolve <id>
     specs show <id>
     specs list
@@ -58,6 +58,9 @@ def parser() -> argparse.ArgumentParser:
     create.add_argument("name")
     create.add_argument("title")
     create.add_argument("--owner")
+    create.add_argument(
+        "--scope", action="append", required=True, metavar="path", help="a path of the rule"
+    )
     commands.add_parser("resolve", help="print the long form of a rule ID").add_argument("id")
     commands.add_parser("show", help="print the full text of a spec").add_argument("id")
     commands.add_parser("list", help="list every rule")
@@ -254,7 +257,9 @@ def _dispatch(args: argparse.Namespace, pretty: bool, log: Mapping[Path, Mark]) 
             return _check(True, pretty, log, (f"added at {commit}",))
         case "new":
             project = Project.open()
-            path = new(project, args.kind, args.path, args.name, args.title, args.owner)
+            path = new(
+                project, args.kind, args.path, args.name, args.title, args.owner, tuple(args.scope)
+            )
             return _message(pretty, str(path), log, project.root)
         case "resolve":
             long = queries.resolve(Project.open(), args.id)

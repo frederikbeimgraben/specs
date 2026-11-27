@@ -25,8 +25,9 @@ A new spec must start as a copy of its template in `.specs/templates/`:
 | `structure` | `.specs/templates/TEMPLATE-structure.md` |
 | `decision` | `.specs/templates/TEMPLATE-decision.md` |
 
-`specs new <kind> <area>/<topic> <name> "<title>"` must make the copy (000069). It sets the number,
-the title, the kind, the owner and the date.
+`specs new <kind> <area>/<topic> <name> "<title>" --scope <path>` must make the copy (000069). It
+sets the number, the title, the kind, the owner, the date and `scope`. The copy must pass
+`specs check`.
 
 Reason: The template holds the keys in the correct order and the fixed sections. The command
 gives the next free number (000013), so that nobody must count by hand.

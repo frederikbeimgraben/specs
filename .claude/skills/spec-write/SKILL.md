@@ -16,7 +16,7 @@ The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`, in a pr
    folder, make it. Use lower case and `-` (000005).
 2. Search `specs/` for a rule that already covers the change. Change that rule instead of a new
    one (000006).
-3. Make the file with `specs new <kind> <area>/<topic> <short-name> "<title>"` (000008). It
+3. Make the file with `specs new <kind> <area>/<topic> <short-name> "<title>" --scope <path>` (000008). It
    copies the template, takes the highest number of `specs/` and the base branch plus one, and
    sets `owner` from `--owner` or `git config <forge>.user`. Run `git fetch origin` first. If an
    open pull request has the same number, give the spec a new number (000013). For a UML

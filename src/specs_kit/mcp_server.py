@@ -55,7 +55,9 @@ def search(text: str) -> str:
 
 
 @server.tool()
-def new(kind: str, path: str, name: str, title: str, owner: str | None = None) -> str:
+def new(
+    kind: str, path: str, name: str, title: str, scope: list[str], owner: str | None = None
+) -> str:
     """Create a new spec from its template and return the created file as `A <path>`.
 
     Args:
@@ -63,11 +65,12 @@ def new(kind: str, path: str, name: str, title: str, owner: str | None = None) -
         path: The area and the topic, as <area>/<topic>.
         name: The short name of the file, in kebab case.
         title: The title of the rule.
+        scope: The paths of the rule, from the root of the project. At least one.
         owner: The login of the owner. Without it, git config <forge>.user.
     """
     project = Project.open()
     with recording() as log:
-        new_spec(project, kind, path, name, title, owner)
+        new_spec(project, kind, path, name, title, owner, tuple(scope))
         return "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
 
 

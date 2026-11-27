@@ -21,7 +21,7 @@ The rules are 000033 to 000039 in `specs/conventions/specs/structures/`.
    | `entity` | `erDiagram` | Tables, columns, foreign keys. |
    | `component` | `flowchart` | Services, modules and their connections. |
 
-3. Run `specs new structure <area>/<topic> <name> "<title>"`. It copies
+3. Run `specs new structure <area>/<topic> <name> "<title>" --scope <path>`. It copies
    `.specs/templates/TEMPLATE-structure.md` and gives the number (000008).
 4. Read the code. Draw what the code does now, not a plan (000038). For a plan, set
    `status: draft` and `implementation: null`.

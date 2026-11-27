@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import json
 import re
 import subprocess
 from collections.abc import Mapping
@@ -10,12 +11,21 @@ from pathlib import Path
 
 from specs_kit.changes import write_text
 from specs_kit.check import git_numbers
-from specs_kit.project import FOLDER, FOLDER_BY_KIND, KINDS_BY_PREFIX, Project
+from specs_kit.project import (
+    FOLDER,
+    FOLDER_BY_KIND,
+    KINDS_BY_PREFIX,
+    Project,
+    parse_front_matter,
+)
+from specs_kit.sections import SCHEMA_DIALECT, is_json, schema_path
 
 
 class NewError(Exception):
     """A new spec cannot be created."""
 
+
+MINIMAL_SCHEMA = json.dumps({"$schema": SCHEMA_DIALECT, "type": "object"}, indent=2) + "\n"
 
 TEMPLATES: Mapping[str, str] = {
     "protocol": "TEMPLATE-protocol.md",
@@ -78,7 +88,15 @@ def next_number(project: Project) -> str:
     return f"{max((int(n) for n in (*local, *base)), default=0) + 1:06d}"
 
 
-def fill(template: str, number: str, title: str, kind: str, owner: str, day: str) -> str:
+def fill(
+    template: str,
+    number: str,
+    title: str,
+    kind: str,
+    owner: str,
+    day: str,
+    scope: tuple[str, ...] = (),
+) -> str:
     """Return the text of a template with the values of the new spec.
 
     Args:
@@ -88,6 +106,7 @@ def fill(template: str, number: str, title: str, kind: str, owner: str, day: str
         kind: The kind name.
         owner: The login of the owner.
         day: The date as `YYYY-MM-DD`.
+        scope: The paths of `scope`, or empty to keep the paths of the template.
 
     Returns:
         The text of the new spec.
@@ -107,12 +126,31 @@ def fill(template: str, number: str, title: str, kind: str, owner: str, day: str
         )
         for line in head.splitlines(keepends=True)
     )
+    scoped = (
+        re.sub(
+            r"^scope:(?:\n  - .*)*",
+            lambda _: "scope:" + "".join(f"\n  - {p}" for p in scope),
+            filled,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        if scope
+        else filled
+    )
     return (
-        filled + sep + re.sub(r"^# .*$", lambda _: f"# {title}", body, count=1, flags=re.MULTILINE)
+        scoped + sep + re.sub(r"^# .*$", lambda _: f"# {title}", body, count=1, flags=re.MULTILINE)
     )
 
 
-def new(project: Project, kind: str, path: str, name: str, title: str, owner: str | None) -> Path:
+def new(
+    project: Project,
+    kind: str,
+    path: str,
+    name: str,
+    title: str,
+    owner: str | None,
+    scope: tuple[str, ...],
+) -> Path:
     """Create a new spec and return its path.
 
     Args:
@@ -122,12 +160,13 @@ def new(project: Project, kind: str, path: str, name: str, title: str, owner: st
         name: The short name of the file, in kebab case.
         title: The title.
         owner: The login of the owner, or None for `git config <forge>.user`.
+        scope: The paths of `scope`, from the root of the project (§000069).
 
     Returns:
         The path of the new file.
 
     Raises:
-        NewError: A value is not valid, or no owner is known.
+        NewError: A value is not valid, a scope path does not exist, or no owner is known.
     """
     found = kind_name(kind)
     parts = tuple(path.strip("/").split("/"))
@@ -136,6 +175,11 @@ def new(project: Project, kind: str, path: str, name: str, title: str, owner: st
         raise NewError(f"{path!r} must be <area>/<topic> in kebab case (000005)")
     if not FOLDER.match(name):
         raise NewError(f"{name!r} must be kebab case (000016)")
+    missing = tuple(p for p in scope if not (project.root / p).exists())
+    if not scope:
+        raise NewError("pass the paths of the rule with --scope <path> (000069)")
+    if missing:
+        raise NewError(f"scope path {', '.join(map(repr, missing))} does not exist (000009)")
     if login is None:
         raise NewError(f"no owner: pass --owner or set git config {project.config.forge}.user")
     template = project.templates_dir / TEMPLATES.get(found, "TEMPLATE.md")
@@ -150,6 +194,22 @@ def new(project: Project, kind: str, path: str, name: str, title: str, owner: st
         found,
         login,
         datetime.date.today().isoformat(),
+        scope,
     )
-    write_text(target, text)
+    write_text(target, text.replace("NNNNNN_<name>", f"{number}_{name}"))
+    if found == "protocol" and _json_template(text):
+        write_text(schema_path(target), MINIMAL_SCHEMA)
     return target
+
+
+def _json_template(text: str) -> bool:
+    """Return True when the `media_type` of a new protocol spec is a JSON format (§000028).
+
+    Args:
+        text: The text of the new spec.
+
+    Returns:
+        True for a JSON format.
+    """
+    meta = parse_front_matter(text)
+    return meta is not None and is_json(meta[0].get("media_type"))
