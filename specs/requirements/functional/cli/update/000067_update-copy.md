@@ -23,10 +23,10 @@ skills, the CI files of 000066 and the entry `specs` in `.mcp.json`. When `flake
 input `specs` of 000066, the command must set its ref to the new commit and run
 `nix flake update specs`. Without this input, it must not change `flake.nix` and `flake.lock`.
 When it changed `flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it must tell to
-leave the shell and run `nix develop`, because a program cannot load its shell again. Without
-`<ref>`, it must take the default branch. The command must stop with an error when `<repo>` is not in
-`specs.toml`, when `<repo>` at `<ref>` has no folder of `include`, when the kit at `<ref>` has
-no `.specs/templates/`, or when `.gitlab-ci.yml` has an `include` that is not a list. It must
-then change no file.
+leave the shell and run `nix develop`, because a program cannot load its shell again.
+Without `<ref>`, it must take the default branch. The command must stop with an error when
+`<repo>` is not in `specs.toml`, when `<repo>` at `<ref>` has no folder of `include`, when the
+kit at `<ref>` has no `.specs/templates/`, or when `.gitlab-ci.yml` has an `include` that is
+not a list. It must then change no file.
 
 Reason: An update is one command and one diff (000048).
