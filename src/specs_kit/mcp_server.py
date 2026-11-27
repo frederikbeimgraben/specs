@@ -39,9 +39,13 @@ def show(ref: str) -> str:
 
 
 @server.tool(name="list")
-def list_specs() -> str:
-    """Return one line per rule of the project and of the copies: kind, ID, status, title."""
-    return queries.listing(Project.open())
+def list_specs(kind: str | None = None) -> str:
+    """Return one line per rule of the project and of the copies: kind, ID, status, title.
+
+    Args:
+        kind: Only the rules of this kind, as kind name or kind letter.
+    """
+    return queries.listing(Project.open(), kind)
 
 
 @server.tool()
