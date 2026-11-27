@@ -2,7 +2,7 @@
 id: "000065"
 title: specs check checks the specs and writes the index
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
