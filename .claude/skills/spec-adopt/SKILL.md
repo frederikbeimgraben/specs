@@ -5,58 +5,64 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 
 # Add the spec format to a project
 
+`specs` is the command of the kit. Run it with Nix as
+`nix run github:frederikbeimgraben/specs/<ref> -- <command>`.
+
 ## New project, or a project without `specs/`
 
-1. Get the kit and run the installer from the project root:
+1. Run `init` in the project root:
 
    ```sh
-   git clone --depth 1 https://github.com/frederikbeimgraben/specs /tmp/spec-kit
-   /tmp/spec-kit/install.sh . <owner-login>
+   nix run github:frederikbeimgraben/specs -- init
    ```
 
-   The installer copies the templates, `specs/config.toml`, `scripts/check_specs.py`, the skills
-   and the CI workflow. It does not overwrite a file that exists. It sets `owner` in the
-   templates to `<owner-login>`. The rules of the kit go to
-   `specs/upstream/github.com/frederikbeimgraben/specs/` as an unchanged copy (000048), and
-   `specs/config.toml` gets their `ref`.
+   `init` writes `specs.toml`, makes `specs/`, and puts the rules of the kit in
+   `.specs/upstream/github.com/frederikbeimgraben/specs/` as an unchanged copy (000048). It
+   copies the templates to `.specs/templates/` and the skills to `.claude/skills/`. It writes the
+   CI file (`.github/workflows/specs.yml` or `.gitlab-ci.yml`) and the MCP server `specs` in
+   `.mcp.json`. It finds the forge in `git remote origin`. Give `--forge github` or
+   `--forge gitlab` if it cannot.
 
-2. Edit `specs/config.toml`: set `base_ref` to the base branch and `code_dirs` to the folders
-   with code.
-3. Run `python3 scripts/check_specs.py --write`.
+2. Edit `specs.toml`: set `base_ref` to the base branch and `code_dirs` to the folders with code.
+3. Run `specs check --write`.
 4. Add the text below to `CLAUDE.md` or `AGENTS.md`.
 5. Commit and open a pull request.
 6. The project numbers its own rules from `000001`. A reference to a kit rule has the form
-   `github.com/frederikbeimgraben/specs:<ID>` (000047).
+   `github.com/frederikbeimgraben/specs:<number>` (000047).
 
 ## Project with its own `specs/`
 
-1. Run the installer. It copies only the files that do not exist and lists the files that it
-   skipped.
-2. Compare each skipped file with the kit. Merge by hand.
-3. Compare the rules of the project with the kit rules in `specs/upstream/`. If a project rule
-   contradicts a kit rule, ask the owner which one applies. Replace the kit rule with `replaces`, or change
-   the project rule (000050).
+1. Move the files in `specs/` that are not rules out of `specs/` (000051). Move an old
+   `specs/config.toml` to `specs.toml`.
+2. Run `init`. It stops if `specs.toml` exists. Then merge the settings by hand.
+3. Compare the rules of the project with the kit rules in `.specs/upstream/`. If a project rule
+   contradicts a kit rule, ask the owner which one applies. Replace the kit rule with
+   `replaces`, or change the project rule (000050).
 4. Move the project specs to the kind folders of 000004. A moved rule keeps its number (000014).
 
 ## Update the kit
 
-1. Set `ref` of `github.com/frederikbeimgraben/specs` in `specs/config.toml` to the new tag or
-   commit.
-2. Run `python3 scripts/check_specs.py --fetch --write`. It replaces the copy (000048).
-3. Copy the new `scripts/check_specs.py` and the skills from the kit.
-4. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (000049), and fix each
-   error. Open a pull request.
+1. Run `specs update <ref>`, or `specs update` for the default branch. It replaces the copy, the
+   templates, the skills, the CI file and the MCP server entry, and sets `ref` in `specs.toml`
+   (000048).
+2. Run `specs check --write`.
+3. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (000049),
+   and fix each error. Open a pull request.
+
+The rules of a different repository: `specs add <repo> <ref>` adds a copy, and
+`specs update <repo> <ref>` replaces it.
 
 ## Text for CLAUDE.md
 
 ```markdown
 ## Specs
 
-`specs/` holds the binding rules, one rule per file. A spec wins over a skill or a comment.
-`specs/upstream/` holds the rules of the kit. They apply, except a rule that a project spec
-names in `replaces`.
-`specs/agents/` holds the rules for agents. Read them before each task.
+`specs/` holds the binding rules of the project, one rule per file. A spec wins over a skill or a comment.
+`.specs/upstream/` holds the rules of different repositories. They apply, except a rule that a
+project spec names in `replaces`. `.specs/index.md` lists all rules that apply.
+Rules for agents are in the kind folder `agents/`. Read them before each task.
 A change request starts as a spec, and code starts after the owner approves it.
 Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`.
-Check: `python3 scripts/check_specs.py --write`.
+Command: `nix run github:frederikbeimgraben/specs/<ref> -- <command>`, with the `ref` of the kit in
+`specs.toml`, or the MCP server `specs`. Check: `specs check --write`.
 ```

@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -27,4 +27,4 @@ spec.
 Reason: The schema exists before the code (000002). One schema language lets one validator
 check every example and every implementation.
 
-Test: `scripts/check_specs.py` checks the file, `$schema` and the schema itself.
+Test: `specs check` checks the file, `$schema` and the schema itself.

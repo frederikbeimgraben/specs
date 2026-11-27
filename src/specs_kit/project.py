@@ -1,0 +1,410 @@
+"""The layout of a project with specs: paths, settings, rule IDs and the parsed specs.
+
+`specs/` holds only the rules of the project. `.specs/` holds the rest: the copies of different
+repositories, the templates and the index (§000004). The settings are in `specs.toml` in the
+root of the project (§000013).
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import tomllib
+from collections.abc import Mapping
+from dataclasses import dataclass
+from pathlib import Path
+from types import MappingProxyType
+from typing import cast
+
+KIT_REPO = "github.com/frederikbeimgraben/specs"
+CONFIG_NAME = "specs.toml"
+
+KINDS: Mapping[str, tuple[str, str]] = {
+    "requirements/functional": ("F", "functional"),
+    "requirements/non-functional": ("NF", "non-functional"),
+    "protocols": ("P", "protocol"),
+    "structures": ("U", "structure"),
+    "style": ("S", "style"),
+    "conventions": ("C", "convention"),
+    "workflow": ("W", "workflow"),
+    "agents": ("A", "agent"),
+    "decisions": ("D", "decision"),
+}
+KINDS_BY_PREFIX: Mapping[str, str] = dict(KINDS.values())
+FOLDER_BY_KIND: Mapping[str, str] = {kind: folder for folder, (_, kind) in KINDS.items()}
+PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
+STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
+IN_FORCE = frozenset({"draft", "approved"})
+
+FOLDER = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+FILE_NAME = re.compile(r"^[0-9]{6}_[a-z0-9]+(-[a-z0-9]+)*\.md$")
+REPO = r"[a-z0-9.-]+\.[a-z]+/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+NUMBER = r"[0-9]{6}"
+LONG_LOCAL = rf"(?:{PREFIXES})/[a-z0-9-]+/[a-z0-9-]+/{NUMBER}"
+SHORT = re.compile(rf"^(?:({REPO}):)?({NUMBER})$")
+LONG = re.compile(rf"^(?:({REPO}):)?({LONG_LOCAL})$")
+
+type Meta = Mapping[str, str | tuple[str, ...]]
+
+
+@dataclass(frozen=True, slots=True)
+class Config:
+    """The settings of `specs.toml`.
+
+    Attributes:
+        base_ref: The base branch for the check of the numbers (§000013).
+        forge: `github` or `gitlab`.
+        code_dirs: The folders that hold code with `§` references (§000017).
+        code_suffixes: The file types of the code.
+        max_elements: The highest count of elements in one structure diagram.
+        upstream: The `ref` of each repository with a copy below `.specs/upstream/` (§000048).
+    """
+
+    base_ref: str = "origin/main"
+    forge: str = "github"
+    code_dirs: tuple[str, ...] = ()
+    code_suffixes: frozenset[str] = frozenset({".py", ".ts", ".js", ".go", ".rs", ".java"})
+    max_elements: int = 25
+    upstream: Mapping[str, str | None] = MappingProxyType({})
+
+
+@dataclass(frozen=True, slots=True)
+class Spec:
+    """One parsed spec file.
+
+    Attributes:
+        path: The path of the file.
+        base: The folder that holds the kind folders.
+        full_id: The local part of the long form, for example `C/specs/format/000012`.
+        meta: The keys of the front matter.
+        keys: The keys of the front matter in their order.
+        body: The Markdown text after the front matter.
+        repo: Empty for a rule of the project, else `<host>/<owner>/<repo>`.
+    """
+
+    path: Path
+    base: Path
+    full_id: str
+    meta: Meta
+    keys: tuple[str, ...]
+    body: str
+    repo: str = ""
+
+    @property
+    def rel(self) -> Path:
+        """Return the path below the folder of the kind folders."""
+        return self.path.relative_to(self.base)
+
+    @property
+    def number(self) -> str:
+        """Return the six-digit number of the rule."""
+        return self.path.name[:6]
+
+    @property
+    def prefix(self) -> str:
+        """Return the kind letter of the rule ID."""
+        return self.full_id.split("/", 1)[0]
+
+    @property
+    def short(self) -> str:
+        """Return the short form of the ID (§000047)."""
+        return f"{self.repo}:{self.number}" if self.repo else self.number
+
+    @property
+    def long(self) -> str:
+        """Return the long form of the ID (§000047)."""
+        return f"{self.repo}:{self.full_id}" if self.repo else self.full_id
+
+    @property
+    def status(self) -> str:
+        """Return the status, or an empty string."""
+        return str(self.meta.get("status", ""))
+
+    @property
+    def title(self) -> str:
+        """Return the title, or an empty string."""
+        return str(self.meta.get("title", ""))
+
+    def entries(self, key: str) -> tuple[str, ...] | None:
+        """Return the entries of a list key, an empty tuple for a key with one value, or None.
+
+        Args:
+            key: The key of the front matter.
+
+        Returns:
+            The entries, `()` when the key holds a single value, or None without the key.
+        """
+        value = self.meta.get(key)
+        return value if isinstance(value, tuple) or value is None else ()
+
+
+def _front_matter_lines(lines: list[str]) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
+    """Return the keys and values of the lines of a front matter block.
+
+    Args:
+        lines: The lines between the two `---` lines.
+
+    Returns:
+        One pair of key and value per key line. A key with list items gets a tuple.
+    """
+    starts = tuple(i for i, line in enumerate(lines) if not line.startswith("  - "))
+    ends = (*starts[1:], len(lines))
+    return tuple(
+        (
+            lines[start].partition(":")[0].strip(),
+            tuple(item[4:].strip().strip('"') for item in lines[start + 1 : end])
+            if end > start + 1 or not lines[start].partition(":")[2].strip()
+            else lines[start].partition(":")[2].strip().strip('"'),
+        )
+        for start, end in zip(starts, ends, strict=True)
+    )
+
+
+def parse_front_matter(text: str) -> tuple[Meta, tuple[str, ...], str] | None:
+    """Return the keys, their order and the body of a spec text.
+
+    Args:
+        text: The whole text of a spec file.
+
+    Returns:
+        The keys and values, the order of the keys and the body, or None without front matter.
+    """
+    end = text.find("\n---\n", 4) if text.startswith("---\n") else -1
+    pairs = _front_matter_lines(text[4:end].splitlines()) if end >= 0 else ()
+    return (dict(pairs), tuple(k for k, _ in pairs), text[end + 5 :]) if end >= 0 else None
+
+
+def kind_of(rel: Path) -> tuple[str, str, Path] | None:
+    """Return the ID prefix, the kind and the path below the kind folder.
+
+    Args:
+        rel: A path below the folder of the kind folders.
+
+    Returns:
+        The prefix, the kind and the rest of the path, or None outside every kind folder.
+    """
+    return next(
+        (
+            (prefix, kind, Path(*rel.parts[len(Path(folder).parts) :]))
+            for folder, (prefix, kind) in KINDS.items()
+            if rel.parts[: len(Path(folder).parts)] == Path(folder).parts
+        ),
+        None,
+    )
+
+
+def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[str, ...]]:
+    """Return the spec of one file below `base`, and the errors of its layout.
+
+    Args:
+        path: The spec file.
+        base: The folder of the kind folders.
+        repo: Empty for the project, else `<host>/<owner>/<repo>`.
+
+    Returns:
+        The spec or None, and the errors of the file layout.
+    """
+    kind = kind_of(path.relative_to(base))
+    if kind is None:
+        return None, ("not below a kind folder (000004)",)
+    prefix, _, below = kind
+    if len(below.parts) != 3:
+        return None, ("must be <area>/<topic>/<file> below the kind folder (000004)",)
+    errors = (
+        *(() if FILE_NAME.match(path.name) else ("file name breaks 000016",)),
+        *(f"folder {f!r} breaks 000005" for f in below.parts[:2] if not FOLDER.match(f)),
+    )
+    parsed = parse_front_matter(path.read_text(encoding="utf-8"))
+    if parsed is None:
+        return None, (*errors, "no front matter (000009)")
+    meta, keys, body = parsed
+    full_id = f"{prefix}/{below.parts[0]}/{below.parts[1]}/{path.name[:6]}"
+    return Spec(path, base, full_id, meta, keys, body, repo), errors
+
+
+def find_root(start: Path) -> Path:
+    """Return the nearest folder from `start` upward that holds `specs.toml`, else `start`.
+
+    Args:
+        start: The folder to start the search in.
+
+    Returns:
+        The root of the project.
+    """
+    here = start.resolve()
+    return next((f for f in (here, *here.parents) if (f / CONFIG_NAME).is_file()), here)
+
+
+def read_config(path: Path) -> Config:
+    """Read `specs.toml`. A missing file or key gets the default.
+
+    Args:
+        path: The path of `specs.toml`.
+
+    Returns:
+        The settings.
+    """
+    data = tomllib.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    default = Config()
+    upstream = cast("Mapping[str, object]", data.get("upstream", {}))
+    return Config(
+        base_ref=str(data.get("base_ref", default.base_ref)),
+        forge=str(data.get("forge", default.forge)),
+        code_dirs=tuple(cast("list[str]", data.get("code_dirs", default.code_dirs))),
+        code_suffixes=frozenset(
+            cast("list[str]", data.get("code_suffixes", default.code_suffixes))
+        ),
+        max_elements=int(cast("int", data.get("max_elements", default.max_elements))),
+        upstream={
+            repo: str(cast("Mapping[str, object]", v).get("ref"))
+            if isinstance(v, dict) and v.get("ref")
+            else None
+            for repo, v in upstream.items()
+        },
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class Project:
+    """A project with a `specs/` folder.
+
+    Attributes:
+        root: The root folder of the project.
+        config: The settings of `specs.toml`.
+    """
+
+    root: Path
+    config: Config
+
+    @classmethod
+    def open(cls, root: Path | None = None) -> Project:
+        """Read the project at `root`, or at the nearest folder above the current folder.
+
+        Args:
+            root: The root of the project, or None to search from the current folder.
+
+        Returns:
+            The project.
+        """
+        found = root.resolve() if root else find_root(Path.cwd())
+        return cls(found, read_config(found / CONFIG_NAME))
+
+    @property
+    def specs_dir(self) -> Path:
+        """Return `specs/`."""
+        return self.root / "specs"
+
+    @property
+    def dot_dir(self) -> Path:
+        """Return `.specs/`."""
+        return self.root / ".specs"
+
+    @property
+    def upstream_dir(self) -> Path:
+        """Return `.specs/upstream/`."""
+        return self.dot_dir / "upstream"
+
+    @property
+    def templates_dir(self) -> Path:
+        """Return `.specs/templates/`."""
+        return self.dot_dir / "templates"
+
+    @property
+    def index_path(self) -> Path:
+        """Return `.specs/index.md`."""
+        return self.dot_dir / "index.md"
+
+    @property
+    def readme_path(self) -> Path:
+        """Return `specs/README.md`, the copy of the index."""
+        return self.specs_dir / "README.md"
+
+    @property
+    def config_path(self) -> Path:
+        """Return `specs.toml`."""
+        return self.root / CONFIG_NAME
+
+    def copies(self) -> frozenset[str]:
+        """Return the repositories that have a copy below `.specs/upstream/`."""
+        return frozenset(
+            p.relative_to(self.upstream_dir).as_posix()
+            for p in (self.upstream_dir.glob("*/*/*") if self.upstream_dir.is_dir() else ())
+            if p.is_dir()
+        )
+
+    def load(self) -> tuple[tuple[Spec, ...], tuple[str, ...]]:
+        """Parse every rule of the project.
+
+        Returns:
+            The specs and the errors of the file layout.
+        """
+        if not self.specs_dir.is_dir():
+            return (), ("specs/: the folder does not exist (000004)",)
+        files = tuple(p for p in sorted(self.specs_dir.rglob("*")) if p.is_file())
+        top = tuple(
+            f"specs/{p.name}: specs/ holds only rules and README.md (000004)"
+            for p in files
+            if p.parent == self.specs_dir and p.name != "README.md"
+        )
+        parsed = tuple(
+            (p, parse_spec(p, self.specs_dir, ""))
+            for p in files
+            if p.parent != self.specs_dir and p.suffix == ".md"
+        )
+        return (
+            tuple(spec for _, (spec, _) in parsed if spec),
+            (
+                *top,
+                *(
+                    f"specs/{p.relative_to(self.specs_dir)}: {e}"
+                    for p, (_, errors) in parsed
+                    for e in errors
+                ),
+            ),
+        )
+
+    def load_upstream(self) -> tuple[Spec, ...]:
+        """Parse every rule of the copies below `.specs/upstream/`. Skip a file that is no rule.
+
+        Returns:
+            The specs of the copies.
+        """
+        parsed = (
+            parse_spec(path, self.upstream_dir / repo, repo)
+            for repo in sorted(self.copies())
+            for path in sorted((self.upstream_dir / repo).rglob("*.md"))
+            if path.relative_to(self.upstream_dir / repo).parent != Path()
+        )
+        return tuple(spec for spec, errors in parsed if spec and not errors)
+
+    def all_specs(self) -> tuple[Spec, ...]:
+        """Return the rules of the project, then the rules of the copies."""
+        return (*self.load()[0], *self.load_upstream())
+
+    def find(self, ref: str) -> Spec | None:
+        """Return the spec of a short or a long ID (§000047).
+
+        Args:
+            ref: The ID, for example `000012` or `github.com/o/r:C/specs/format/000012`.
+
+        Returns:
+            The spec, or None when no rule has this ID.
+        """
+        match = SHORT.match(ref) or LONG.match(ref)
+        if match is None:
+            return None
+        repo, rest = match.group(1) or "", match.group(2)
+        pool = self.load_upstream() if repo else self.load()[0]
+        return next((s for s in pool if s.repo == repo and rest in (s.number, s.full_id)), None)
+
+
+def kit_source() -> Path:
+    """Return the folder of the kit that this program comes from."""
+    env = os.environ.get("SPECS_KIT_SOURCE")
+    return Path(env) if env else Path(__file__).resolve().parents[2]
+
+
+def kit_rev() -> str | None:
+    """Return the commit of the kit that this program comes from, or None if it is not clean."""
+    rev = os.environ.get("SPECS_KIT_REV", "")
+    return rev if re.fullmatch(r"[0-9a-f]{40}", rev) else None

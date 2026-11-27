@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -20,4 +20,4 @@ spec has the fixed `##` sections of 000042.
 
 Reason: The rule ID then points to exactly one file and one rule.
 
-Test: `scripts/check_specs.py`: the body has the title and only the allowed sections.
+Test: `specs check`: the body has the title and only the allowed sections.

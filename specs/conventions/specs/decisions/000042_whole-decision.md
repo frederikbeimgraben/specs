@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
-  - specs/TEMPLATE-decision.md
+  - src/specs_kit/check.py
+  - .specs/templates/TEMPLATE-decision.md
 scope:
   - specs/
 ---
@@ -32,4 +32,4 @@ The labels `Reason:` and `Test:` come after the last section.
 Reason: An agent finds the alternatives that the owner did not choose. It does not propose them
 again.
 
-Test: `scripts/check_specs.py` checks the headings and their order.
+Test: `specs check` checks the headings and their order.

@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
-  - specs/TEMPLATE-protocol.md
+  - src/specs_kit/check.py
+  - .specs/templates/TEMPLATE-protocol.md
 scope:
   - specs/
 ---
@@ -32,4 +32,4 @@ The labels `Reason:` and `Test:` come after the last section.
 
 Reason: A receiver builds against a format as a whole. One file then holds the full contract.
 
-Test: `scripts/check_specs.py` checks the headings and their order.
+Test: `specs check` checks the headings and their order.

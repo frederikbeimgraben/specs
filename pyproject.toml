@@ -1,0 +1,50 @@
+[project]
+name = "specs"
+version = "0.1.0"
+description = "Check and manage the specs of a project: the specs command and its MCP server."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jsonschema>=4",
+    "mcp>=2,<3",
+]
+
+[project.scripts]
+specs = "specs_kit.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+specs_kit = ["data/*"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "I", "UP", "B", "SIM", "ANN", "RUF100", "D",
+    "C4", "PERF401", "PERF402", "SIM108", "RET", "PLW2901", "FURB",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.basedpyright]
+pythonVersion = "3.13"
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false
+reportUnnecessaryTypeIgnoreComment = "error"
+reportDeprecated = "error"
+reportUnnecessaryCast = "error"
+reportUnusedVariable = "error"
+reportConstantRedefinition = "error"
+reportMissingTypeArgument = "error"
+reportMissingParameterType = "error"
+reportMatchNotExhaustive = "error"
+include = ["src"]

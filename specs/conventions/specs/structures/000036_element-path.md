@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
+  - src/specs_kit/check.py
 scope:
   - specs/
 ---
@@ -21,4 +21,4 @@ folders, in `implementation`.
 Reason: A reader goes from the diagram to the code in one step. A moved file breaks the check,
 so the diagram cannot point to old code.
 
-Test: `scripts/check_specs.py` checks that each path exists. A review checks `implementation`.
+Test: `specs check` checks that each path exists. A review checks `implementation`.

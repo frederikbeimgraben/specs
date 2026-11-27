@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - scripts/check_specs.py
-  - specs/config.toml
+  - src/specs_kit/check.py
+  - specs.toml
 scope:
   - specs/
 ---
@@ -15,9 +15,9 @@ scope:
 # A diagram has at most 25 elements
 
 A diagram must have at most 25 elements. A larger structure must become several structure
-specs, for example one for each module. `max_elements` in `specs/config.toml` can set a
+specs, for example one for each module. `max_elements` in `specs.toml` can set a
 different limit for a project.
 
 Reason: A person cannot read a diagram with more elements on one screen.
 
-Test: `scripts/check_specs.py` counts the rows of `## Elements`.
+Test: `specs check` counts the rows of `## Elements`.
