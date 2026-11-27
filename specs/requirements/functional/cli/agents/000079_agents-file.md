@@ -2,7 +2,7 @@
 id: "000079"
 title: specs writes the rules for agents to AGENTS.md
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
