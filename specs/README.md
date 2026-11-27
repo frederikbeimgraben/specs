@@ -2,8 +2,8 @@
 
 The binding rules of this project. The kind folders of `specs/` hold the rules
 of the project, `specs/.upstream/` the rules of different repositories and
-`specs/.templates/` the templates. The command `specs check --write` writes
-this file. Do not change it by hand (000007).
+`specs/.templates/` the templates. The command `specs install` writes this
+file. Do not change it by hand (000007).
 
 A new spec starts with
 `specs new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).
@@ -14,7 +14,7 @@ A new spec starts with
 specs/
   requirements/
     functional/
-      cli/  add, agents, check, init, list, mcp, migrate, new, output, resolve, search, settings, show, update
+      cli/  add, agents, check, init, install, list, mcp, migrate, new, output, resolve, search, settings, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -71,6 +71,7 @@ specs/
 | [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | approved |
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |
+| [C/specs/references/000082](/specs/conventions/specs/references/000082_lock-file.md) | specs.lock holds the commit and the hash of each copy | approved |
 | [C/specs/structures/000033](/specs/conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | approved |
 | [C/specs/structures/000034](/specs/conventions/specs/structures/000034_mermaid-diagram.md) | The diagram is one Mermaid block of a fixed type | approved |
 | [C/specs/structures/000035](/specs/conventions/specs/structures/000035_elements-table.md) | Each element of the diagram has a row in the element table | approved |
@@ -80,8 +81,9 @@ specs/
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | approved |
 | [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | specs writes the rules for agents to AGENTS.md | approved |
-| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | approved |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | approved |
+| [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | specs install brings a project to the state of its settings | approved |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | approved |
 | [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | approved |
@@ -93,7 +95,7 @@ specs/
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | specs search finds rules by a text | approved |
 | [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | specs.toml holds the settings of the specs command | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | approved |
-| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update replaces a copy and its ref | approved |
+| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update resolves the refs again and replaces the copies | approved |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
 | [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | approved |
 | [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | approved |

@@ -1,11 +1,11 @@
 """The command `specs`: check and manage the specs of a project.
 
 Usage:
-    specs check [--write]
+    specs check
+    specs install
     specs init [<dir>] [--forge github|gitlab|codeberg]
-    specs update [<ref>]
-    specs update <repo> <ref>
-    specs add <repo> <ref> [--include <folder>]...
+    specs update [<repo> [<ref>]]
+    specs add <repo> [<ref>] [--include <folder>]...
     specs new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]
     specs resolve <id>
     specs show <id>
@@ -28,10 +28,10 @@ from rich.console import Group, RenderableType
 from rich.text import Text
 
 from specs_kit import data, queries
-from specs_kit.agents import claude_import
 from specs_kit.changes import Mark, lines, recording
 from specs_kit.check import run
 from specs_kit.devshell import init_flake, update_flake
+from specs_kit.install import install
 from specs_kit.kit import KitError, add, init, update
 from specs_kit.mcp_server import serve
 from specs_kit.new import NewError, new
@@ -45,16 +45,19 @@ def parser() -> argparse.ArgumentParser:
         prog="specs", description="Check and manage the specs of a project."
     )
     commands = root.add_subparsers(dest="command", required=True)
-    check = commands.add_parser("check", help="check the specs; --write also writes the index")
-    check.add_argument("--write", action="store_true")
+    commands.add_parser("check", help="check the specs; change no file")
+    commands.add_parser(
+        "install", help="load the copies, write missing files and the index, then check"
+    )
     start = commands.add_parser("init", help="install the kit in a project")
     start.add_argument("dir", nargs="?", default=".")
     start.add_argument("--forge", choices=("github", "gitlab", "codeberg"))
-    renew = commands.add_parser("update", help="update the kit, or the copy of one repository")
-    renew.add_argument("args", nargs="*", metavar="[repo] ref")
+    renew = commands.add_parser("update", help="resolve the refs again and replace the copies")
+    renew.add_argument("repo", nargs="?", help="a repository, or kit; without it each one")
+    renew.add_argument("ref", nargs="?", help="a new tag, branch or commit")
     more = commands.add_parser("add", help="add the copy of a repository")
     more.add_argument("repo")
-    more.add_argument("ref")
+    more.add_argument("ref", nargs="?", help="a tag, branch or commit; else the newest tag")
     more.add_argument("--include", action="append", default=[], metavar="folder")
     create = commands.add_parser("new", help="create a new spec from its template")
     create.add_argument("kind")
@@ -78,29 +81,6 @@ def parser() -> argparse.ArgumentParser:
             form.add_argument("--json", action="store_true", help="print the data as JSON")
     commands.add_parser("mcp", help="run the MCP server on stdin and stdout")
     return root
-
-
-def _update_target(args: list[str]) -> tuple[str, str | None]:
-    """Return the repository and the ref of `specs update`.
-
-    Args:
-        args: The arguments after `update`.
-
-    Returns:
-        The repository and the ref, or None for the default branch.
-
-    Raises:
-        KitError: More than two arguments.
-    """
-    match args:
-        case []:
-            return KIT_REPO, None
-        case [ref]:
-            return KIT_REPO, ref
-        case [repo, ref]:
-            return repo, ref
-        case _:
-            raise KitError("usage: specs update [<repo>] [<ref>]")
 
 
 class Mode(Enum):
@@ -178,11 +158,11 @@ def _check(
 ) -> int:
     """Run the check and print the message, the report and the changed files.
 
-    `init`, `update` and `add` run the check with `--write` at their end and give their
-    message and hints (§000066, §000067, §000068).
+    `install` writes the index and `AGENTS.md` first. `init`, `update` and `add` end with
+    `install` and give their message and hints (§000066, §000067, §000068, §000083).
 
     Args:
-        write: True to write the index first.
+        write: True to write the index and `AGENTS.md` first.
         mode: The form of the output.
         log: The changes of the command.
         message: The message and the hints of the command before the check, or None.
@@ -275,30 +255,32 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
     command: str = args.command
     match command:
         case "check":
-            return _check(bool(args.write), mode, log)
+            return _check(False, mode, log)
+        case "install":
+            project = Project.open()
+            hints = install(project)
+            return _check(True, mode, log, ("installed", hints), project.root)
         case "init":
-            project = init(Path(args.dir), args.forge)
-            hints = (
-                *init_flake(project.root, project.config.upstream.get(KIT_REPO) or ""),
-                *claude_import(project.root),
-            )
+            project, commit = init(Path(args.dir), args.forge)
+            hints = (*init_flake(project.root, commit), *install(project))
             text = f"installed the kit in {project.root}"
             return _check(True, mode, log, (text, hints), project.root)
         case "update":
-            target = _update_target(list(args.args))
             project = Project.open()
-            commit, ran = update(project, *target)
+            done, ran = update(project, args.repo, args.ref)
+            kit = dict(done).get(KIT_REPO)
             hints = (
                 *(f"migrated: {d}" for d in ran),
-                *(update_flake(project.root, commit) if target[0] == KIT_REPO else ()),
+                *(update_flake(project.root, kit) if kit else ()),
+                *install(Project.open(project.root)),
             )
-            return _check(True, mode, log, (f"updated to {commit}", hints))
+            text = "; ".join(f"updated {repo} to {commit}" for repo, commit in done)
+            return _check(True, mode, log, (text, hints), project.root)
         case "add":
             project = Project.open()
             commit, ran = add(project, args.repo, args.ref, tuple(args.include))
-            return _check(
-                True, mode, log, (f"added at {commit}", tuple(f"migrated: {d}" for d in ran))
-            )
+            hints = (*(f"migrated: {d}" for d in ran), *install(Project.open(project.root)))
+            return _check(True, mode, log, (f"added at {commit}", hints), project.root)
         case "new":
             project = Project.open()
             path = new(

@@ -19,8 +19,8 @@ scope:
 
 # specs lists the files that a command changes
 
-At its end, each command of `specs` that changes files (`init`, `update`, `add`, `new` and
-`check --write`) must list each file that it created, changed or deleted, one file on each line,
+At its end, each command of `specs` that changes files (`init`, `install`, `update`, `add`
+and `new`) must list each file that it created, changed or deleted, one file on each line,
 as in `git status --short`:
 
 | Mark | Change | Color on a terminal |
@@ -34,7 +34,7 @@ place in the code that writes a file must record it. A file that a different pro
 for the command, for example `flake.lock` from `nix flake lock`, must be in the list too. A
 write with the same content is no change. For a copied folder, for example
 `specs/.upstream/`, the list must hold only the files that are new, changed or deleted. The
-MCP tool `new` must return the same list as plain text.
+MCP tools `install` and `new` must return the same list as plain text.
 
 Reason: The person sees what a command did without `git status`, and a script can read the
 list.

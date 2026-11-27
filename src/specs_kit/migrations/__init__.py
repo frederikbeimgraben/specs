@@ -12,7 +12,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from specs_kit.migrations import m0001_specs_folder
+from specs_kit.migrations import m0001_specs_folder, m0002_lock_file, m0003_agents_marker
+from specs_kit.project import kit_rev
+
+type History = Callable[[], Path]
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +42,18 @@ MIGRATIONS: tuple[Migration, ...] = (
         m0001_specs_folder.project,
         m0001_specs_folder.copy,
     ),
+    Migration(
+        m0002_lock_file.COMMIT,
+        m0002_lock_file.DESCRIPTION,
+        m0002_lock_file.project,
+        m0002_lock_file.copy,
+    ),
+    Migration(
+        m0003_agents_marker.COMMIT,
+        m0003_agents_marker.DESCRIPTION,
+        m0003_agents_marker.project,
+        m0003_agents_marker.copy,
+    ),
 )
 
 
@@ -64,24 +79,32 @@ def contains(history: Path, commit: str, ref: str) -> bool:
     )
 
 
-def pending(history: Path, ref: str | None) -> tuple[Migration, ...]:
+def pending(history: History, ref: str | None) -> tuple[Migration, ...]:
     """Return the migrations that a kit ref does not hold, oldest first.
 
+    The commit of this program holds each of its migrations, so this ref needs no history.
+
     Args:
-        history: A clone of the kit with its history.
+        history: Returns a clone of the kit with its history. It runs only when it is needed.
         ref: The kit ref of the project or the copy, or None for the oldest format.
 
     Returns:
         The migrations.
     """
-    return tuple(m for m in MIGRATIONS if ref is None or not contains(history, m.commit, ref))
+    match ref:
+        case None:
+            return MIGRATIONS
+        case str() if ref == kit_rev():
+            return ()
+        case str():
+            return tuple(m for m in MIGRATIONS if not contains(history(), m.commit, ref))
 
 
-def migrate_project(history: Path, root: Path, ref: str | None) -> tuple[str, ...]:
+def migrate_project(history: History, root: Path, ref: str | None) -> tuple[str, ...]:
     """Run the pending migrations of a project.
 
     Args:
-        history: A clone of the kit with its history.
+        history: Returns a clone of the kit with its history.
         root: The root of the project.
         ref: The kit ref of the project.
 
@@ -94,11 +117,11 @@ def migrate_project(history: Path, root: Path, ref: str | None) -> tuple[str, ..
     return tuple(m.description for m in todo)
 
 
-def migrate_copy(history: Path, folder: Path, ref: str | None) -> tuple[str, ...]:
+def migrate_copy(history: History, folder: Path, ref: str | None) -> tuple[str, ...]:
     """Run the pending migrations of a copy.
 
     Args:
-        history: A clone of the kit with its history.
+        history: Returns a clone of the kit with its history.
         folder: The folder of the copy.
         ref: The kit ref of the repository of the copy, or None when it has none.
 

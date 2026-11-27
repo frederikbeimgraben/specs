@@ -36,34 +36,35 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 | `specs/.upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (000048). |
 | `specs/.templates/` | The templates for a new spec (000008). |
 | `specs.toml` | The settings (000078). |
+| `specs.lock` | The commit and the hash of each copy below `specs/.upstream/` (000082). |
 | `.claude/skills/spec-*` | Skills for agents. |
 | `.mcp.json` | The MCP server `specs`. |
 | `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` (included from `.gitlab-ci.yml`) or `.forgejo/workflows/specs.yml` | The CI job. |
-| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `specs check --write`, and the import `@AGENTS.md` (000079). |
-| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `specs` at the `ref` of the kit (000066). |
+| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `specs install`, and the import `@AGENTS.md` (000079). |
+| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `specs` at the commit of the kit (000066). |
 
 ## Commands
 
 ```sh
-nix run github:frederikbeimgraben/specs/<ref> -- <command>
+nix run github:frederikbeimgraben/specs/<commit> -- <command>
 ```
 
 | Command | Effect |
 | --- | --- |
-| `check [--write]` | Checks the specs and the `§` references. `--write` also writes the index. |
+| `check` | Checks the specs and the `§` references. It changes no file. |
+| `install` | Loads each copy that does not agree with `specs.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (000083). |
 | `init [<dir>] [--forge github\|gitlab\|codeberg]` | Adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
-| `update [<ref>]` | Updates the kit: the copy of its rules, the templates, the skills, the CI file, the MCP server entry and the input `specs` in `flake.nix`. |
-| `update <repo> <ref>` | Replaces the copy of the rules of a different repository. |
-| `add <repo> <ref>` | Adds the copy of the rules of a different repository. |
+| `update [<repo> [<ref>]]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `specs.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `specs` in `flake.nix`. |
+| `add <repo> [<ref>] [--include <folder>]...` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
 | `new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` | Makes a new spec from its template, with the next number and the paths of `scope`. |
 | `resolve <id>` | Prints the long form of an ID, for example `C/specs/format/000012` for `000012`. |
 | `show <id>` | Prints the full text of a spec. |
 | `list` | Lists every rule. |
 | `search <text>` | Lists the rules that hold a text. |
-| `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `resolve`, `show`, `list`, `search` and `new`. |
+| `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search` and `new`. |
 
-A project runs the command at the `ref` of the kit in `specs.toml`. `init` and `update` write
-this `ref` into the CI file, into `.mcp.json` and into the input `specs` of `flake.nix`.
+A project runs the command at the commit of the kit in `specs.lock`. `init` and `update` write
+this commit into the CI file, into `.mcp.json` and into the input `specs` of `flake.nix`.
 With direnv, the devShell loads the new command after `specs update`.
 
 ## Add the kit to a project

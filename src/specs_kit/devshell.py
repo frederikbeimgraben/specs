@@ -18,7 +18,7 @@ LOCK = "flake.lock"
 ENVRC = ".envrc"
 INPUT = re.compile(r'"github:frederikbeimgraben/specs(?:/[^"?]*)?"')
 INPUT_LINES = (
-    "  # The specs command of the kit. The ref must be the ref in specs.toml.\n"
+    "  # The specs command of the kit. The ref must be the commit in specs.lock.\n"
     '  inputs.specs.url = "github:frederikbeimgraben/specs/{ref}";'
 )
 PACKAGE = "specs.packages.${system}.default"
@@ -39,7 +39,7 @@ def _git_repo(root: Path) -> bool:
         return False
 
 
-def _envrc(root: Path) -> tuple[str, ...]:
+def envrc(root: Path) -> tuple[str, ...]:
     """Write `.envrc` with `use flake` when it is missing.
 
     Args:
@@ -76,7 +76,7 @@ def init_flake(root: Path, ref: str) -> tuple[str, ...]:
     match path.is_file():
         case False:
             write_text(path, package_data(FLAKE).replace("{ref}", ref))
-            hints = _envrc(root)
+            hints = envrc(root)
             if _git_repo(root):
                 run_command("git", "add", "--", FLAKE, ENVRC, cwd=root)
             with watching(root / LOCK):
@@ -97,7 +97,7 @@ def init_flake(root: Path, ref: str) -> tuple[str, ...]:
                     if "specs.packages" in text
                     else (f"hint: add {PACKAGE} to the packages of your devShell",)
                 ),
-                *_envrc(root),
+                *envrc(root),
             )
 
 

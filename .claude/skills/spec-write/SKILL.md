@@ -8,7 +8,7 @@ description: Write a new spec or change a spec in specs/ (functional, non-functi
 The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`, in a project below
 `specs/.upstream/github.com/frederikbeimgraben/specs/`. A spec wins over this skill (000001).
 
-`specs` is the command of the kit. Run it as `nix run github:frederikbeimgraben/specs/<ref> -- <command>`, with the `ref` of the kit in `specs.toml`, or use the tools of the MCP server `specs`.
+`specs` is the command of the kit. Run it as `nix run github:frederikbeimgraben/specs/<commit> -- <command>`, with the commit of the kit in `specs.lock`, or use the tools of the MCP server `specs`.
 
 ## Steps
 
@@ -32,7 +32,7 @@ The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`, in a pr
      `<host>/<group>/.../<repo>:<number>` (000047). `specs resolve` and `specs show` find the rule.
 6. Set `implementation: null` until code exists. Set `scope` to the paths that the rule
    controls. Each path must exist (000009).
-7. Run `specs check --write`. Fix each error.
+7. Run `specs install`. Fix each error.
 8. Open a pull request. Ask the owner to approve the spec (skill `spec-approve`). Do not write
     the code before the owner approves (000002).
 

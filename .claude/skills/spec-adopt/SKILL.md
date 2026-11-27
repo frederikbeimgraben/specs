@@ -6,7 +6,8 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 # Add the spec format to a project
 
 `specs` is the command of the kit. Run it with Nix as
-`nix run github:frederikbeimgraben/specs/<ref> -- <command>`.
+`nix run github:frederikbeimgraben/specs/<commit> -- <command>`, with the commit of the kit in
+`specs.lock`.
 
 ## New project, or a project without `specs/`
 
@@ -16,7 +17,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    nix run github:frederikbeimgraben/specs -- init
    ```
 
-   `init` writes `specs.toml`, makes `specs/`, and puts the rules of the kit in
+   `init` writes `specs.toml` and `specs.lock`, makes `specs/`, and puts the rules of the kit in
    `specs/.upstream/github.com/frederikbeimgraben/specs/` as an unchanged copy (000048). It
    copies the templates to `specs/.templates/` and the skills to `.claude/skills/`. It writes the
    CI file (`.github/workflows/specs.yml` or `.gitlab/ci/specs.yml`, included from `.gitlab-ci.yml`) and the MCP server `specs` in
@@ -24,7 +25,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    `--forge gitlab` if it cannot.
 
 2. Edit `specs.toml`: set `base_ref` to the base branch and `code_dirs` to the folders with code.
-3. Run `specs check --write`.
+3. Run `specs install`.
 4. Add the text below to `CLAUDE.md` or `AGENTS.md`.
 5. Commit and open a pull request.
 6. The project numbers its own rules from `000001`. A reference to a kit rule has the form
@@ -42,15 +43,16 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
 
 ## Update the kit
 
-1. Run `specs update <ref>`, or `specs update` for the default branch. It replaces the copy, the
-   templates, the skills, the CI file and the MCP server entry, and sets `ref` in `specs.toml`
-   (000048).
-2. Run `specs check --write`.
-3. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (000049),
+1. Run `specs update kit`. It resolves the `ref` of the kit in `specs.toml` again. To change the
+   version, run `specs update kit <ref>`. It replaces the copy, the templates, the skills, the CI
+   file and the MCP server entry, and writes the new commit to `specs.lock` (000048, 000082).
+   `specs update` without arguments does this for each repository of `specs.toml`.
+2. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (000049),
    and fix each error. Open a pull request.
 
-The rules of a different repository: `specs add <repo> <ref>` adds a copy, and
-`specs update <repo> <ref>` replaces it. `<repo>` is the full path, with each GitLab subgroup.
+The rules of a different repository: `specs add <repo> [<ref>]` adds a copy, and
+`specs update <repo> [<ref>]` replaces it. After a clone, or when a file of the kit is missing,
+run `specs install`. It changes no version (000083). `<repo>` is the full path, with each GitLab subgroup.
 To take only some rules, add `--include <folder>` once for each folder below `specs/`, for
 example `--include style/python/`.
 
@@ -65,6 +67,7 @@ project spec names in `replaces`. `specs/README.md` lists all rules that apply.
 Rules for agents are in the kind folder `agents/`. Read them before each task.
 A change request starts as a spec, and code starts after the owner approves it.
 Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`.
-Command: `nix run github:frederikbeimgraben/specs/<ref> -- <command>`, with the `ref` of the kit in
-`specs.toml`, or the MCP server `specs`. Check: `specs check --write`.
+Command: `nix run github:frederikbeimgraben/specs/<commit> -- <command>`, with the commit of the
+kit in `specs.lock`, or the MCP server `specs`. Check: `specs check`. After a change of a rule:
+`specs install`.
 ```

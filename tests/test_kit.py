@@ -22,6 +22,20 @@ def _config(project: Path) -> dict[str, object]:
     return tomllib.loads((project / "specs.toml").read_text(encoding="utf-8"))
 
 
+def _lock(project: Path) -> dict[str, dict[str, object]]:
+    """Return the upstream tables of `specs.lock`.
+
+    Args:
+        project: The root of the project.
+
+    Returns:
+        The tables by repository.
+    """
+    value = tomllib.loads((project / "specs.lock").read_text(encoding="utf-8"))["upstream"]
+    assert isinstance(value, dict)
+    return value
+
+
 def _upstream(project: Path) -> dict[str, dict[str, object]]:
     """Return the upstream tables of `specs.toml`.
 
@@ -39,7 +53,8 @@ def _upstream(project: Path) -> dict[str, dict[str, object]]:
 def test_init_writes_the_kit_files(kit: Kit, project: Path) -> None:
     """`specs init` writes the settings, the kit copy, templates, skills, CI and MCP files."""
     assert _config(project)["forge"] == "github"
-    assert _upstream(project)["github.com/frederikbeimgraben/specs"]["ref"] == kit.rev
+    assert _upstream(project)["github.com/frederikbeimgraben/specs"]["ref"] == "main"
+    assert _lock(project)["github.com/frederikbeimgraben/specs"]["commit"] == kit.rev
     for name in (
         f"{KIT}/workflow/specs/process/000001_precedence.md",
         "specs/.templates/TEMPLATE.md",
@@ -48,6 +63,7 @@ def test_init_writes_the_kit_files(kit: Kit, project: Path) -> None:
         ".mcp.json",
         ".envrc",
         "specs/README.md",
+        "specs.lock",
     ):
         assert (project / name).is_file(), name
 
@@ -148,7 +164,39 @@ def test_update_stops_for_an_unknown_repository(kit: Kit, project: Path) -> None
 
 def test_update_of_the_kit_runs_the_check(kit: Kit, project: Path) -> None:
     """`specs update` of the kit replaces the kit files and prints the report of the check."""
-    result = kit.run(project, "update", kit.rev, "--raw")
+    result = kit.run(project, "update", "kit", kit.rev, "--raw")
     assert result.code == 0, result.out + result.err
-    assert f"updated to {kit.rev}" in result.out
+    assert f"updated github.com/frederikbeimgraben/specs to {kit.rev}" in result.out
     assert "0 specs, 0 errors" in result.out
+
+
+def test_add_without_ref_takes_the_default_branch(kit: Kit, project: Path) -> None:
+    """`specs add` without a ref writes the default branch as `ref` and its commit to the lock."""
+    result = kit.run(project, "add", RULES_REPO, "--raw")
+    assert result.code == 0, result.out + result.err
+    assert _upstream(project)[RULES_REPO]["ref"] == "main"
+    assert _lock(project)[RULES_REPO]["commit"] == kit.rules_rev
+
+
+def test_update_without_arguments_updates_each_repository(kit: Kit, project: Path) -> None:
+    """`specs update` resolves the ref of each repository again and keeps the refs."""
+    assert kit.run(project, "add", RULES_REPO, "main").code == 0
+    write_rule(
+        kit.rules,
+        "agents/work/tests",
+        "000003",
+        "small-commits",
+        "An agent makes small commits",
+        "agent",
+        "An agent must make small commits.",
+    )
+    rev = kit.commit_rules()
+    try:
+        result = kit.run(project, "update", "--raw")
+        assert result.code == 0, result.out + result.err
+        assert _upstream(project)[RULES_REPO]["ref"] == "main"
+        assert _lock(project)[RULES_REPO]["commit"] == rev
+        assert f"updated {RULES_REPO} to {rev}" in result.out
+        assert f"updated github.com/frederikbeimgraben/specs to {kit.rev}" in result.out
+    finally:
+        git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)

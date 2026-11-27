@@ -34,7 +34,7 @@ The rules are 000033 to 000039 in `specs/conventions/specs/structures/`.
 7. Write the rule text: which part of the code must agree with the diagram. Use `must`.
 8. Put the element paths, or their folders, in `implementation` (000036).
 9. Add the number to `structures` of each rule that depends on the structure (000039).
-10. Run `specs check --write`. Fix each error.
+10. Run `specs install`. Fix each error.
 11. Look at the diagram in the GitHub preview of the pull request. GitHub draws Mermaid blocks.
 
 ## Keep a structure spec current

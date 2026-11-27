@@ -16,9 +16,13 @@ from specs_kit.project import Spec
 AGENTS = "AGENTS.md"
 CLAUDE = "CLAUDE.md"
 IMPORT = "@AGENTS.md"
-BEGIN = "<!-- specs:begin (written by specs check --write, do not edit) -->"
+BEGIN = "<!-- specs:begin (written by specs install, do not edit) -->"
+OLD_BEGIN = "<!-- specs:begin (written by specs check --write, do not edit) -->"
 END = "<!-- specs:end -->"
-BLOCK = re.compile(rf"^{re.escape(BEGIN)}\n.*?^{re.escape(END)}\n?", re.MULTILINE | re.DOTALL)
+BLOCK = re.compile(
+    rf"^(?:{re.escape(BEGIN)}|{re.escape(OLD_BEGIN)})\n.*?^{re.escape(END)}\n?",
+    re.MULTILINE | re.DOTALL,
+)
 PREFIXES = frozenset({"A", "W"})
 PREAMBLE = (
     "## Rules for agents",

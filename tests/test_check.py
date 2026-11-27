@@ -30,8 +30,8 @@ def test_check_passes_after_init(kit: Kit, project: Path) -> None:
     assert result.out.endswith("0 specs, 0 errors\n")
 
 
-def test_check_without_write_changes_no_file(kit: Kit, project: Path) -> None:
-    """`specs check` without `--write` must not change a file."""
+def test_check_changes_no_file(kit: Kit, project: Path) -> None:
+    """`specs check` must not change a file."""
     _rule(project)
     before = (project / "specs" / "README.md").read_text(encoding="utf-8")
     result = kit.run(project, "check", "--raw")
@@ -40,10 +40,10 @@ def test_check_without_write_changes_no_file(kit: Kit, project: Path) -> None:
     assert (project / "specs" / "README.md").read_text(encoding="utf-8") == before
 
 
-def test_check_write_writes_the_index(kit: Kit, project: Path) -> None:
-    """`specs check --write` writes the index."""
+def test_install_writes_the_index(kit: Kit, project: Path) -> None:
+    """`specs install` writes the index."""
     _rule(project)
-    result = kit.run(project, "check", "--write", "--raw")
+    result = kit.run(project, "install", "--raw")
     index = (project / "specs" / "README.md").read_text(encoding="utf-8")
     assert result.code == 0, result.out
     assert "S/code/names/000100" in index
@@ -52,7 +52,7 @@ def test_check_write_writes_the_index(kit: Kit, project: Path) -> None:
 def test_check_finds_a_rule_without_must(kit: Kit, project: Path) -> None:
     """A rule text without `must` is an error with exit code 1."""
     _rule(project, "A name is short.")
-    result = kit.run(project, "check", "--write", "--raw")
+    result = kit.run(project, "install", "--raw")
     assert result.code == 1
     assert "000100" in result.out
 
@@ -61,7 +61,7 @@ def test_check_finds_a_bad_file_name(kit: Kit, project: Path) -> None:
     """A file name that breaks the convention is an error."""
     path = _rule(project)
     path.rename(path.with_name("100_short.md"))
-    result = kit.run(project, "check", "--write", "--raw")
+    result = kit.run(project, "install", "--raw")
     assert result.code == 1
     assert "100_short.md" in result.out
 
@@ -72,7 +72,7 @@ def test_check_finds_a_missing_key(kit: Kit, project: Path) -> None:
     path.write_text(
         path.read_text(encoding="utf-8").replace("owner: someone\n", ""), encoding="utf-8"
     )
-    result = kit.run(project, "check", "--write", "--raw")
+    result = kit.run(project, "install", "--raw")
     assert result.code == 1
     assert "front matter keys" in result.out
 

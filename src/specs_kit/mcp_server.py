@@ -1,4 +1,4 @@
-"""The MCP server `specs` in stdio mode. Only the tool `new` writes."""
+"""The MCP server `specs` in stdio mode. Only the tools `install` and `new` write."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ from mcp.server.mcpserver import MCPServer
 
 from specs_kit import queries
 from specs_kit.changes import lines, recording
+from specs_kit.install import install as install_project
 from specs_kit.new import new as new_spec
 from specs_kit.project import Project
 
@@ -16,6 +17,23 @@ server = MCPServer("specs")
 def check() -> str:
     """Check the specs of the project and return the report. The tool writes nothing."""
     return queries.check(Project.open())[1]
+
+
+@server.tool()
+def install() -> str:
+    """Load the copies, write each missing file, the index and AGENTS.md, then check.
+
+    Returns the hints, the report of the check and the changed files as `<mark> <path>` lines.
+    """
+    project = Project.open()
+    with recording() as log:
+        hints = install_project(project)
+        _, report = queries.check(Project.open(project.root), write=True)
+        return (
+            "".join(f"{h}\n" for h in hints)
+            + report
+            + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+        )
 
 
 @server.tool()
