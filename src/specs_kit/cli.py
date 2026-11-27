@@ -5,7 +5,7 @@ Usage:
     specs init [<dir>] [--forge github|gitlab]
     specs update [<ref>]
     specs update <repo> <ref>
-    specs add <repo> <ref>
+    specs add <repo> <ref> [--include <folder>]...
     specs new <kind> <area>/<topic> <name> "<title>" [--owner <login>]
     specs resolve <id>
     specs show <id>
@@ -44,6 +44,7 @@ def parser() -> argparse.ArgumentParser:
     more = commands.add_parser("add", help="add the copy of a repository")
     more.add_argument("repo")
     more.add_argument("ref")
+    more.add_argument("--include", action="append", default=[], metavar="folder")
     create = commands.add_parser("new", help="create a new spec from its template")
     create.add_argument("kind")
     create.add_argument("path", metavar="area/topic")
@@ -126,7 +127,9 @@ def dispatch(args: argparse.Namespace) -> int:
         case "update":
             return _print(f"updated to {update(Project.open(), *_update_target(list(args.args)))}")
         case "add":
-            return _print(f"added at {add(Project.open(), args.repo, args.ref)}")
+            return _print(
+                f"added at {add(Project.open(), args.repo, args.ref, tuple(args.include))}"
+            )
         case "new":
             return _print(
                 str(new(Project.open(), args.kind, args.path, args.name, args.title, args.owner))

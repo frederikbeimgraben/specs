@@ -897,7 +897,7 @@ def _upstream_errors(project: Project) -> Errors:
             for repo in sorted(copies - set(upstream))
         ),
         *(
-            f"specs.toml: upstream {repo!r} is not <host>/<owner>/<repo> (000047)"
+            f"specs.toml: upstream {repo!r} is not <host>/<group>/.../<repo> (000047)"
             for repo in sorted(upstream)
             if not re.fullmatch(REPO, repo)
         ),
@@ -911,6 +911,42 @@ def _upstream_errors(project: Project) -> Errors:
             f" {repo} <ref> (000048)"
             for repo in sorted(upstream)
             if repo not in copies
+        ),
+        *(
+            e
+            for repo, include in sorted(project.config.include.items())
+            if include and repo in copies
+            for e in _include_errors(project, repo, include)
+        ),
+    )
+
+
+def _include_errors(project: Project, repo: str, include: tuple[str, ...]) -> Errors:
+    """Check that the copy of one repository holds the folders of `include` and nothing else.
+
+    Args:
+        project: The project.
+        repo: The repository.
+        include: The folders of `include` in `specs.toml`.
+
+    Returns:
+        The errors.
+    """
+    root = project.upstream_dir / repo
+    folders = tuple(f.strip("/") for f in include)
+    return (
+        *(
+            f"specs.toml: include {f!r} of {repo!r} is not in the copy; run specs update"
+            f" {repo} <ref> (000048)"
+            for f in folders
+            if not (root / f).is_dir()
+        ),
+        *(
+            f".specs/upstream/{repo}/{p.relative_to(root).as_posix()}: not in include of"
+            f" specs.toml; run specs update {repo} <ref> (000048)"
+            for p in sorted(root.rglob("*"))
+            if p.is_file()
+            and not any(p.relative_to(root).as_posix().startswith(f"{f}/") for f in folders)
         ),
     )
 

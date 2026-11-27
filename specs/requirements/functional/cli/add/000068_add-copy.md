@@ -15,7 +15,11 @@ scope:
 
 `specs add <repo> <ref>` must copy the `specs/` folder of `<repo>` at `<ref>` to
 `.specs/upstream/<repo>/` and add `[upstream."<repo>"]` with the commit as `ref` to
-`specs.toml`. `<repo>` must have the form `<host>/<owner>/<repo>`. The command must stop with an
-error when `<repo>` is in `specs.toml` already.
+`specs.toml`. `<repo>` must have the form `<host>/<group>/.../<repo>` with one or more groups.
+With one or more `--include <folder>`, the command must copy only these folders below `specs/`
+and must write them as `include` to the table (000048). The command must stop with an error
+and change no file when `<repo>` is in `specs.toml` already, or when `<repo>` at `<ref>` has no
+folder of `--include`.
 
-Reason: A project takes the rules of a different repository with one command (000048).
+Reason: A project takes the rules of a different repository, or only the rules that it needs,
+with one command (000048).
