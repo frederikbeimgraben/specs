@@ -7,11 +7,11 @@ description: Check the specs in specs/ and the code against them. Run the checke
 
 ## Run the checker
 
-`specs` is the command of the kit. Run it as `nix run github:frederikbeimgraben/specs/<ref> -- <command>`, with the `ref` of the kit in `specs.toml`, or use the tools of the MCP server `specs`.
+`specs` is the command of the kit. Run it as `nix run github:frederikbeimgraben/specs/<commit> -- <command>`, with the commit of the kit in `specs.lock`, or use the tools of the MCP server `specs`.
 
 ```sh
 specs check          # check, exit 1 on an error
-specs check --write  # also write the index specs/README.md and AGENTS.md
+specs install        # load the copies, write missing files, the index and AGENTS.md
 ```
 
 Each error names the file and the rule number. Read that rule with `specs show <number>` and fix

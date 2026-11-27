@@ -8,12 +8,12 @@ This repository is a starter kit for specs. `README.md` tells what it does.
 - A change of a rule starts as a spec change with `status: draft` (000002). The owner approves it.
 - All text follows ASD-STE100 (000025).
 - Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`, `spec-adopt`.
-- Command: `nix run . -- <command>`. Check: `nix run . -- check --write`. It must show 0 errors.
+- Command: `nix run . -- <command>`. Check: `nix run . -- install`. It must show 0 errors.
 - Code check: `nix develop -c ruff check src tests`, `nix develop -c basedpyright`. Both must show 0 errors.
 - Tests: `nix develop -c pytest`. All tests must pass.
 - `specs init` and `specs update` copy `specs/.templates/`, the skills `.claude/skills/spec-*` and `src/specs_kit/data/` into a project. A new file of the kit that a project needs must be in one of these places.
 
-<!-- specs:begin (written by specs check --write, do not edit) -->
+<!-- specs:begin (written by specs install, do not edit) -->
 ## Rules for agents
 
 The rules for agents (A) and the workflow rules (W) that apply to this project. Before a
@@ -28,5 +28,4 @@ in this file. The ID links to the rule.
 | [A/work/questions/000044](/specs/agents/work/questions/000044_follow-the-spec.md) | To follow a spec is not an assumption | approved |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
-| [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |
 <!-- specs:end -->

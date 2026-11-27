@@ -2,7 +2,7 @@
 id: "000081"
 title: specs migrates a project and its copies to a new kit
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -13,6 +13,7 @@ implementation:
   - src/specs_kit/migrations/
   - src/specs_kit/kit.py
   - src/specs_kit/cli.py
+  - src/specs_kit/install.py
 scope:
   - src/specs_kit/
 ---
@@ -25,13 +26,15 @@ with the change. A migration must change only what it finds in the old format, s
 second run changes nothing.
 
 A kit ref holds a migration when its commit is the commit of the migration or a later commit
-on the same history (`git merge-base --is-ancestor`). `specs update` and `specs add` must run
-each migration that a ref does not hold, oldest first, before they copy:
+on the same history (`git merge-base --is-ancestor`). `specs update`, `specs add` and
+`specs install` must run each migration that a ref does not hold, oldest first, before they
+copy:
 
 | Target | Ref |
 | --- | --- |
-| The project and each copy, on an update of the kit | The kit ref of the project before the update. |
-| The copy of a different repository | The kit ref in `specs.toml` of that repository at its `ref`. Without one, each migration runs. |
+| The project and each copy, on an update of the kit | The kit commit in `specs.lock` of the project before the update, else the kit ref in its `specs.toml`. |
+| The project, on `specs install` | The same ref. Without a kit entry, no migration runs. |
+| The copy of a different repository | The kit commit in `specs.lock` of that repository at its commit, else the kit ref in its `specs.toml`. Without one, each migration runs. |
 
 When a different repository needs a kit that the kit ref of the project does not hold, the
 command must stop with an error that tells to run `specs update` first, and change no file.

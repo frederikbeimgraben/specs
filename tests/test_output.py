@@ -73,15 +73,15 @@ def test_changed_files_are_sorted_and_relative(kit: Kit, empty: Path) -> None:
 
 
 def test_a_write_with_the_same_content_is_no_change(kit: Kit, project: Path) -> None:
-    """`check --write` on a current project lists no file."""
-    out = kit.run(project, "check", "--write", "--raw").out
+    """`specs install` on a current project lists no file."""
+    out = kit.run(project, "install", "--raw").out
     assert not [line for line in out.splitlines() if re.match(r"^[AMD] ", line)]
 
 
 def test_mcp_tools_give_the_plain_results(
     kit: Kit, project: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """The MCP tools give the same results as the commands, and `check` writes no index."""
+    """The MCP tools give the same results as the commands, and only `install` writes the index."""
     for key, value in kit.env.items():
         monkeypatch.setenv(key, value)
     monkeypatch.chdir(project)
@@ -90,6 +90,8 @@ def test_mcp_tools_give_the_plain_results(
     (project / "specs" / "README.md").write_text("changed\n", encoding="utf-8")
     assert "the index is not current" in mcp_server.check()
     assert (project / "specs" / "README.md").read_text(encoding="utf-8") == "changed\n"
+    assert "M specs/README.md" in mcp_server.install()
+    assert "the index is not current" not in mcp_server.check()
     assert mcp_server.list_specs() == kit.run(project, "list", "--raw").out
     (project / "src").mkdir()
     result = mcp_server.new("F", "app/login", "sign-in", "Sign in", ["src"], "someone")

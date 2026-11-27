@@ -128,14 +128,15 @@ def search(project: Project, text: str) -> str:
     return "".join(f"{_line(s)}\n" for s in matches(project, text))
 
 
-def check(project: Project) -> tuple[bool, str]:
-    """Run the check without a write.
+def check(project: Project, *, write: bool = False) -> tuple[bool, str]:
+    """Run the check.
 
     Args:
         project: The project.
+        write: True to write the index and `AGENTS.md` first, as `specs install` does.
 
     Returns:
         True without errors, and the report.
     """
-    count, errors = run(project, write=False)
+    count, errors = run(project, write=write)
     return not errors, "".join(f"{e}\n" for e in errors) + f"{count} specs, {len(errors)} errors\n"

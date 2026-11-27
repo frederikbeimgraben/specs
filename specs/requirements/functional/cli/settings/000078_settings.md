@@ -2,7 +2,7 @@
 id: "000078"
 title: specs.toml holds the settings of the specs command
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -27,7 +27,7 @@ optional and must have this type and default:
 | `code_dirs` | list of strings | `[]` | The folders with `§` references (000017). |
 | `code_suffixes` | list of strings | `.py`, `.ts`, `.js`, `.go`, `.rs`, `.java`, `.kt`, `.nix`, `.sh` | The file types in `code_dirs`. |
 | `max_elements` | whole number from 1 | `25` | The highest count of elements in one diagram (000037). |
-| `[upstream."<repo>"]` | table | none | One table for each copy, with `ref` (string) and the optional `include` (list of strings) (000048). |
+| `[upstream."<repo>"]` | table | none | One table for each copy, with `ref` (string: a tag, a branch or a commit) and the optional `include` (list of strings) (000048, 000082). |
 
 The template `src/specs_kit/data/specs.toml` must hold each key with its default and a comment.
 When `specs.toml` is no valid TOML, or a key has a different type, each command must stop with

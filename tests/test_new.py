@@ -36,7 +36,7 @@ def test_new_writes_a_spec_that_passes_the_check(kit: Kit, project: Path) -> Non
     assert "scope:\n  - src\n" in text
     assert "# Sign in with a \\d key" in text
     assert "A specs/requirements/functional/app/login/000001_sign-in.md" in out
-    check = kit.run(project, "check", "--write", "--raw")
+    check = kit.run(project, "install", "--raw")
     assert "000001" not in check.out.replace("specs, 0 errors", "")
 
 

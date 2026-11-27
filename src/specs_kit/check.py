@@ -18,6 +18,7 @@ from specs_kit.agents import AGENTS, block, merge
 from specs_kit.changes import write_text
 from specs_kit.context import Context, Errors, where
 from specs_kit.index import index
+from specs_kit.lock import LOCK_NAME, read_lock, tree_hash
 from specs_kit.project import (
     IN_FORCE,
     KINDS_BY_PREFIX,
@@ -480,8 +481,8 @@ def _upstream_errors(project: Project) -> Errors:
             if ref is None
         ),
         *(
-            f"specs.toml: upstream {repo!r} has no copy in specs/.upstream/; run specs update"
-            f" {repo} <ref> (000048)"
+            f"specs.toml: upstream {repo!r} has no copy in specs/.upstream/; run specs install"
+            " (000048)"
             for repo in sorted(upstream)
             if repo not in copies
         ),
@@ -490,6 +491,48 @@ def _upstream_errors(project: Project) -> Errors:
             for repo, include in sorted(project.config.include.items())
             if include and repo in copies
             for e in _include_errors(project, repo, include)
+        ),
+    )
+
+
+def _lock_errors(project: Project) -> Errors:
+    """Check that `specs.lock`, `specs.toml` and the copies agree (§000082).
+
+    Args:
+        project: The project.
+
+    Returns:
+        The errors.
+    """
+    lock = read_lock(project.root)
+    upstream = project.config.upstream
+    copies = project.copies()
+    return (
+        *(
+            f"{LOCK_NAME}: no entry for {repo!r}; run specs install (000082)"
+            for repo in sorted(upstream)
+            if repo not in lock
+        ),
+        *(
+            f"{LOCK_NAME}: {repo!r} is not in specs.toml; run specs install (000082)"
+            for repo in sorted(set(lock) - set(upstream))
+        ),
+        *(
+            f"{LOCK_NAME}: {repo!r} does not agree with ref or include in specs.toml;"
+            " run specs install (000082)"
+            for repo, entry in sorted(lock.items())
+            if repo in upstream
+            and (
+                entry.ref != upstream[repo]
+                or entry.include
+                != tuple(sorted({f.strip("/") for f in project.config.include.get(repo, ())}))
+            )
+        ),
+        *(
+            f"specs/.upstream/{repo}: the copy does not agree with its hash in {LOCK_NAME};"
+            " run specs install (000048)"
+            for repo, entry in sorted(lock.items())
+            if repo in copies and tree_hash(project.upstream_dir / repo) != entry.hash
         ),
     )
 
@@ -509,14 +552,13 @@ def _include_errors(project: Project, repo: str, include: tuple[str, ...]) -> Er
     folders = tuple(f.strip("/") for f in include)
     return (
         *(
-            f"specs.toml: include {f!r} of {repo!r} is not in the copy; run specs update"
-            f" {repo} <ref> (000048)"
+            f"specs.toml: include {f!r} of {repo!r} is not in the copy; run specs install (000048)"
             for f in folders
             if not (root / f).is_dir()
         ),
         *(
             f"specs/.upstream/{repo}/{p.relative_to(root).as_posix()}: not in include of"
-            f" specs.toml; run specs update {repo} <ref> (000048)"
+            " specs.toml; run specs install (000048)"
             for p in sorted(root.rglob("*"))
             if p.is_file()
             and not any(p.relative_to(root).as_posix().startswith(f"{f}/") for f in folders)
@@ -748,6 +790,7 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     return len(specs), (
         *layout,
         *_upstream_errors(project),
+        *_lock_errors(project),
         *_check_replaces(ctx, specs, raw),
         *_number_errors(project, specs),
         *(e for s in specs for e in (*_check_meta(ctx, s), *_check_body(ctx, s))),
@@ -756,14 +799,12 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
         *(
             ()
             if _read(project.index_path) == text
-            else ("specs/README.md: the index is not current; run specs check --write (000007)",)
+            else ("specs/README.md: the index is not current; run specs install (000007)",)
         ),
         *(
             ()
             if _read(agents_path) == agents
-            else (
-                f"{AGENTS}: the rules for agents are not current; run specs check --write (000079)",
-            )
+            else (f"{AGENTS}: the rules for agents are not current; run specs install (000079)",)
         ),
         *_code_refs(ctx),
     )

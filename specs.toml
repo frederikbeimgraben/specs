@@ -16,6 +16,7 @@ code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh
 max_elements = 25
 
 # The rules of a different repository, copied to specs/.upstream/<host>/<group>/.../<repo>/ (000048).
-# ref is the commit of the copy. Change it with specs update or specs add.
+# ref is a tag, a branch or a commit. specs.lock holds the commit of the copy (000082).
+# specs update resolves ref again, specs add adds a repository, specs install changes no ref.
 # include is optional: the folders below specs/ that the copy holds, for example ["style/python/"].
 # Without include, the copy holds all rules. specs add --include sets it.

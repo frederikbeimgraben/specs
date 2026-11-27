@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from conftest import RULES_REPO, Kit
 
-BEGIN = "<!-- specs:begin (written by specs check --write, do not edit) -->"
+BEGIN = "<!-- specs:begin (written by specs install, do not edit) -->"
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ def test_init_keeps_an_existing_claude(kit: Kit, empty: Path) -> None:
 
 
 def test_the_block_keeps_the_text_around_it(kit: Kit, project: Path) -> None:
-    """`check --write` replaces only the block and keeps the text before and after it."""
+    """`specs install` replaces only the block and keeps the text before and after it."""
     path = project / "AGENTS.md"
     path.write_text(f"# Head\n\n{path.read_text(encoding='utf-8')}\n# Tail\n", encoding="utf-8")
     assert kit.run(project, "add", RULES_REPO, kit.rules_rev).code == 0
@@ -64,9 +64,9 @@ def test_the_block_keeps_the_text_around_it(kit: Kit, project: Path) -> None:
 
 
 def test_a_file_without_block_gets_it_at_the_end(kit: Kit, project: Path) -> None:
-    """`check --write` adds the block at the end of a file without it."""
+    """`specs install` adds the block at the end of a file without it."""
     path = project / "AGENTS.md"
     path.write_text("# Mine\n", encoding="utf-8")
     assert kit.run(project, "check", "--raw").code == 1
-    assert kit.run(project, "check", "--write", "--raw").code == 0
+    assert kit.run(project, "install", "--raw").code == 0
     assert path.read_text(encoding="utf-8").startswith(f"# Mine\n\n{BEGIN}")

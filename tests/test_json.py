@@ -63,7 +63,7 @@ def test_check_gives_errors_as_objects(kit: Kit, project: Path) -> None:
     assert checked["changed"] == []
     assert {
         "file": "specs/README.md",
-        "message": "the index is not current; run specs check --write",
+        "message": "the index is not current; run specs install",
         "rule": "000007",
     } in checked["errors"]
 

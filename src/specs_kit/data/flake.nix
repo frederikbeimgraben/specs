@@ -2,7 +2,7 @@
   description = "The development shell of the project";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  # The specs command of the kit. The ref must be the ref in specs.toml.
+  # The specs command of the kit. The ref must be the commit in specs.lock.
   inputs.specs.url = "github:frederikbeimgraben/specs/{ref}";
 
   outputs =
