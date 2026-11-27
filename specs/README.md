@@ -79,7 +79,7 @@ specs/
 | [C/specs/structures/000037](/specs/conventions/specs/structures/000037_diagram-size.md) | A diagram has at most 25 elements | approved |
 | [C/specs/structures/000038](/specs/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
-| [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | draft |
+| [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | approved |
 | [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | specs writes the rules for agents to AGENTS.md | draft |
 | [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs | draft |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | draft |
