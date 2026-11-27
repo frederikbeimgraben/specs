@@ -54,7 +54,7 @@ class Config:
 
     Attributes:
         base_ref: The base branch for the check of the numbers (§000013).
-        forge: `github` or `gitlab`.
+        forge: `github`, `gitlab` or `codeberg`.
         code_dirs: The folders that hold code with `§` references (§000017).
         code_suffixes: The file types of the code.
         max_elements: The highest count of elements in one structure diagram.
@@ -65,7 +65,9 @@ class Config:
     base_ref: str = "origin/main"
     forge: str = "github"
     code_dirs: tuple[str, ...] = ()
-    code_suffixes: frozenset[str] = frozenset({".py", ".ts", ".js", ".go", ".rs", ".java"})
+    code_suffixes: frozenset[str] = frozenset(
+        {".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"}
+    )
     max_elements: int = 25
     upstream: Mapping[str, str | None] = MappingProxyType({})
     include: Mapping[str, tuple[str, ...]] = MappingProxyType({})
@@ -238,6 +240,108 @@ def find_root(start: Path) -> Path:
     return next((f for f in (here, *here.parents) if (f / CONFIG_NAME).is_file()), here)
 
 
+class ConfigError(Exception):
+    """`specs.toml` is no valid TOML, or a key has a wrong type."""
+
+
+def _text(data: Mapping[str, object], key: str, default: str) -> str:
+    """Return a string key of `specs.toml`.
+
+    Args:
+        data: The table.
+        key: The key.
+        default: The value without the key.
+
+    Returns:
+        The value.
+
+    Raises:
+        ConfigError: The value is no string.
+    """
+    value = data.get(key, default)
+    if not isinstance(value, str):
+        raise ConfigError(f"specs.toml: {key} must be a string")
+    return value
+
+
+def _texts(data: Mapping[str, object], key: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    """Return a key of `specs.toml` that holds a list of strings.
+
+    Args:
+        data: The table.
+        key: The key.
+        default: The value without the key.
+
+    Returns:
+        The strings.
+
+    Raises:
+        ConfigError: The value is no list of strings.
+    """
+    value = data.get(key, list(default))
+    items = cast("list[object]", value) if isinstance(value, list) else None
+    if items is None or not all(isinstance(i, str) for i in items):
+        raise ConfigError(f"specs.toml: {key} must be a list of strings")
+    return tuple(cast("list[str]", items))
+
+
+def _number(data: Mapping[str, object], key: str, default: int) -> int:
+    """Return a whole-number key of `specs.toml`.
+
+    Args:
+        data: The table.
+        key: The key.
+        default: The value without the key.
+
+    Returns:
+        The number.
+
+    Raises:
+        ConfigError: The value is no whole number from 1.
+    """
+    value = data.get(key, default)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise ConfigError(f"specs.toml: {key} must be a whole number from 1")
+    return value
+
+
+def _upstream(data: Mapping[str, object]) -> Mapping[str, Mapping[str, object]]:
+    """Return the tables below `upstream` of `specs.toml`.
+
+    Args:
+        data: The whole file.
+
+    Returns:
+        The table of each repository.
+
+    Raises:
+        ConfigError: `upstream` or a repository entry is no table.
+    """
+    value = data.get("upstream", {})
+    tables = cast("Mapping[str, object]", value) if isinstance(value, dict) else None
+    if tables is None or not all(isinstance(t, dict) for t in tables.values()):
+        raise ConfigError('specs.toml: upstream must hold one table [upstream."<repo>"] each')
+    return cast("Mapping[str, Mapping[str, object]]", tables)
+
+
+def _load_toml(path: Path) -> Mapping[str, object]:
+    """Return the content of `specs.toml`, or an empty table without the file.
+
+    Args:
+        path: The path of `specs.toml`.
+
+    Returns:
+        The table.
+
+    Raises:
+        ConfigError: The file is no valid TOML.
+    """
+    try:
+        return tomllib.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    except tomllib.TOMLDecodeError as error:
+        raise ConfigError(f"specs.toml: no valid TOML: {error}") from error
+
+
 def read_config(path: Path) -> Config:
     """Read `specs.toml`. A missing file or key gets the default.
 
@@ -247,28 +351,19 @@ def read_config(path: Path) -> Config:
     Returns:
         The settings.
     """
-    data = tomllib.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    data = _load_toml(path)
     default = Config()
-    upstream = cast("Mapping[str, object]", data.get("upstream", {}))
+    upstream = _upstream(data)
     return Config(
-        base_ref=str(data.get("base_ref", default.base_ref)),
-        forge=str(data.get("forge", default.forge)),
-        code_dirs=tuple(cast("list[str]", data.get("code_dirs", default.code_dirs))),
+        base_ref=_text(data, "base_ref", default.base_ref),
+        forge=_text(data, "forge", default.forge),
+        code_dirs=_texts(data, "code_dirs", default.code_dirs),
         code_suffixes=frozenset(
-            cast("list[str]", data.get("code_suffixes", default.code_suffixes))
+            _texts(data, "code_suffixes", tuple(sorted(default.code_suffixes)))
         ),
-        max_elements=int(cast("int", data.get("max_elements", default.max_elements))),
-        upstream={
-            repo: str(cast("Mapping[str, object]", v).get("ref"))
-            if isinstance(v, dict) and v.get("ref")
-            else None
-            for repo, v in upstream.items()
-        },
-        include={
-            repo: tuple(str(f) for f in cast("list[object]", v.get("include", [])))
-            for repo, v in upstream.items()
-            if isinstance(v, dict)
-        },
+        max_elements=_number(data, "max_elements", default.max_elements),
+        upstream={repo: _text(table, "ref", "") or None for repo, table in upstream.items()},
+        include={repo: _texts(table, "include", ()) for repo, table in upstream.items()},
     )
 
 

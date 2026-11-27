@@ -7,6 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
   - src/specs_kit/check.py
+  - src/specs_kit/sections.py
 scope:
   - specs/
 ---

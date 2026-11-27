@@ -31,7 +31,7 @@ from specs_kit.devshell import init_flake, update_flake
 from specs_kit.kit import KitError, add, init, update
 from specs_kit.mcp_server import serve
 from specs_kit.new import NewError, new
-from specs_kit.project import KIT_REPO, Project
+from specs_kit.project import KIT_REPO, ConfigError, Project
 from specs_kit.view import console, done, file_list, report, spec_text, table
 
 
@@ -277,5 +277,5 @@ def main() -> None:
     """Run the command line and exit with its code."""
     try:
         sys.exit(dispatch(parser().parse_args()))
-    except (KitError, NewError, queries.QueryError) as error:
+    except (KitError, NewError, ConfigError, queries.QueryError, OSError) as error:
         sys.exit(f"specs: {error}")

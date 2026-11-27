@@ -101,10 +101,15 @@ def fill(template: str, number: str, title: str, kind: str, owner: str, day: str
     }
     head, sep, body = template.partition("\n---\n")
     filled = "".join(
-        next((re.sub(p, v, line) for p, v in values.items() if re.match(p, line)), line)
+        next(
+            (v + line[len(line.rstrip("\n")) :] for p, v in values.items() if re.match(p, line)),
+            line,
+        )
         for line in head.splitlines(keepends=True)
     )
-    return filled + sep + re.sub(r"^# .*$", f"# {title}", body, count=1, flags=re.MULTILINE)
+    return (
+        filled + sep + re.sub(r"^# .*$", lambda _: f"# {title}", body, count=1, flags=re.MULTILINE)
+    )
 
 
 def new(project: Project, kind: str, path: str, name: str, title: str, owner: str | None) -> Path:
