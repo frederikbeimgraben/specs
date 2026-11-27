@@ -49,8 +49,7 @@ repository with the error.
 
 The command must replace only the parts whose switch in `[features]` is on, and must not change
 `flake.nix` when `flake` is off (000084). Before it copies, the command must run the migrations
-of 000081. At its end, it must do the
-steps of `specs install` (000083).
+of 000081. At its end, it must do the steps of `specs install` (000083).
 
 Reason: `specs.toml` keeps the version that the project wants, and one command takes the newest
 commit of each version (000048). New rules of an update can show errors in the project, and the
