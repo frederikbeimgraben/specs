@@ -305,7 +305,11 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     replace_tree(source / ".specs" / "templates", project.templates_dir)
     for skill in _skills(source):
         replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
-    write_text(project.root / target, package_data(data_name).replace("{ref}", ref))
+    branch = project.config.base_ref.removeprefix("origin/")
+    write_text(
+        project.root / target,
+        package_data(data_name).replace("{ref}", ref).replace("{branch}", branch),
+    )
     if root_text is not None:
         write_text(project.root / GITLAB_ROOT, root_text)
     write_mcp(project, ref)

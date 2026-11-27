@@ -17,7 +17,8 @@ specs check --write  # also write .specs/index.md and its copy specs/README.md
 Each error names the file and the rule number. Read that rule with `specs show <number>` and fix
 the spec. Do not change a rule of the kit to make the check pass.
 
-`specs.toml` sets `forge`, `base_ref`, `code_dirs`, `code_suffixes`, `max_elements` and `upstream`.
+`specs.toml` sets `forge`, `base_ref`, `code_dirs`, `code_suffixes`, `max_elements` and
+`upstream` with `ref` and `include` (000078).
 
 ## Review what the checker cannot see
 

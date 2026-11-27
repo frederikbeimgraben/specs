@@ -14,7 +14,7 @@ A new spec starts with
 specs/
   requirements/
     functional/
-      cli/  add, check, init, list, mcp, new, output, resolve, search, show, update
+      cli/  add, check, init, list, mcp, new, output, resolve, search, settings, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -88,6 +88,7 @@ specs/
 | [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | approved |
 | [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | specs resolve prints the long form of an ID | approved |
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | specs search finds rules by a text | approved |
+| [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | specs.toml holds the settings of the specs command | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | approved |
 | [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update replaces a copy and its ref | approved |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
