@@ -30,6 +30,7 @@ from specs_kit.project import (
     STATUSES,
     Project,
     Spec,
+    source,
 )
 from specs_kit.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
 
@@ -64,6 +65,8 @@ SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{REPO}:)?(?:{PREFIXES})/[a-z0-9/-]+/)
 FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({NUMBER})\b")
 FOREIGN_LONG_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LONG_LOCAL})\b")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
+QUOTED = re.compile(r"'([^'\n]+)'")
+NAMED_REF = re.compile(rf"§[^\s]+|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+")
 
 
 def _paths(ctx: Context, spec: Spec, key: str) -> Errors:
@@ -121,7 +124,7 @@ def _check_meta(ctx: Context, spec: Spec) -> Errors:
     """
     rel = where(ctx.project, spec)
     order = tuple(k for k in KEYS if k in spec.keys)
-    raw_id = spec.path.read_text(encoding="utf-8").split("\n", 2)[1]
+    raw_id = source(spec.path).split("\n", 2)[1]
     kind = KINDS_BY_PREFIX.get(spec.prefix)
     tests = spec.entries("tests") or ()
     scope = spec.entries("scope")
@@ -613,7 +616,7 @@ def _code_refs(ctx: Context) -> Errors:
         The errors.
     """
     texts = tuple(
-        (p.relative_to(ctx.project.root).as_posix(), p.read_text(encoding="utf-8", errors="ignore"))
+        (p.relative_to(ctx.project.root).as_posix(), source(p, "ignore"))
         for p in _code_files(ctx.project)
     )
     return (
@@ -762,7 +765,50 @@ def _read(path: Path) -> str | None:
     Returns:
         The text, or None.
     """
-    return path.read_text(encoding="utf-8") if path.is_file() else None
+    return source(path) if path.is_file() else None
+
+
+def _line(text: str, message: str) -> int:
+    """Return the line that an error names (§000065).
+
+    Args:
+        text: The text of the file.
+        message: The error without the path.
+
+    Returns:
+        The first line with an entry or a reference of the message, else the line of the front
+        matter key at the start of the message, else 1.
+    """
+    lines = tuple(enumerate(text.splitlines(), 1))
+    key = message.split(" ", 1)[0]
+    return next(
+        (
+            n
+            for needle in (*QUOTED.findall(message), *NAMED_REF.findall(message))
+            for n, line in lines
+            if needle in line
+        ),
+        next((n for n, line in lines if key in KEYS and line.startswith(f"{key}:")), 1),
+    )
+
+
+def with_line(root: Path, error: str) -> str:
+    """Add the line to an error of a file, as `<path>:<line>: <message>` (§000065).
+
+    Args:
+        root: The root of the project.
+        error: The error as `<path>: <message>`.
+
+    Returns:
+        The error with the line, or the same error for a folder or a missing file.
+    """
+    rel, _, message = error.partition(": ")
+    path = root / rel
+    return (
+        f"{rel}:{_line(source(path, 'ignore'), message)}: {message}"
+        if message and path.is_file()
+        else error
+    )
 
 
 def run(project: Project, *, write: bool) -> tuple[int, Errors]:
@@ -789,24 +835,29 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     if write and agents is not None:
         write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
-    return len(specs), (
-        *layout,
-        *_upstream_errors(project),
-        *_lock_errors(project),
-        *_check_replaces(ctx, specs, raw),
-        *_number_errors(project, specs),
-        *(e for s in specs for e in (*_check_meta(ctx, s), *_check_body(ctx, s))),
-        *_base_errors(project, specs),
-        *_schema_errors(project, specs),
-        *(
-            ()
-            if _read(project.index_path) == text
-            else ("specs/README.md: the index is not current; run specs install (000007)",)
-        ),
-        *(
-            ()
-            if agents is None or _read(agents_path) == agents
-            else (f"{AGENTS}: the rules for agents are not current; run specs install (000079)",)
-        ),
-        *_code_refs(ctx),
+    return len(specs), tuple(
+        with_line(project.root, e)
+        for e in (
+            *layout,
+            *_upstream_errors(project),
+            *_lock_errors(project),
+            *_check_replaces(ctx, specs, raw),
+            *_number_errors(project, specs),
+            *(e for s in specs for e in (*_check_meta(ctx, s), *_check_body(ctx, s))),
+            *_base_errors(project, specs),
+            *_schema_errors(project, specs),
+            *(
+                ()
+                if _read(project.index_path) == text
+                else ("specs/README.md: the index is not current; run specs install (000007)",)
+            ),
+            *(
+                ()
+                if agents is None or _read(agents_path) == agents
+                else (
+                    f"{AGENTS}: the rules for agents are not current; run specs install (000079)",
+                )
+            ),
+            *_code_refs(ctx),
+        )
     )

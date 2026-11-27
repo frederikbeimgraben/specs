@@ -11,7 +11,9 @@ from __future__ import annotations
 import os
 import re
 import tomllib
-from collections.abc import Mapping
+from collections.abc import Generator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -50,6 +52,43 @@ SHORT = re.compile(rf"^(?:({REPO}):)?({NUMBER})$")
 LONG = re.compile(rf"^(?:({REPO}):)?({LONG_LOCAL})$")
 
 type Meta = Mapping[str, str | tuple[str, ...]]
+
+_TEXTS: ContextVar[Mapping[Path, str]] = ContextVar("texts", default=MappingProxyType({}))
+
+
+@contextmanager
+def editing(texts: Mapping[Path, str]) -> Generator[None]:
+    """Read the texts of an editor in place of the files on the disk in the block (§000088).
+
+    Args:
+        texts: The text of each file by absolute path.
+
+    Yields:
+        Nothing.
+    """
+    token = _TEXTS.set(MappingProxyType({p.resolve(): t for p, t in texts.items()}))
+    try:
+        yield
+    finally:
+        _TEXTS.reset(token)
+
+
+def source(path: Path, errors: str = "strict") -> str:
+    """Return the text of a file, or the text of the editor in a block of `editing`.
+
+    Args:
+        path: The file.
+        errors: How to decode bytes that are no UTF-8.
+
+    Returns:
+        The text.
+    """
+    texts = _TEXTS.get()
+    return (
+        texts[path.resolve()]
+        if path.resolve() in texts
+        else path.read_text(encoding="utf-8", errors=errors)
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -248,7 +287,7 @@ def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[st
         *(() if FILE_NAME.match(path.name) else ("file name breaks 000016",)),
         *(f"folder {f!r} breaks 000005" for f in below.parts[:2] if not FOLDER.match(f)),
     )
-    parsed = parse_front_matter(path.read_text(encoding="utf-8"))
+    parsed = parse_front_matter(source(path))
     if parsed is None:
         return None, (*errors, "no front matter (000009)")
     meta, keys, body = parsed
