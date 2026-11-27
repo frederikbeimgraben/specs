@@ -50,7 +50,9 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    and fix each error. Open a pull request.
 
 The rules of a different repository: `specs add <repo> <ref>` adds a copy, and
-`specs update <repo> <ref>` replaces it.
+`specs update <repo> <ref>` replaces it. `<repo>` is the full path, with each GitLab subgroup.
+To take only some rules, add `--include <folder>` once for each folder below `specs/`, for
+example `--include style/python/`.
 
 ## Text for CLAUDE.md
 
