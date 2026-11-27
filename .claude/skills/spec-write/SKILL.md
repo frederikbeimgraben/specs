@@ -29,7 +29,7 @@ The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`, in a pr
    - Write ASD-STE100: active voice, at most 20 words for each instruction (000025).
    - No history, no ticket numbers, no introduction (000018, 000024).
    - Refer to a rule by its number, and to a rule of a different repository as
-     `<host>/<owner>/<repo>:<number>` (000047). `specs resolve` and `specs show` find the rule.
+     `<host>/<group>/.../<repo>:<number>` (000047). `specs resolve` and `specs show` find the rule.
 6. Set `implementation: null` until code exists. Set `scope` to the paths that the rule
    controls. Each path must exist (000009).
 7. Run `specs check --write`. Fix each error.

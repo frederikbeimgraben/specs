@@ -14,8 +14,9 @@ scope:
 # A reference to a rule of a different repository names the repository
 
 A reference to a rule of a different repository must put the repository before the rule, in
-the form `<host>/<owner>/<repo>:<number>`. A reference to a rule of the same repository must
-be only the number. This is the short form:
+the form `<host>/<group>/.../<repo>:<number>`. The path between the host and the colon must be
+the full path of the repository, with each group and subgroup. A reference to a rule of the same
+repository must be only the number. This is the short form:
 
 | Rule | Short form | Long form |
 | --- | --- | --- |
@@ -26,8 +27,9 @@ Code (000017), the front matter (000009) and the text of a spec must use the sho
 `specs resolve <ID>` must print the long form of a short or a long form (000070).
 `specs show <ID>` must print the full text of the rule (000071).
 
-Reason: Two repositories can use the same number. The host, the owner and the repository make
-the reference unique. The number is the identity of a rule (000013), so the short form stays
+Reason: Two repositories can use the same number. The host and the full path make the
+reference unique. A GitLab project can be in subgroups, so the path can have more than two
+parts. The number is the identity of a rule (000013), so the short form stays
 correct when a rule moves. The two commands give the kind, the path and the text without a
 search by hand.
 

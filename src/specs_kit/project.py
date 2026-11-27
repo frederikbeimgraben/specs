@@ -38,7 +38,8 @@ IN_FORCE = frozenset({"draft", "approved"})
 
 FOLDER = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 FILE_NAME = re.compile(r"^[0-9]{6}_[a-z0-9]+(-[a-z0-9]+)*\.md$")
-REPO = r"[a-z0-9.-]+\.[a-z]+/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"
+REPO = r"[a-z0-9.-]+\.[a-z]+(?:/[A-Za-z0-9_.-]+){2,}"
+TOP_FOLDERS = frozenset(folder.split("/")[0] for folder in KINDS)
 NUMBER = r"[0-9]{6}"
 LONG_LOCAL = rf"(?:{PREFIXES})/[a-z0-9-]+/[a-z0-9-]+/{NUMBER}"
 SHORT = re.compile(rf"^(?:({REPO}):)?({NUMBER})$")
@@ -58,6 +59,7 @@ class Config:
         code_suffixes: The file types of the code.
         max_elements: The highest count of elements in one structure diagram.
         upstream: The `ref` of each repository with a copy below `.specs/upstream/` (§000048).
+        include: The folders of each repository that the copy holds; empty for all (§000048).
     """
 
     base_ref: str = "origin/main"
@@ -66,6 +68,7 @@ class Config:
     code_suffixes: frozenset[str] = frozenset({".py", ".ts", ".js", ".go", ".rs", ".java"})
     max_elements: int = 25
     upstream: Mapping[str, str | None] = MappingProxyType({})
+    include: Mapping[str, tuple[str, ...]] = MappingProxyType({})
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,7 +82,7 @@ class Spec:
         meta: The keys of the front matter.
         keys: The keys of the front matter in their order.
         body: The Markdown text after the front matter.
-        repo: Empty for a rule of the project, else `<host>/<owner>/<repo>`.
+        repo: Empty for a rule of the project, else `<host>/<group>/.../<repo>`.
     """
 
     path: Path
@@ -199,7 +202,7 @@ def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[st
     Args:
         path: The spec file.
         base: The folder of the kind folders.
-        repo: Empty for the project, else `<host>/<owner>/<repo>`.
+        repo: Empty for the project, else `<host>/<group>/.../<repo>`.
 
     Returns:
         The spec or None, and the errors of the file layout.
@@ -260,6 +263,11 @@ def read_config(path: Path) -> Config:
             if isinstance(v, dict) and v.get("ref")
             else None
             for repo, v in upstream.items()
+        },
+        include={
+            repo: tuple(str(f) for f in cast("list[object]", v.get("include", [])))
+            for repo, v in upstream.items()
+            if isinstance(v, dict)
         },
     )
 
@@ -325,12 +333,19 @@ class Project:
         return self.root / CONFIG_NAME
 
     def copies(self) -> frozenset[str]:
-        """Return the repositories that have a copy below `.specs/upstream/`."""
-        return frozenset(
+        """Return the repositories that have a copy below `.specs/upstream/`.
+
+        A copy is a folder whose path has the form of a repository and that holds a kind folder
+        or `README.md`. A folder inside a copy is no copy.
+        """
+        roots = tuple(
             p.relative_to(self.upstream_dir).as_posix()
-            for p in (self.upstream_dir.glob("*/*/*") if self.upstream_dir.is_dir() else ())
+            for p in (sorted(self.upstream_dir.rglob("*")) if self.upstream_dir.is_dir() else ())
             if p.is_dir()
+            and re.fullmatch(REPO, p.relative_to(self.upstream_dir).as_posix())
+            and any(c.name in TOP_FOLDERS or c.name == "README.md" for c in p.iterdir())
         )
+        return frozenset(r for r in roots if not any(r.startswith(f"{o}/") for o in roots))
 
     def load(self) -> tuple[tuple[Spec, ...], tuple[str, ...]]:
         """Parse every rule of the project.

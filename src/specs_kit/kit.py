@@ -17,7 +17,15 @@ from importlib import resources
 from pathlib import Path
 from typing import cast
 
-from specs_kit.project import CONFIG_NAME, KIT_REPO, REPO, Project, kit_rev, kit_source
+from specs_kit.project import (
+    CONFIG_NAME,
+    FOLDER,
+    KIT_REPO,
+    REPO,
+    Project,
+    kit_rev,
+    kit_source,
+)
 
 
 class KitError(Exception):
@@ -70,7 +78,7 @@ def latest_ref(repo: str) -> str:
     """Return the commit of the default branch of a repository.
 
     Args:
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
 
     Returns:
         The commit.
@@ -89,7 +97,7 @@ def checkout(repo: str, ref: str) -> Generator[Path]:
     """Check out a repository at one ref into a temporary folder.
 
     Args:
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The tag or the commit.
 
     Yields:
@@ -102,31 +110,62 @@ def checkout(repo: str, ref: str) -> Generator[Path]:
         yield Path(tmp)
 
 
-def _replace_tree(source: Path, target: Path) -> None:
+def _replace_tree(source: Path, target: Path, include: tuple[str, ...] = ()) -> None:
     """Replace the folder `target` with a copy of `source`, without an `upstream/` folder.
 
     Args:
         source: The folder to copy.
         target: The folder to replace.
+        include: The folders of `source` to copy, or empty for all of `source`.
     """
     shutil.rmtree(target, ignore_errors=True)
-    shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream"))
+    match include:
+        case ():
+            shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream"))
+        case _:
+            for folder in include:
+                shutil.copytree(source / folder, target / folder)
 
 
-def copy_rules(source: Path, project: Project, repo: str) -> None:
-    """Replace the copy of one repository with its `specs/` folder (§000048).
+def normal_include(include: tuple[str, ...]) -> tuple[str, ...]:
+    """Return the folders of `include` without a slash at the start or the end, sorted.
+
+    Args:
+        include: The folders, for example `style/python/`.
+
+    Returns:
+        The folders, for example `style/python`.
+
+    Raises:
+        KitError: A folder is not a path of kebab-case names.
+    """
+    folders = tuple(sorted({f.strip("/") for f in include}))
+    bad = tuple(f for f in folders if not all(FOLDER.match(p) for p in f.split("/")))
+    if bad:
+        raise KitError(f"include {', '.join(map(repr, bad))} is not a path of kebab-case names")
+    return folders
+
+
+def copy_rules(source: Path, project: Project, repo: str, include: tuple[str, ...] = ()) -> None:
+    """Replace the copy of one repository with its `specs/` folder or the folders of `include`.
+
+    The copy holds `specs/README.md` only without `include` (§000048).
 
     Args:
         source: The root of a checkout of the repository.
         project: The project.
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
+        include: The folders below `specs/` to copy, or empty for all.
 
     Raises:
-        KitError: The checkout has no `specs/` folder.
+        KitError: The checkout has no `specs/` folder, or a folder of `include`.
     """
+    missing = tuple(f for f in include if not (source / "specs" / f).is_dir())
     if not (source / "specs").is_dir():
         raise KitError(f"{repo} has no specs/ folder")
-    _replace_tree(source / "specs", project.upstream_dir / repo)
+    if missing:
+        raise KitError(f"{repo} has no folder specs/{', specs/'.join(missing)}")
+    _replace_tree(source / "specs", project.upstream_dir / repo, include)
 
 
 def set_ref(project: Project, repo: str, ref: str) -> None:
@@ -134,7 +173,7 @@ def set_ref(project: Project, repo: str, ref: str) -> None:
 
     Args:
         project: The project.
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The commit.
     """
     text = project.config_path.read_text(encoding="utf-8") if project.config_path.is_file() else ""
@@ -147,6 +186,29 @@ def set_ref(project: Project, repo: str, ref: str) -> None:
     )
     project.config_path.write_text(
         updated if updated.endswith("\n") else f"{updated}\n", encoding="utf-8"
+    )
+
+
+def set_include(project: Project, repo: str, include: tuple[str, ...]) -> None:
+    """Add `include` below the table of one repository in `specs.toml`.
+
+    Args:
+        project: The project.
+        repo: The repository as `<host>/<group>/.../<repo>`.
+        include: The folders of the copy.
+    """
+    text = project.config_path.read_text(encoding="utf-8")
+    header = f'[upstream."{repo}"]'
+    entry = "include = [" + ", ".join(f'"{f}/"' for f in include) + "]"
+    project.config_path.write_text(
+        re.sub(
+            rf"^({re.escape(header)}\n(?:(?!\[).*\n)*?ref = .*)$",
+            lambda m: f"{m.group(1)}\n{entry}",
+            text,
+            count=1,
+            flags=re.MULTILINE,
+        ),
+        encoding="utf-8",
     )
 
 
@@ -321,7 +383,7 @@ def init(root: Path, forge: str | None) -> Project:
 
 
 def _check_repo(repo: str) -> None:
-    """Fail for a repository name that is not `<host>/<owner>/<repo>`.
+    """Fail for a repository name that is not `<host>/<group>/.../<repo>`.
 
     Args:
         repo: The repository name.
@@ -330,7 +392,7 @@ def _check_repo(repo: str) -> None:
         KitError: The name has a different form.
     """
     if not re.fullmatch(REPO, repo):
-        raise KitError(f"{repo!r} is not <host>/<owner>/<repo>")
+        raise KitError(f"{repo!r} is not <host>/<group>/.../<repo>")
 
 
 def update(project: Project, repo: str, ref: str | None) -> str:
@@ -338,7 +400,7 @@ def update(project: Project, repo: str, ref: str | None) -> str:
 
     Args:
         project: The project.
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The tag or the commit, or None for the default branch.
 
     Returns:
@@ -350,16 +412,17 @@ def update(project: Project, repo: str, ref: str | None) -> str:
     _check_repo(repo)
     if repo not in project.config.upstream:
         raise KitError(f"{repo} is not in specs.toml; run specs add {repo} <ref>")
-    return _install(project, repo, ref or latest_ref(repo))
+    return _install(project, repo, ref or latest_ref(repo), project.config.include.get(repo, ()))
 
 
-def add(project: Project, repo: str, ref: str) -> str:
+def add(project: Project, repo: str, ref: str, include: tuple[str, ...] = ()) -> str:
     """Add the copy of a new repository.
 
     Args:
         project: The project.
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The tag or the commit.
+        include: The folders below `specs/` to copy, or empty for all.
 
     Returns:
         The commit of the new copy.
@@ -370,16 +433,21 @@ def add(project: Project, repo: str, ref: str) -> str:
     _check_repo(repo)
     if repo in project.config.upstream:
         raise KitError(f"{repo} is in specs.toml; run specs update {repo} <ref>")
-    return _install(project, repo, ref)
+    folders = normal_include(include)
+    commit = _install(project, repo, ref, folders)
+    if folders:
+        set_include(project, repo, folders)
+    return commit
 
 
-def _install(project: Project, repo: str, ref: str) -> str:
+def _install(project: Project, repo: str, ref: str, include: tuple[str, ...]) -> str:
     """Replace the copy of one repository and set its ref.
 
     Args:
         project: The project.
-        repo: The repository as `<host>/<owner>/<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The tag or the commit.
+        include: The folders below `specs/` to copy, or empty for all.
 
     Returns:
         The commit of the new copy.
@@ -390,7 +458,7 @@ def _install(project: Project, repo: str, ref: str) -> str:
             raise KitError(f"the kit at {commit} has no .specs/templates/; it is too old")
         if repo == KIT_REPO:
             check_forge(project.root, project.config.forge)
-        copy_rules(source, project, repo)
+        copy_rules(source, project, repo, normal_include(include))
         set_ref(project, repo, commit)
         if repo == KIT_REPO:
             install_kit_files(source, Project.open(project.root), commit)
