@@ -83,3 +83,17 @@ def test_check_finds_a_stale_index(kit: Kit, project: Path) -> None:
     result = kit.run(project, "check", "--raw")
     assert result.code == 1
     assert "the index is not current" in result.out
+
+
+def test_check_gives_the_line(kit: Kit, project: Path) -> None:
+    """An error line names the line of the key or of the reference, else line 1."""
+    path = _rule(project, "A name must be short, as §000999 says.")
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("updated: 2026-11-27", "updated: today"),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    rel = "specs/style/code/names/000100_short-names.md"
+    assert f"{rel}:7: updated must be YYYY-MM-DD (000009)" in result.out
+    assert f"{rel}:15: a spec refers to a rule without § (000017): §000999" in result.out
+    assert "specs/README.md:1: the index is not current" in result.out

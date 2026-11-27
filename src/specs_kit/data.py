@@ -12,7 +12,8 @@ from specs_kit.project import Project, Spec
 type Json = None | bool | int | str | list[Json] | dict[str, Json]
 
 ERROR = re.compile(
-    r"^(?:(?P<file>[^\s:][^:]*?)(?::(?P<line>[0-9]+))?: )?(?P<message>.*?)(?: \((?P<rule>[0-9]{6})\))?$"
+    r"^(?:(?P<file>[^\s:][^:]*?)(?::(?P<line>[0-9]+))?: )?"
+    r"(?P<message>.*?)(?: \((?P<rule>[0-9]{6})\))?$"
 )
 
 

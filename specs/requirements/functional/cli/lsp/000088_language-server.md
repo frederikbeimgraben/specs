@@ -2,7 +2,7 @@
 id: "000088"
 title: specs lsp runs the language server
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -35,9 +35,9 @@ text. The server must check the project:
 3. When the client saves a file: the whole project, from the files on the disk. The server
    must remove each diagnostic of a file that has no error now.
 
-On a reference to a rule, the server must give a hover and a definition. A reference is a `§`
-reference in a spec or in the code (000017), and an entry of `replaces` or `replaced_by`
-(000009). The hover must show the long form, the title, the status and the text of the rule
+On a reference to a rule, the server must give a hover and a definition. In a spec, a
+reference is a rule ID in the short or the long form (000047), also in the front matter. In the
+code, a reference is a `§` reference (000017). The hover must show the long form, the title, the status and the text of the rule
 after the front matter. The definition must give the first line of the file of the
 rule. The server must not write a file.
 
