@@ -2,7 +2,7 @@
 id: "000080"
 title: specs prints its data as JSON
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -34,11 +34,12 @@ must not go together.
 | `init`, `update`, `add`, `new` | `message`, `hints`, `check` with `specs` and `errors` or `null`, and `changed`. |
 
 A rule object must hold `kind` (the kind letter), `id` (the short form of 000047), `long` (the
-long form), `status`, `title` and `path`. An error object must hold `file`, `message` and
-`rule` (the number of the rule that the error names), and `null` for a part that the error line
-does not have. Each object of `changed` must hold `mark` and `path`. When a command stops with
-an error, it must print `{"error": "<error>"}` to stdout, nothing to stderr, and end with the
-exit code 1. A path must be relative to the root of the project.
+long form), `status`, `title` and `path`. An error object must hold `file`, `line` (a whole
+number from 1), `message` and `rule` (the number of the rule that the error names), and `null`
+for a part that the error line does not have. Each object of `changed` must hold `mark` and
+`path`. When a command stops with an error, it must print `{"error": "<error>"}` to stdout,
+nothing to stderr, and end with the exit code 1. A path must be relative to the root of the
+project.
 
 Reason: A script reads every command in the same way, without parsing text.
 

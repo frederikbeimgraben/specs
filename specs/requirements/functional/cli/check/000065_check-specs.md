@@ -2,7 +2,7 @@
 id: "000065"
 title: specs check checks the specs
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -13,6 +13,7 @@ tests:
   - tests/test_check.py:test_check_finds_a_bad_file_name
   - tests/test_check.py:test_check_finds_a_missing_key
   - tests/test_check.py:test_check_finds_a_stale_index
+  - tests/test_check.py:test_check_gives_the_line
 implementation:
   - src/specs_kit/agents.py
   - src/specs_kit/check.py
@@ -25,11 +26,14 @@ scope:
 # specs check checks the specs
 
 `specs check` must run every check of the conventions on the specs of the project. It must also
-check that `specs.toml`, `specs.lock` and the copies of 000048 agree (000082), and check each `§` reference in
-`code_dirs` (000017). It must print one line for each
-error, then the count of specs and errors. It must exit with 1 when it finds an error, else
-with 0. The command must not change a file and must not use the network. `specs install`
-writes the index `specs/README.md` (000007) and the block in `AGENTS.md` (000079) (000083).
+check that `specs.toml`, `specs.lock` and the copies of 000048 agree (000082), and check each
+`§` reference in `code_dirs` (000017). It must print one line for each error, then the count of
+specs and errors. An error line must start with `<path>:<line>: `. The line must be the line of
+the front matter key, of the entry or of the reference that the error names, else 1. An error
+of a folder or of a missing file must have only `<path>: `. The command must exit with 1 when
+it finds an error, else with 0. The command must not change a file and must not use the
+network. `specs install` writes the index `specs/README.md` (000007) and the block in
+`AGENTS.md` (000079) (000083).
 
 Reason: CI and an agent run the same check with one command.
 
