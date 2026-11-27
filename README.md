@@ -55,7 +55,7 @@ nix run github:frederikbeimgraben/specs/<ref> -- <command>
 | `update [<ref>]` | Updates the kit: the copy of its rules, the templates, the skills, the CI file, the MCP server entry and the input `specs` in `flake.nix`. |
 | `update <repo> <ref>` | Replaces the copy of the rules of a different repository. |
 | `add <repo> <ref>` | Adds the copy of the rules of a different repository. |
-| `new <kind> <area>/<topic> <name> "<title>" [--owner <login>]` | Makes a new spec from its template, with the next number. |
+| `new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` | Makes a new spec from its template, with the next number and the paths of `scope`. |
 | `resolve <id>` | Prints the long form of an ID, for example `C/specs/format/000012` for `000012`. |
 | `show <id>` | Prints the full text of a spec. |
 | `list` | Lists every rule. |

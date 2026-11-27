@@ -7,8 +7,6 @@ owner: your-github-login
 updated: YYYY-MM-DD
 version: 1
 media_type: application/json
-tests:
-  - "tests/protocols/test_example.py:test_example_matches_schema"
 implementation: null
 scope:
   - src/example

@@ -110,7 +110,7 @@ def schema_path(spec_path: Path) -> Path:
     return spec_path.with_name(spec_path.name[: -len(".md")] + ".schema.json")
 
 
-def _is_json(media_type: object) -> bool:
+def is_json(media_type: object) -> bool:
     """Return True for `application/json` and every `+json` media type.
 
     Args:
@@ -191,7 +191,7 @@ def _check_protocol(ctx: Context, spec: Spec) -> Errors:
     if len(FENCE.findall(example)) < 2:
         return (f"{rel}: ## Example must hold at least one code block (000029)",)
     schema = schema_path(spec.path)
-    if not _is_json(spec.meta.get("media_type")):
+    if not is_json(spec.meta.get("media_type")):
         return _check_plain_protocol(rel, schema, sections)
     data = _read_schema(rel, schema)
     return (data,) if isinstance(data, str) else _check_examples(rel, data, example)
