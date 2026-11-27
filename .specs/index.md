@@ -14,7 +14,7 @@ A new spec starts with
 specs/
   requirements/
     functional/
-      cli/  add, check, init, list, mcp, new, output, resolve, search, settings, show, update
+      cli/  add, agents, check, init, list, mcp, new, output, resolve, search, settings, show, update
   structures/
     specs/  lifecycle, model
   style/
@@ -79,7 +79,8 @@ specs/
 | [C/specs/structures/000038](/specs/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | approved |
-| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | approved |
+| [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | specs writes the rules for agents to AGENTS.md | draft |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | draft |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | draft |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | approved |

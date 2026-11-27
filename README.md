@@ -40,6 +40,7 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 | `.claude/skills/spec-*` | Skills for agents. |
 | `.mcp.json` | The MCP server `specs`. |
 | `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` (included from `.gitlab-ci.yml`) or `.forgejo/workflows/specs.yml` | The CI job. |
+| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `specs check --write`, and the import `@AGENTS.md` (000079). |
 | `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `specs` at the `ref` of the kit (000066). |
 
 ## Commands
