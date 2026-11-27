@@ -11,7 +11,10 @@ from specs_kit.project import Project, Spec
 
 type Json = None | bool | int | str | list[Json] | dict[str, Json]
 
-ERROR = re.compile(r"^(?:(?P<file>[^\s:][^:]*?): )?(?P<message>.*?)(?: \((?P<rule>[0-9]{6})\))?$")
+ERROR = re.compile(
+    r"^(?:(?P<file>[^\s:][^:]*?)(?::(?P<line>[0-9]+))?: )?"
+    r"(?P<message>.*?)(?: \((?P<rule>[0-9]{6})\))?$"
+)
 
 
 def dumps(value: Json) -> str:
@@ -83,17 +86,18 @@ def spec_text(project: Project, spec: Spec) -> Json:
 
 
 def error(line: str) -> Json:
-    """Return one error of the check as an object with its file, message and rule.
+    """Return one error of the check as an object with its file, line, message and rule.
 
     Args:
         line: The error line.
 
     Returns:
-        The object. `file` or `rule` is None when the line has none.
+        The object. `file`, `line` or `rule` is None when the error has none.
     """
     found = ERROR.match(line)
     return {
         "file": found["file"] if found else None,
+        "line": int(found["line"]) if found and found["line"] else None,
         "message": found["message"] if found else line,
         "rule": found["rule"] if found else None,
     }

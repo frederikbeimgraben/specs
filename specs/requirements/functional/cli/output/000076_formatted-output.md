@@ -17,7 +17,8 @@ scope:
 
 # specs formats its output for a terminal
 
-When stdout is a terminal, each command of `specs` except `mcp` must print a formatted output:
+When stdout is a terminal, each command of `specs` except `mcp` and `lsp` must print a formatted
+output:
 
 | Command | Formatted output |
 | --- | --- |

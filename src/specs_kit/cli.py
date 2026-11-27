@@ -14,9 +14,10 @@ Usage:
     specs list [<kind>]
     specs search <text>
     specs mcp
+    specs lsp
 
-Each command except `mcp` takes `--raw` or `--json`. On a terminal, `init`, `add`, `update` and
-`configure` ask questions; `--yes` takes the proposals instead (§000085).
+Each command except `mcp` and `lsp` takes `--raw` or `--json`. On a terminal, `init`, `add`,
+`update` and `configure` ask questions; `--yes` takes the proposals instead (§000085).
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from pathlib import Path
 from rich.console import Group, RenderableType
 from rich.text import Text
 
-from specs_kit import data, queries
+from specs_kit import data, lsp, queries
 from specs_kit.ask import Ask, Cancelled, Stop, asker
 from specs_kit.changes import Mark, lines, recording
 from specs_kit.check import run
@@ -93,11 +94,12 @@ def parser() -> argparse.ArgumentParser:
     )
     commands.add_parser("search", help="list the rules that hold a text").add_argument("text")
     for name, sub in commands.choices.items():
-        if name != "mcp":
+        if name not in ("mcp", "lsp"):
             form = sub.add_mutually_exclusive_group()
             form.add_argument("--raw", action="store_true", help="print plain text")
             form.add_argument("--json", action="store_true", help="print the data as JSON")
     commands.add_parser("mcp", help="run the MCP server on stdin and stdout")
+    commands.add_parser("lsp", help="run the language server on stdin and stdout")
     return root
 
 
@@ -393,6 +395,8 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             )
         case "mcp":
             return serve()
+        case "lsp":
+            return lsp.serve()
         case _:
             raise KitError(f"unknown command {command!r}")
 

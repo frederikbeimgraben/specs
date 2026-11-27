@@ -27,6 +27,7 @@
           dependencies = with pkgs.python313Packages; [
             jsonschema
             mcp
+            pygls
             questionary
             rich
             tomlkit
@@ -60,6 +61,7 @@
             (pkgs.python313.withPackages (ps: [
               ps.jsonschema
               ps.mcp
+              ps.pygls
               ps.pytest
               ps.questionary
               ps.rich
