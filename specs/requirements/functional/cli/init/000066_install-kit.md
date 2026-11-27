@@ -57,8 +57,8 @@ The input `specs` must not follow the input `nixpkgs` of the project.
 The command must write only the parts whose switch in `[features]` is on (000084). At its end,
 it must do the steps of `specs install` (000083).
 
-Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must stop with
-an error and change no file when `specs.toml` exists, when the forge is unknown, when
+Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must
+stop with an error and change no file when `specs.toml` exists, when the forge is unknown, when
 `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when this
 program is an older commit of the kit than the commit of the `ref`.
 
