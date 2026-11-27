@@ -48,4 +48,8 @@ reportConstantRedefinition = "error"
 reportMissingTypeArgument = "error"
 reportMissingParameterType = "error"
 reportMatchNotExhaustive = "error"
-include = ["src"]
+include = ["src", "tests"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests"]
+testpaths = ["tests"]

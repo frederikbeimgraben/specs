@@ -5,6 +5,10 @@ kind: functional
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_kit.py:test_add_copies_the_rules
+  - tests/test_kit.py:test_add_with_include_copies_only_the_folders
+  - tests/test_kit.py:test_add_stops_for_a_repository_in_the_settings
 implementation:
   - src/specs_kit/kit.py
   - src/specs_kit/cli.py
@@ -28,3 +32,5 @@ own message. It must end with the exit code 1 when the check finds errors.
 Reason: A project takes the rules of a different repository, or only the rules that it needs,
 with one command (000048). The new rules can show errors in the project, and the index must
 show them.
+
+Test: `tests/test_kit.py`.

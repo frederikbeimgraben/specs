@@ -9,7 +9,8 @@ This repository is a starter kit for specs. `README.md` tells what it does.
 - All text follows ASD-STE100 (000025).
 - Skills: `spec-write`, `spec-structure`, `spec-approve`, `spec-check`, `spec-adopt`.
 - Command: `nix run . -- <command>`. Check: `nix run . -- check --write`. It must show 0 errors.
-- Code check: `nix develop -c ruff check src`, `nix develop -c basedpyright`. Both must show 0 errors.
+- Code check: `nix develop -c ruff check src tests`, `nix develop -c basedpyright`. Both must show 0 errors.
+- Tests: `nix develop -c pytest`. All tests must pass.
 - `specs init` and `specs update` copy `.specs/templates/`, the skills `.claude/skills/spec-*` and `src/specs_kit/data/` into a project. A new file of the kit that a project needs must be in one of these places.
 
 <!-- specs:begin (written by specs check --write, do not edit) -->

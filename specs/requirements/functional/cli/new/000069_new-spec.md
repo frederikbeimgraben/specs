@@ -5,6 +5,11 @@ kind: functional
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_new.py:test_new_writes_a_spec_that_passes_the_check
+  - tests/test_new.py:test_new_writes_a_schema_for_a_json_protocol
+  - tests/test_new.py:test_new_stops_for_a_missing_scope_path
+  - tests/test_new.py:test_new_needs_a_scope
 implementation:
   - src/specs_kit/new.py
 scope:
@@ -25,3 +30,5 @@ a protocol with a JSON media type, the command must also write a minimal JSON Sc
 spec (000028). The MCP tool `new` must take `scope` as a list of paths.
 
 Reason: A new spec starts correct, with the next free number (000008).
+
+Test: `tests/test_new.py`.

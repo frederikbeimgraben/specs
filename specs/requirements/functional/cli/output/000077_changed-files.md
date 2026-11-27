@@ -5,6 +5,9 @@ kind: functional
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_output.py:test_changed_files_are_sorted_and_relative
+  - tests/test_output.py:test_a_write_with_the_same_content_is_no_change
 implementation:
   - src/specs_kit/changes.py
   - src/specs_kit/cli.py
@@ -35,3 +38,5 @@ MCP tool `new` must return the same list as plain text.
 
 Reason: The person sees what a command did without `git status`, and a script can read the
 list.
+
+Test: `tests/test_output.py`.

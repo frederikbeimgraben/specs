@@ -5,6 +5,8 @@ kind: functional
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_settings.py:test_a_bad_setting_stops_each_command
 implementation:
   - src/specs_kit/project.py
   - src/specs_kit/data/specs.toml
@@ -33,3 +35,5 @@ one line `specs: specs.toml: <error>` and the exit code 1.
 
 Reason: One table tells every key, and a wrong type stops the command before it reads the wrong
 folders.
+
+Test: `tests/test_settings.py`.

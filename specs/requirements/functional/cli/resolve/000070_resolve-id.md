@@ -5,6 +5,9 @@ kind: functional
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
+tests:
+  - tests/test_queries.py:test_resolve_prints_the_long_form
+  - tests/test_queries.py:test_resolve_stops_for_an_unknown_id
 implementation:
   - src/specs_kit/queries.py
   - src/specs_kit/project.py
@@ -19,3 +22,5 @@ example `C/specs/format/000012` for `000012`. It must stop with an error when no
 project or of a copy has this ID.
 
 Reason: An agent gets the kind and the place of a rule without a search.
+
+Test: `tests/test_queries.py`.

@@ -58,6 +58,7 @@
             (pkgs.python313.withPackages (ps: [
               ps.jsonschema
               ps.mcp
+              ps.pytest
               ps.rich
             ]))
             pkgs.ruff

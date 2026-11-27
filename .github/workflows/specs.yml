@@ -17,6 +17,7 @@ jobs:
           fetch-depth: 0
       - uses: cachix/install-nix-action@v31
       - run: nix run . -- check
-      - run: nix develop -c ruff check src
-      - run: nix develop -c ruff format --check src
+      - run: nix develop -c ruff check src tests
+      - run: nix develop -c ruff format --check src tests
       - run: nix develop -c basedpyright
+      - run: nix develop -c pytest
