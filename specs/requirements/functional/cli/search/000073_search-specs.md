@@ -2,7 +2,7 @@
 id: "000073"
 title: specs search finds rules by a text
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:

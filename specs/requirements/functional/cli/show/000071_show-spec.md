@@ -2,7 +2,7 @@
 id: "000071"
 title: specs show prints the full text of a spec
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:

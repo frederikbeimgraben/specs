@@ -2,7 +2,7 @@
 id: "000072"
 title: specs list prints every rule
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
