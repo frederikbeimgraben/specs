@@ -2,7 +2,7 @@
 id: "000077"
 title: specs lists the files that a command changes
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
