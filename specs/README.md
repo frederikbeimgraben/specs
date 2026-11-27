@@ -82,7 +82,7 @@ specs/
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | draft |
 | [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | specs writes the rules for agents to AGENTS.md | approved |
 | [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs | approved |
-| [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | specs configure changes the settings in specs.toml | draft |
+| [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | specs configure changes the settings in specs.toml | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | draft |
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | specs install brings a project to the state of its settings | approved |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |

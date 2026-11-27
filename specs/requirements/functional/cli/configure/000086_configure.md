@@ -2,7 +2,7 @@
 id: "000086"
 title: specs configure changes the settings in specs.toml
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
