@@ -2,7 +2,7 @@
 id: "000078"
 title: specs.toml holds the settings of the specs command
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
