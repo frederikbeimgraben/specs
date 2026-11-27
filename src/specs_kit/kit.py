@@ -26,8 +26,10 @@ class KitError(Exception):
 
 CI_FILES: Mapping[str, tuple[str, str]] = {
     "github": ("github-workflow.yml", ".github/workflows/specs.yml"),
-    "gitlab": ("gitlab-ci.yml", ".gitlab-ci.yml"),
+    "gitlab": ("gitlab-ci.yml", ".gitlab/ci/specs.yml"),
 }
+GITLAB_ROOT = ".gitlab-ci.yml"
+GITLAB_INCLUDE = "  - local: .gitlab/ci/specs.yml"
 
 
 def _data(name: str) -> str:
@@ -184,6 +186,53 @@ def write_mcp(project: Project, ref: str) -> None:
     )
 
 
+def gitlab_root_text(root: Path) -> str | None:
+    """Return the new text of `.gitlab-ci.yml` with the include of the kit job.
+
+    Args:
+        root: The root of the project.
+
+    Returns:
+        The new text, or None when the file includes the job already.
+
+    Raises:
+        KitError: The file has an `include` that is not a block list.
+    """
+    path = root / GITLAB_ROOT
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    lines = text.splitlines()
+    match (
+        GITLAB_INCLUDE.strip("- ") in text,
+        "include:" in lines,
+        any(ln.startswith("include") for ln in lines),
+    ):
+        case (True, _, _):
+            return None
+        case (False, True, _):
+            at = lines.index("include:") + 1
+            return "\n".join((*lines[:at], GITLAB_INCLUDE, *lines[at:])) + "\n"
+        case (False, False, True):
+            raise KitError(f"{GITLAB_ROOT}: add {GITLAB_INCLUDE.strip()} to include by hand")
+        case (False, False, False):
+            return f"{text.rstrip()}\n\ninclude:\n{GITLAB_INCLUDE}\n".lstrip()
+
+
+def check_forge(root: Path, forge: str) -> None:
+    """Fail before a change when the kit cannot write its CI file for a forge.
+
+    Args:
+        root: The root of the project.
+        forge: The forge.
+
+    Raises:
+        KitError: The forge is unknown, or `.gitlab-ci.yml` cannot get the include.
+    """
+    if forge not in CI_FILES:
+        raise KitError(f"specs.toml: forge {forge!r} must be github or gitlab")
+    if forge == "gitlab":
+        gitlab_root_text(root)
+
+
 def install_kit_files(source: Path, project: Project, ref: str) -> None:
     """Replace the templates, the skills, the CI file and the MCP server of the kit.
 
@@ -196,14 +245,16 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
         KitError: The forge in `specs.toml` is unknown.
     """
     forge = project.config.forge
-    if forge not in CI_FILES:
-        raise KitError(f"specs.toml: forge {forge!r} must be github or gitlab")
+    check_forge(project.root, forge)
     data_name, target = CI_FILES[forge]
+    root_text = gitlab_root_text(project.root) if forge == "gitlab" else None
     _replace_tree(source / ".specs" / "templates", project.templates_dir)
     for skill in _skills(source):
         _replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
     (project.root / target).parent.mkdir(parents=True, exist_ok=True)
     (project.root / target).write_text(_data(data_name).replace("{ref}", ref), encoding="utf-8")
+    if root_text is not None:
+        (project.root / GITLAB_ROOT).write_text(root_text, encoding="utf-8")
     write_mcp(project, ref)
 
 
@@ -256,6 +307,7 @@ def init(root: Path, forge: str | None) -> Project:
     if (root / CONFIG_NAME).exists():
         raise KitError(f"{CONFIG_NAME} exists; run specs update")
     found = forge or detect_forge(root)
+    check_forge(root, found)
     (root / CONFIG_NAME).write_text(_data("specs.toml").replace("{forge}", found), encoding="utf-8")
     (root / "specs").mkdir(exist_ok=True)
     project = Project.open(root)
@@ -333,6 +385,8 @@ def _install(project: Project, repo: str, ref: str) -> str:
         commit = _run("git", "-C", str(source), "rev-parse", "HEAD").strip()
         if repo == KIT_REPO and not (source / ".specs" / "templates").is_dir():
             raise KitError(f"the kit at {commit} has no .specs/templates/; it is too old")
+        if repo == KIT_REPO:
+            check_forge(project.root, project.config.forge)
         copy_rules(source, project, repo)
         set_ref(project, repo, commit)
         if repo == KIT_REPO:

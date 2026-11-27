@@ -2,9 +2,9 @@
 id: "000062"
 title: Python code is documented in Google-style docstrings
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - pyproject.toml
   - src/specs_kit/

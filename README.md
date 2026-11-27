@@ -39,7 +39,7 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 | `specs.toml` | The settings. |
 | `.claude/skills/spec-*` | Skills for agents. |
 | `.mcp.json` | The MCP server `specs`. |
-| `.github/workflows/specs.yml` or `.gitlab-ci.yml` | The CI job. |
+| `.github/workflows/specs.yml` or `.gitlab/ci/specs.yml`, included from `.gitlab-ci.yml` | The CI job. |
 
 ## Commands
 

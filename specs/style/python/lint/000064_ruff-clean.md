@@ -2,9 +2,9 @@
 id: "000064"
 title: ruff reports no warning
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - pyproject.toml
 scope:

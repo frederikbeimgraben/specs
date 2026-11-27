@@ -2,7 +2,7 @@
 id: "000075"
 title: ruff format changes nothing
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:

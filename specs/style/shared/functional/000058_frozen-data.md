@@ -2,9 +2,9 @@
 id: "000058"
 title: Data types are frozen by default
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - src/specs_kit/
 scope:

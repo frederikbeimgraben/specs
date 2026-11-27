@@ -19,7 +19,7 @@ description: Add the spec format of frederikbeimgraben/specs to a new or an exis
    `init` writes `specs.toml`, makes `specs/`, and puts the rules of the kit in
    `.specs/upstream/github.com/frederikbeimgraben/specs/` as an unchanged copy (000048). It
    copies the templates to `.specs/templates/` and the skills to `.claude/skills/`. It writes the
-   CI file (`.github/workflows/specs.yml` or `.gitlab-ci.yml`) and the MCP server `specs` in
+   CI file (`.github/workflows/specs.yml` or `.gitlab/ci/specs.yml`, included from `.gitlab-ci.yml`) and the MCP server `specs` in
    `.mcp.json`. It finds the forge in `git remote origin`. Give `--forge github` or
    `--forge gitlab` if it cannot.
 

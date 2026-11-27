@@ -79,7 +79,7 @@ specs/
 | [C/specs/structures/000038](/specs/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | specs add adds the copy of a different repository | draft |
-| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | draft |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs and writes the index | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | draft |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | draft |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | draft |
@@ -88,20 +88,20 @@ specs/
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | specs search finds rules by a text | draft |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | specs show prints the full text of a spec | draft |
 | [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | specs update replaces a copy and its ref | draft |
-| [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | draft |
-| [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | draft |
-| [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | draft |
-| [S/python/lint/000075](/specs/style/python/lint/000075_ruff-format.md) | ruff format changes nothing | draft |
-| [S/python/typing/000061](/specs/style/python/typing/000061_strict-types.md) | Python code is strictly typed | draft |
-| [S/python/version/000060](/specs/style/python/version/000060_python-313.md) | Python code needs Python 3.13 or later | draft |
-| [S/shared/functional/000052](/specs/style/shared/functional/000052_body-shape.md) | A function body has one shape | draft |
-| [S/shared/functional/000053](/specs/style/shared/functional/000053_readability-limit.md) | Readability limits the single expression | draft |
-| [S/shared/functional/000054](/specs/style/shared/functional/000054_bind-once.md) | A local is bound once | draft |
-| [S/shared/functional/000055](/specs/style/shared/functional/000055_no-mutation.md) | A value is not mutated | draft |
-| [S/shared/functional/000056](/specs/style/shared/functional/000056_comprehensions.md) | Comprehensions instead of loops | draft |
-| [S/shared/functional/000057](/specs/style/shared/functional/000057_exhaustive-match.md) | A branch on one value is an exhaustive match | draft |
-| [S/shared/functional/000058](/specs/style/shared/functional/000058_frozen-data.md) | Data types are frozen by default | draft |
-| [S/shared/functional/000059](/specs/style/shared/functional/000059_exceptions.md) | The exceptions of the functional style are named | draft |
+| [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
+| [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | approved |
+| [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | approved |
+| [S/python/lint/000075](/specs/style/python/lint/000075_ruff-format.md) | ruff format changes nothing | approved |
+| [S/python/typing/000061](/specs/style/python/typing/000061_strict-types.md) | Python code is strictly typed | approved |
+| [S/python/version/000060](/specs/style/python/version/000060_python-313.md) | Python code needs Python 3.13 or later | approved |
+| [S/shared/functional/000052](/specs/style/shared/functional/000052_body-shape.md) | A function body has one shape | approved |
+| [S/shared/functional/000053](/specs/style/shared/functional/000053_readability-limit.md) | Readability limits the single expression | approved |
+| [S/shared/functional/000054](/specs/style/shared/functional/000054_bind-once.md) | A local is bound once | approved |
+| [S/shared/functional/000055](/specs/style/shared/functional/000055_no-mutation.md) | A value is not mutated | approved |
+| [S/shared/functional/000056](/specs/style/shared/functional/000056_comprehensions.md) | Comprehensions instead of loops | approved |
+| [S/shared/functional/000057](/specs/style/shared/functional/000057_exhaustive-match.md) | A branch on one value is an exhaustive match | approved |
+| [S/shared/functional/000058](/specs/style/shared/functional/000058_frozen-data.md) | Data types are frozen by default | approved |
+| [S/shared/functional/000059](/specs/style/shared/functional/000059_exceptions.md) | The exceptions of the functional style are named | approved |
 | [U/specs/lifecycle/000041](/specs/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | approved |
 | [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |

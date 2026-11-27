@@ -2,9 +2,9 @@
 id: "000061"
 title: Python code is strictly typed
 kind: style
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - pyproject.toml
   - src/specs_kit/
