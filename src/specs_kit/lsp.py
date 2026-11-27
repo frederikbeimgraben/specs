@@ -242,8 +242,10 @@ def _pattern(project: Project, path: Path) -> re.Pattern[str] | None:
             return None
 
 
-def reference(pattern: re.Pattern[str], text: str, line: int, column: int) -> str | None:
-    """Return the rule ID at a position.
+def reference(
+    pattern: re.Pattern[str], text: str, line: int, column: int
+) -> tuple[str, types.Range] | None:
+    """Return the rule ID at a position and the range of the reference.
 
     Args:
         pattern: The pattern of a reference, with the ID in group 1.
@@ -252,11 +254,24 @@ def reference(pattern: re.Pattern[str], text: str, line: int, column: int) -> st
         column: The column, from 0.
 
     Returns:
-        The ID, or None.
+        The ID and the range of the whole reference, with `§` in code, or None.
     """
     lines = text.splitlines()
     here = lines[line] if line < len(lines) else ""
-    return next((m[1] for m in pattern.finditer(here) if m.start() <= column <= m.end()), None)
+    return next(
+        (
+            (
+                m[1],
+                types.Range(
+                    start=types.Position(line=line, character=m.start()),
+                    end=types.Position(line=line, character=m.end()),
+                ),
+            )
+            for m in pattern.finditer(here)
+            if m.start() <= column <= m.end()
+        ),
+        None,
+    )
 
 
 def _in_copy(project: Project, path: Path, ref: str) -> str:
@@ -276,8 +291,10 @@ def _in_copy(project: Project, path: Path, ref: str) -> str:
     return f"{repo}:{ref}" if repo and ":" not in ref else ref
 
 
-def target(ls: LanguageServer, uri: str, position: types.Position) -> Spec | None:
-    """Return the rule of the reference at a position.
+def target(
+    ls: LanguageServer, uri: str, position: types.Position
+) -> tuple[Spec, types.Range] | None:
+    """Return the rule of the reference at a position and the range of the reference.
 
     Args:
         ls: The server.
@@ -285,7 +302,7 @@ def target(ls: LanguageServer, uri: str, position: types.Position) -> Spec | Non
         position: The position.
 
     Returns:
-        The spec, or None when there is no reference or no rule.
+        The spec and the range, or None when there is no reference or no rule.
     """
     path = _path(uri)
     try:
@@ -294,8 +311,13 @@ def target(ls: LanguageServer, uri: str, position: types.Position) -> Spec | Non
         return None
     pattern = _pattern(project, path)
     text = ls.workspace.get_text_document(uri).source
-    ref = reference(pattern, text, position.line, position.character) if pattern else None
-    return project.find(_in_copy(project, path, ref)) if ref else None
+    found = reference(pattern, text, position.line, position.character) if pattern else None
+    match found:
+        case (ref, span):
+            spec = project.find(_in_copy(project, path, ref))
+            return (spec, span) if spec else None
+        case _:
+            return None
 
 
 def hover_text(spec: Spec) -> str:
@@ -358,18 +380,36 @@ def _hover(ls: LanguageServer, params: types.HoverParams) -> types.Hover | None:
     Returns:
         The hover, or None.
     """
-    spec = target(ls, params.text_document.uri, params.position)
-    return (
-        types.Hover(
-            contents=types.MarkupContent(kind=types.MarkupKind.Markdown, value=hover_text(spec))
-        )
-        if spec
-        else None
-    )
+    match target(ls, params.text_document.uri, params.position):
+        case (spec, span):
+            return types.Hover(
+                contents=types.MarkupContent(
+                    kind=types.MarkupKind.Markdown, value=hover_text(spec)
+                ),
+                range=span,
+            )
+        case _:
+            return None
+
+
+def _links(ls: LanguageServer) -> bool:
+    """Return whether the client takes a `LocationLink` as the definition.
+
+    Args:
+        ls: The server.
+
+    Returns:
+        True when the client gives `linkSupport` for the definition.
+    """
+    document = ls.client_capabilities.text_document
+    definition = document.definition if document else None
+    return bool(definition and definition.link_support)
 
 
 @server.feature(types.TEXT_DOCUMENT_DEFINITION)
-def _definition(ls: LanguageServer, params: types.DefinitionParams) -> types.Location | None:
+def _definition(
+    ls: LanguageServer, params: types.DefinitionParams
+) -> types.Location | list[types.LocationLink] | None:
     """Give the first line of the file of the rule under the cursor.
 
     Args:
@@ -377,15 +417,25 @@ def _definition(ls: LanguageServer, params: types.DefinitionParams) -> types.Loc
         params: The parameters.
 
     Returns:
-        The location, or None.
+        A link with the range of the reference when the client takes links, else the location,
+        or None.
     """
-    spec = target(ls, params.text_document.uri, params.position)
     start = types.Position(line=0, character=0)
-    return (
-        types.Location(uri=spec.path.resolve().as_uri(), range=types.Range(start=start, end=start))
-        if spec
-        else None
-    )
+    top = types.Range(start=start, end=start)
+    match target(ls, params.text_document.uri, params.position), _links(ls):
+        case (spec, span), True:
+            return [
+                types.LocationLink(
+                    target_uri=spec.path.resolve().as_uri(),
+                    target_range=top,
+                    target_selection_range=top,
+                    origin_selection_range=span,
+                )
+            ]
+        case (spec, _), False:
+            return types.Location(uri=spec.path.resolve().as_uri(), range=top)
+        case _:
+            return None
 
 
 def serve() -> int:

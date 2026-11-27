@@ -86,7 +86,7 @@ specs/
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | approved |
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | specs install brings a project to the state of its settings | approved |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
-| [F/cli/lsp/000088](/specs/requirements/functional/cli/lsp/000088_language-server.md) | specs lsp runs the language server | approved |
+| [F/cli/lsp/000088](/specs/requirements/functional/cli/lsp/000088_language-server.md) | specs lsp runs the language server | draft |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | approved |
 | [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | approved |
 | [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | approved |
