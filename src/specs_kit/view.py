@@ -11,6 +11,7 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 
+from specs_kit.changes import Mark
 from specs_kit.project import Spec
 
 STATUS_STYLE: Mapping[str, str] = {
@@ -18,6 +19,12 @@ STATUS_STYLE: Mapping[str, str] = {
     "draft": "yellow",
     "replaced": "dim",
     "removed": "dim strike",
+}
+
+MARK_STYLE: Mapping[Mark, str] = {
+    Mark.ADDED: "green",
+    Mark.MODIFIED: "yellow",
+    Mark.DELETED: "red",
 }
 
 
@@ -93,3 +100,17 @@ def done(text: str) -> Text:
         The message with a green mark.
     """
     return Text.assemble(("✓ ", "bold green"), text)
+
+
+def file_list(changed: tuple[tuple[Mark, str], ...]) -> Group:
+    """Return the changed files as in `git status --short`, with a color for each mark (§000077).
+
+    Args:
+        changed: The mark and the path of each change.
+
+    Returns:
+        One line for each file.
+    """
+    return Group(
+        *(Text.assemble((f"{m} ", f"bold {MARK_STYLE[m]}"), (p, MARK_STYLE[m])) for m, p in changed)
+    )

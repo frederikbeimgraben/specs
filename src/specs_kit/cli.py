@@ -18,20 +18,21 @@ from __future__ import annotations
 
 import argparse
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
-from rich.console import RenderableType
+from rich.console import Group, RenderableType
 from rich.text import Text
 
 from specs_kit import queries
+from specs_kit.changes import Mark, lines, recording
 from specs_kit.check import run
 from specs_kit.devshell import init_flake, update_flake
 from specs_kit.kit import KitError, add, init, update
 from specs_kit.mcp_server import serve
 from specs_kit.new import NewError, new
 from specs_kit.project import KIT_REPO, Project
-from specs_kit.view import console, done, report, spec_text, table
+from specs_kit.view import console, done, file_list, report, spec_text, table
 
 
 def parser() -> argparse.ArgumentParser:
@@ -125,36 +126,62 @@ def _emit(pretty: bool, raw: Callable[[], str], view: Callable[[], RenderableTyp
     return 0
 
 
-def _check(write: bool, pretty: bool) -> int:
-    """Run the check and print the report.
+def _raw_changes(changed: tuple[tuple[Mark, str], ...]) -> str:
+    """Return the changed files as plain text, one `<mark> <path>` on each line (§000077).
+
+    Args:
+        changed: The mark and the path of each change.
+
+    Returns:
+        The lines, each with a newline.
+    """
+    return "".join(f"{mark} {path}\n" for mark, path in changed)
+
+
+def _check(write: bool, pretty: bool, log: Mapping[Path, Mark]) -> int:
+    """Run the check and print the report and the changed files.
 
     Args:
         write: True to write the index first.
         pretty: True for the formatted output.
+        log: The changes of the command.
 
     Returns:
         The exit code.
     """
-    count, errors = run(Project.open(), write=write)
+    project = Project.open()
+    count, errors = run(project, write=write)
+    changed = lines(log, project.root)
     _emit(
         pretty,
-        lambda: "".join(f"{e}\n" for e in errors) + f"{count} specs, {len(errors)} errors",
-        lambda: report(count, tuple(errors)),
+        lambda: (
+            "".join(f"{e}\n" for e in errors)
+            + f"{count} specs, {len(errors)} errors\n"
+            + _raw_changes(changed)
+        ),
+        lambda: Group(report(count, tuple(errors)), file_list(changed)),
     )
     return 1 if errors else 0
 
 
-def _message(pretty: bool, text: str) -> int:
-    """Print the message of a command that changes files.
+def _message(pretty: bool, text: str, log: Mapping[Path, Mark], root: Path) -> int:
+    """Print the message of a command that changes files, and the changed files.
 
     Args:
         pretty: True for the formatted output.
         text: The message.
+        log: The changes of the command.
+        root: The root of the project.
 
     Returns:
         The exit code 0.
     """
-    return _emit(pretty, lambda: text, lambda: done(text))
+    changed = lines(log, root)
+    return _emit(
+        pretty,
+        lambda: f"{text}\n{_raw_changes(changed)}",
+        lambda: Group(done(text), file_list(changed)),
+    )
 
 
 def _lines(text: str, hints: tuple[str, ...]) -> str:
@@ -171,7 +198,7 @@ def _lines(text: str, hints: tuple[str, ...]) -> str:
 
 
 def dispatch(args: argparse.Namespace) -> int:
-    """Run one command.
+    """Run one command and record the files it changes.
 
     Args:
         args: The parsed command line.
@@ -179,27 +206,44 @@ def dispatch(args: argparse.Namespace) -> int:
     Returns:
         The exit code.
     """
+    with recording() as log:
+        return _dispatch(args, _pretty(args), log)
+
+
+def _dispatch(args: argparse.Namespace, pretty: bool, log: Mapping[Path, Mark]) -> int:
+    """Run one command.
+
+    Args:
+        args: The parsed command line.
+        pretty: True for the formatted output.
+        log: The changes of the command, filled while it runs.
+
+    Returns:
+        The exit code.
+    """
     command: str = args.command
-    pretty = _pretty(args)
     match command:
         case "check":
-            return _check(bool(args.write), pretty)
+            return _check(bool(args.write), pretty, log)
         case "init":
             project = init(Path(args.dir), args.forge)
             hints = init_flake(project.root, project.config.upstream.get(KIT_REPO) or "")
-            return _message(pretty, _lines(f"installed the kit in {project.root}", hints))
+            text = _lines(f"installed the kit in {project.root}", hints)
+            return _message(pretty, text, log, project.root)
         case "update":
             target = _update_target(list(args.args))
             project = Project.open()
             commit = update(project, *target)
             hints = update_flake(project.root, commit) if target[0] == KIT_REPO else ()
-            return _message(pretty, _lines(f"updated to {commit}", hints))
+            return _message(pretty, _lines(f"updated to {commit}", hints), log, project.root)
         case "add":
-            commit = add(Project.open(), args.repo, args.ref, tuple(args.include))
-            return _message(pretty, f"added at {commit}")
+            project = Project.open()
+            commit = add(project, args.repo, args.ref, tuple(args.include))
+            return _message(pretty, f"added at {commit}", log, project.root)
         case "new":
-            path = new(Project.open(), args.kind, args.path, args.name, args.title, args.owner)
-            return _message(pretty, str(path))
+            project = Project.open()
+            path = new(project, args.kind, args.path, args.name, args.title, args.owner)
+            return _message(pretty, str(path), log, project.root)
         case "resolve":
             long = queries.resolve(Project.open(), args.id)
             return _emit(pretty, lambda: long, lambda: Text(long, style="bold cyan"))
