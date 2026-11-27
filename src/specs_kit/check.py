@@ -782,9 +782,11 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     text = index(project, specs, foreign, copied)
     agents_path = project.root / AGENTS
     upstream = tuple(s for s in copied if foreign.get(s.short) == "approved")
-    agents = merge(_read(agents_path), block(specs, upstream))
+    agents_on = project.config.on("agents")
+    agents = merge(_read(agents_path), block(specs, upstream)) if agents_on else None
     if write:
         write_text(project.index_path, text)
+    if write and agents is not None:
         write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
     return len(specs), (
@@ -803,7 +805,7 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
         ),
         *(
             ()
-            if _read(agents_path) == agents
+            if agents is None or _read(agents_path) == agents
             else (f"{AGENTS}: the rules for agents are not current; run specs install (000079)",)
         ),
         *_code_refs(ctx),

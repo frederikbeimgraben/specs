@@ -249,3 +249,15 @@ def lines(log: Mapping[Path, Mark], root: Path) -> tuple[tuple[Mark, str], ...]:
         (mark, path.relative_to(base).as_posix() if path.is_relative_to(base) else str(path))
         for path, mark in sorted(log.items())
     )
+
+
+def remove_tree(folder: Path) -> None:
+    """Delete a folder when it exists, and record each deleted file.
+
+    Args:
+        folder: The folder.
+    """
+    old = _files(folder)
+    shutil.rmtree(folder, ignore_errors=True)
+    for rel in sorted(old):
+        _compare_bytes(folder / rel, old[rel], None)

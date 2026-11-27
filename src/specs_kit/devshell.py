@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Mapping
 from pathlib import Path
 
 from specs_kit.changes import watching, write_text
@@ -59,32 +60,37 @@ def envrc(root: Path) -> tuple[str, ...]:
             return ()
 
 
-def init_flake(root: Path, ref: str) -> tuple[str, ...]:
+def init_flake(root: Path, ref: str, features: Mapping[str, bool]) -> tuple[str, ...]:
     """Give the project a devShell with the program `specs` at the ref of the kit.
 
     Without `flake.nix`, write a new flake with the input `specs` and a devShell, lock it, and
     add it to git. With `flake.nix`, change nothing and return a hint for each missing part.
+    The switches `flake` and `envrc` of `[features]` choose the parts (§000084).
 
     Args:
         root: The root of the project.
         ref: The commit of the kit.
+        features: The switches of `[features]`.
 
     Returns:
         The hints.
     """
     path = root / FLAKE
-    match path.is_file():
-        case False:
+    hints = envrc(root) if features.get("envrc", True) else ()
+    match features.get("flake", True), path.is_file():
+        case False, _:
+            return hints
+        case True, False:
             write_text(path, package_data(FLAKE).replace("{ref}", ref))
-            hints = envrc(root)
+            added = tuple(f for f in (FLAKE, ENVRC) if (root / f).is_file())
             if _git_repo(root):
-                run_command("git", "add", "--", FLAKE, ENVRC, cwd=root)
+                run_command("git", "add", "--", *added, cwd=root)
             with watching(root / LOCK):
                 run_command("nix", "flake", "lock", cwd=root)
             if _git_repo(root):
                 run_command("git", "add", "--", LOCK, cwd=root)
             return hints
-        case True:
+        case True, True:
             text = path.read_text(encoding="utf-8")
             return (
                 *(
@@ -97,8 +103,20 @@ def init_flake(root: Path, ref: str) -> tuple[str, ...]:
                     if "specs.packages" in text
                     else (f"hint: add {PACKAGE} to the packages of your devShell",)
                 ),
-                *envrc(root),
+                *hints,
             )
+
+
+def flake_template(ref: str) -> str:
+    """Return the text of a new `flake.nix` at a commit of the kit.
+
+    Args:
+        ref: The commit of the kit.
+
+    Returns:
+        The text.
+    """
+    return package_data(FLAKE).replace("{ref}", ref)
 
 
 def update_flake(root: Path, ref: str) -> tuple[str, ...]:

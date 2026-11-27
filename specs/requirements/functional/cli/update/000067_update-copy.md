@@ -2,7 +2,7 @@
 id: "000067"
 title: specs update resolves the refs again and replaces the copies
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -47,7 +47,9 @@ folder of `include`, when the kit at `<ref>` has no `specs/.templates/`, or when
 `.gitlab-ci.yml` has an `include` that is not a list. It must then change no file of the
 repository with the error.
 
-Before it copies, the command must run the migrations of 000081. At its end, it must do the
+The command must replace only the parts whose switch in `[features]` is on, and must not change
+`flake.nix` when `flake` is off (000084). Before it copies, the command must run the migrations
+of 000081. At its end, it must do the
 steps of `specs install` (000083).
 
 Reason: `specs.toml` keeps the version that the project wants, and one command takes the newest

@@ -2,7 +2,7 @@
 id: "000066"
 title: specs init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -53,7 +53,8 @@ with the commit of `specs.lock`, below the comment
 `# The specs command of the kit. The ref must be the commit in specs.lock.`.
 The input `specs` must not follow the input `nixpkgs` of the project.
 
-At its end, the command must do the steps of `specs install` (000083).
+The command must write only the parts whose switch in `[features]` is on (000084). At its end,
+it must do the steps of `specs install` (000083).
 
 Without `--forge`, the command must take the forge from `git remote origin`. It must stop with
 an error and change no file when `specs.toml` exists, when the forge is unknown, when
