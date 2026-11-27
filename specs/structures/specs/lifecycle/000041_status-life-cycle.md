@@ -2,7 +2,7 @@
 id: "000041"
 title: The status of a spec moves from draft to approved, replaced or removed
 kind: structure
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 diagram: state
