@@ -2,9 +2,9 @@
 id: "000017"
 title: Code refers to a rule with the § sign
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - src/specs_kit/check.py
   - specs.toml

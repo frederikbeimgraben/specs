@@ -2,9 +2,9 @@
 id: "000009"
 title: A spec starts with a YAML front matter
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - src/specs_kit/check.py
 scope:
@@ -22,7 +22,7 @@ these keys, in this order:
 | `title` | string | The title of the rule. It is the same text as the `#` title. |
 | `kind` | enum | `functional`, `non-functional`, `protocol`, `structure`, `style`, `convention`, `workflow`, `agent` or `decision` (000004). |
 | `status` | enum | `draft`, `approved`, `replaced` or `removed` (000010). |
-| `owner` | string | The GitHub login of the person who approves the rule. |
+| `owner` | string | The login on the forge of `specs.toml` (GitHub or GitLab) of the person who approves the rule. |
 | `updated` | date | The date of the last change, as `YYYY-MM-DD`. |
 | `replaced_by` | list of strings | Only with `status: replaced`: the numbers of the rules of the same repository that replace this rule (000010). |
 | `replaces` | list of strings | Optional, only with `status: draft` or `approved`: the rules that this rule replaces, in the short form of 000047. |

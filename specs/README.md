@@ -46,8 +46,8 @@ specs/
 | [C/specs/content/000025](/specs/conventions/specs/content/000025_ste.md) | A spec is written in ASD-STE100 | approved |
 | [C/specs/content/000026](/specs/conventions/specs/content/000026_product-terms.md) | Product terms stay as the product shows them | approved |
 | [C/specs/decisions/000042](/specs/conventions/specs/decisions/000042_whole-decision.md) | A decision spec records one decision with its alternatives | approved |
-| [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | draft |
-| [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | draft |
+| [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | approved |
+| [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | approved |
 | [C/specs/format/000010](/specs/conventions/specs/format/000010_status.md) | The status shows the approval | approved |
 | [C/specs/format/000011](/specs/conventions/specs/format/000011_one-rule-per-file.md) | One file holds one rule | approved |
 | [C/specs/format/000012](/specs/conventions/specs/format/000012_rule-id.md) | The rule ID has kind, path and number | approved |
@@ -55,20 +55,20 @@ specs/
 | [C/specs/format/000014](/specs/conventions/specs/format/000014_moved-rule.md) | A moved rule keeps its number | approved |
 | [C/specs/format/000015](/specs/conventions/specs/format/000015_labels.md) | Labels in a rule are fixed | approved |
 | [C/specs/format/000016](/specs/conventions/specs/format/000016_file-name.md) | The file name is number and name | approved |
-| [C/specs/format/000017](/specs/conventions/specs/format/000017_section-sign-reference.md) | Code refers to a rule with the § sign | draft |
-| [C/specs/layout/000004](/specs/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | draft |
+| [C/specs/format/000017](/specs/conventions/specs/format/000017_section-sign-reference.md) | Code refers to a rule with the § sign | approved |
+| [C/specs/layout/000004](/specs/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | approved |
 | [C/specs/layout/000005](/specs/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](/specs/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
-| [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | draft |
-| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds only the rules of the project | draft |
+| [C/specs/layout/000007](/specs/conventions/specs/layout/000007_index.md) | The index lists every rule | approved |
+| [C/specs/layout/000051](/specs/conventions/specs/layout/000051_project-rules-only.md) | specs/ holds only the rules of the project | approved |
 | [C/specs/protocols/000027](/specs/conventions/specs/protocols/000027_whole-format.md) | A protocol spec describes one whole format | approved |
 | [C/specs/protocols/000028](/specs/conventions/specs/protocols/000028_schema-file.md) | A JSON format has a JSON Schema file beside its spec | approved |
-| [C/specs/protocols/000029](/specs/conventions/specs/protocols/000029_checked-example.md) | The example of a JSON format matches its schema | draft |
+| [C/specs/protocols/000029](/specs/conventions/specs/protocols/000029_checked-example.md) | The example of a JSON format matches its schema | approved |
 | [C/specs/protocols/000030](/specs/conventions/specs/protocols/000030_breaking-change.md) | A breaking change of a format is a new protocol spec | approved |
 | [C/specs/protocols/000031](/specs/conventions/specs/protocols/000031_code-against-schema.md) | A test checks the output of the code against the schema | approved |
 | [C/specs/protocols/000032](/specs/conventions/specs/protocols/000032_protocols-key.md) | A rule names the formats that it uses | approved |
-| [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | draft |
-| [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | draft |
+| [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | approved |
+| [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | approved |
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |
 | [C/specs/structures/000033](/specs/conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | approved |
@@ -106,7 +106,7 @@ specs/
 | [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
-| [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | draft |
+| [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |
 
 ## Upstream
 

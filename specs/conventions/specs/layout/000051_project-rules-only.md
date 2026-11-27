@@ -2,9 +2,9 @@
 id: "000051"
 title: specs/ holds only the rules of the project
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - src/specs_kit/project.py
 scope:

@@ -2,9 +2,9 @@
 id: "000008"
 title: A new spec starts as a copy of the template
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - .specs/templates/TEMPLATE.md
   - .specs/templates/TEMPLATE-protocol.md

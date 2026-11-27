@@ -2,11 +2,12 @@
 id: "000048"
 title: The rules of a different repository are an unchanged copy
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-27
 implementation:
   - src/specs_kit/check.py
+  - src/specs_kit/kit.py
 scope:
   - specs/
 ---
