@@ -2,7 +2,7 @@
 id: "000082"
 title: specs.lock holds the commit and the hash of each copy
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
