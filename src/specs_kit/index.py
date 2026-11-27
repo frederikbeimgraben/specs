@@ -75,7 +75,7 @@ def tree(project: Project) -> str:
     )
 
 
-def _row(spec: Spec) -> str:
+def row(spec: Spec) -> str:
     """Return the index row of one spec, with a link from the root of the repository.
 
     Args:
@@ -126,14 +126,14 @@ def index(
                 "## Index",
                 "",
                 *head,
-                *(_row(s) for s in sorted(specs, key=lambda s: s.full_id)),
+                *(row(s) for s in sorted(specs, key=lambda s: s.full_id)),
                 "",
                 "## Upstream",
                 "",
                 "The rules of different repositories that apply to this project (000049).",
                 "",
                 *(
-                    (*head, *(_row(s) for s in sorted(upstream, key=lambda s: s.long)))
+                    (*head, *(row(s) for s in sorted(upstream, key=lambda s: s.long)))
                     if upstream
                     else ("No rules.",)
                 ),

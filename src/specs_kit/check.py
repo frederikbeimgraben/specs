@@ -14,6 +14,7 @@ import subprocess
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
+from specs_kit.agents import AGENTS, block, merge
 from specs_kit.changes import write_text
 from specs_kit.context import Context, Errors, where
 from specs_kit.index import index
@@ -723,11 +724,11 @@ def _read(path: Path) -> str | None:
 
 
 def run(project: Project, *, write: bool) -> tuple[int, Errors]:
-    """Run every check. With `write`, write the index and its copy first.
+    """Run every check. With `write`, write the index, its copy and `AGENTS.md` first.
 
     Args:
         project: The project.
-        write: True to write `.specs/index.md` and `specs/README.md`.
+        write: True to write `.specs/index.md`, `specs/README.md` and `AGENTS.md`.
 
     Returns:
         The count of specs and the errors.
@@ -737,9 +738,13 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     foreign = foreign_status(specs, copied)
     ctx = Context(project, {s.number: s for s in specs}, foreign)
     text = index(project, specs, foreign, copied)
+    agents_path = project.root / AGENTS
+    upstream = tuple(s for s in copied if foreign.get(s.short) == "approved")
+    agents = merge(_read(agents_path), block(specs, upstream))
     if write:
         write_text(project.index_path, text)
         write_text(project.readme_path, text)
+        write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
     return len(specs), (
         *layout,
@@ -759,6 +764,13 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
             if _read(project.readme_path) == text
             else (
                 "specs/README.md: not an exact copy of the index; run specs check --write (000007)",
+            )
+        ),
+        *(
+            ()
+            if _read(agents_path) == agents
+            else (
+                f"{AGENTS}: the rules for agents are not current; run specs check --write (000079)",
             )
         ),
         *_code_refs(ctx),

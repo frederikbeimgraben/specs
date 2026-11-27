@@ -25,6 +25,7 @@ from rich.console import Group, RenderableType
 from rich.text import Text
 
 from specs_kit import queries
+from specs_kit.agents import claude_import
 from specs_kit.changes import Mark, lines, recording
 from specs_kit.check import run
 from specs_kit.devshell import init_flake, update_flake
@@ -242,7 +243,10 @@ def _dispatch(args: argparse.Namespace, pretty: bool, log: Mapping[Path, Mark]) 
             return _check(bool(args.write), pretty, log)
         case "init":
             project = init(Path(args.dir), args.forge)
-            hints = init_flake(project.root, project.config.upstream.get(KIT_REPO) or "")
+            hints = (
+                *init_flake(project.root, project.config.upstream.get(KIT_REPO) or ""),
+                *claude_import(project.root),
+            )
             text = _lines(f"installed the kit in {project.root}", hints)
             return _check(True, pretty, log, (text,), project.root)
         case "update":
