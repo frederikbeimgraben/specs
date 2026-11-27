@@ -2,7 +2,7 @@
 id: "000068"
 title: specs add adds the copy of a different repository
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -19,7 +19,7 @@ scope:
 
 # specs add adds the copy of a different repository
 
-`specs add <repo> [<ref>]` must copy the `specs/` folder of `<repo>` at `<ref>` to
+`specs add [<repo> [<ref>]] [-y]` must ask the questions of 000085, and must then copy the `specs/` folder of `<repo>` at `<ref>` to
 `specs/.upstream/<repo>/`, add `[upstream."<repo>"]` with `<ref>` as given as `ref` to
 `specs.toml`, and write the entry of `<repo>` to `specs.lock` (000082). Without `<ref>`, the
 command must take the tag with the highest version, for example `v1.10` before `v1.9`. A tag has

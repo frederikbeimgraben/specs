@@ -2,7 +2,7 @@
 id: "000066"
 title: specs init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -23,12 +23,13 @@ scope:
 
 # specs init adds the kit to a project
 
-`specs init [<dir>] [--forge github|gitlab|codeberg]` must add the kit to the project in
-`<dir>`, or in the current folder. It must write these files:
+`specs init [<dir>] [--forge github|gitlab|codeberg] [-y]` must add the kit to the project in
+`<dir>`, or in the current folder. First it must ask the questions of 000085, and it must write
+the answers to `specs.toml`. It must write these files:
 
 | File | Content |
 | --- | --- |
-| `specs.toml` | The settings, with `forge` and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in 000068. |
+| `specs.toml` | The settings, with the answers of 000085 and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in 000068. |
 | `specs.lock` | The commit that this `ref` names, and the hash of the copy of the kit (000082). |
 | `specs/` | An empty folder for the rules of the project. |
 | `specs/.upstream/github.com/frederikbeimgraben/specs/` | The rules of the kit at this commit (000048). |
@@ -56,7 +57,7 @@ The input `specs` must not follow the input `nixpkgs` of the project.
 The command must write only the parts whose switch in `[features]` is on (000084). At its end,
 it must do the steps of `specs install` (000083).
 
-Without `--forge`, the command must take the forge from `git remote origin`. It must stop with
+Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must stop with
 an error and change no file when `specs.toml` exists, when the forge is unknown, when
 `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when this
 program is an older commit of the kit than the commit of the `ref`.

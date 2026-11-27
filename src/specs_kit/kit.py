@@ -6,30 +6,44 @@
 
 from __future__ import annotations
 
+import difflib
 import json
 import re
 import subprocess
 import tempfile
 import tomllib
-from collections.abc import Generator, Mapping
-from contextlib import ExitStack, contextmanager
+from collections.abc import Callable, Generator, Mapping
+from contextlib import ExitStack, contextmanager, suppress
+from dataclasses import dataclass, field
 from functools import cache
 from importlib import resources
 from pathlib import Path
 from typing import cast
 
-from specs_kit.changes import replace_tree, write_text
-from specs_kit.lock import Locked, read_lock, set_locked, tree_hash
+from specs_kit.ask import Ask, Cancelled, Proposals, Stop
+from specs_kit.changes import remove_tree, replace_tree, write_text
+from specs_kit.lock import Locked, drop_locked, read_lock, set_locked, tree_hash
 from specs_kit.migrations import History, contains, migrate_copy, migrate_project
 from specs_kit.project import (
     CONFIG_NAME,
+    FEATURES,
     FOLDER,
     KIT_REPO,
     REPO,
     TEMPLATES,
+    Config,
     Project,
     kit_rev,
     kit_source,
+)
+from specs_kit.review import broken_references, change_lines, rule_changes, rules_in
+from specs_kit.settings import (
+    FORGES,
+    SettingError,
+    Value,
+    drop_repo,
+    set_keys,
+    write_settings,
 )
 
 
@@ -139,6 +153,54 @@ def upstream_kit_ref(source: Path) -> str | None:
             return None
 
 
+def version(name: str) -> tuple[int, ...] | None:
+    """Return the numbers of a version tag such as `1.2.3` or `v1.2.3`.
+
+    Args:
+        name: The name of the tag.
+
+    Returns:
+        The numbers, or None for a name without a version.
+    """
+    return tuple(int(p) for p in name.removeprefix("v").split(".")) if VERSION.match(name) else None
+
+
+def version_tags(repo: str) -> tuple[str, ...]:
+    """Return the version tags of a repository, the highest version first.
+
+    Args:
+        repo: The repository as `<host>/<group>/.../<repo>`.
+
+    Returns:
+        The names of the tags.
+    """
+    tags = run_command("git", "ls-remote", "--tags", "--refs", f"https://{repo}.git")
+    names = (line.partition("refs/tags/")[2] for line in tags.splitlines())
+    return tuple(
+        sorted((n for n in names if VERSION.match(n)), key=lambda n: version(n) or (), reverse=True)
+    )
+
+
+def default_branch(repo: str) -> str | None:
+    """Return the default branch of a repository.
+
+    Args:
+        repo: The repository as `<host>/<group>/.../<repo>`.
+
+    Returns:
+        The name of the branch, or None.
+    """
+    head = run_command("git", "ls-remote", "--symref", f"https://{repo}.git", "HEAD")
+    return next(
+        (
+            line.split()[1].removeprefix("refs/heads/")
+            for line in head.splitlines()
+            if line.startswith("ref: ")
+        ),
+        None,
+    )
+
+
 def default_ref(repo: str) -> str:
     """Return the tag with the highest version of a repository, else its default branch.
 
@@ -153,30 +215,52 @@ def default_ref(repo: str) -> str:
     Raises:
         KitError: git cannot read the repository, or it has no default branch.
     """
-    url = f"https://{repo}.git"
-    tags = run_command("git", "ls-remote", "--tags", "--refs", "--sort=-v:refname", url)
-    versions = tuple(
-        name
-        for line in tags.splitlines()
-        for name in (line.partition("refs/tags/")[2],)
-        if VERSION.match(name)
-    )
-    head = run_command("git", "ls-remote", "--symref", url, "HEAD")
-    branch = next(
-        (
-            line.split()[1].removeprefix("refs/heads/")
-            for line in head.splitlines()
-            if line.startswith("ref: ")
-        ),
-        None,
-    )
-    match versions, branch:
+    match version_tags(repo), default_branch(repo):
         case (first, *_), _:
             return first
-        case (), str():
+        case (), str() as branch:
             return branch
         case _:
             raise KitError(f"{repo} has no default branch")
+
+
+OTHER = "other ref..."
+
+
+def choose_ref(ask: Ask, repo: str, proposal: str) -> str:
+    """Ask for the ref of a repository: one of the 10 highest tags, the branch or a typed ref.
+
+    Args:
+        ask: The questions.
+        repo: The repository.
+        proposal: The ref that the question proposes.
+
+    Returns:
+        The ref.
+    """
+    tags = version_tags(repo)[:10]
+    branch = default_branch(repo)
+    choices = (*tags, *((branch,) if branch and branch not in tags else ()), OTHER)
+    picked = ask.select(f"Ref of {repo}?", choices, proposal)
+    return (
+        ask.text(f"Tag, branch or commit of {repo}?", "", lambda t: None if t else "type a ref")
+        if picked == OTHER
+        else picked
+    )
+
+
+def newer_tag(repo: str, ref: str) -> bool:
+    """Return True when a repository has a tag with a higher version than `ref`.
+
+    Args:
+        repo: The repository.
+        ref: The ref of `specs.toml`.
+
+    Returns:
+        False for a ref without a version.
+    """
+    now = version(ref)
+    return now is not None and any((version(t) or ()) > now for t in version_tags(repo))
 
 
 @contextmanager
@@ -209,7 +293,7 @@ def checkout(repo: str, ref: str) -> Generator[Path]:
 
 
 def normal_include(include: tuple[str, ...]) -> tuple[str, ...]:
-    """Return the folders of `include` without a slash at the start or the end, sorted.
+    """Return the folders of `include` without a slash at the ends and without nested ones, sorted.
 
     Args:
         include: The folders, for example `style/python/`.
@@ -220,7 +304,8 @@ def normal_include(include: tuple[str, ...]) -> tuple[str, ...]:
     Raises:
         KitError: A folder is not a path of kebab-case names.
     """
-    folders = tuple(sorted({f.strip("/") for f in include}))
+    stripped = {f.strip("/") for f in include}
+    folders = tuple(sorted(f for f in stripped if not any(f.startswith(f"{g}/") for g in stripped)))
     bad = tuple(f for f in folders if not all(FOLDER.match(p) for p in f.split("/")))
     if bad:
         raise KitError(f"include {', '.join(map(repr, bad))} is not a path of kebab-case names")
@@ -499,6 +584,22 @@ def check_program(history: History, own: str | None) -> None:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class Plan:
+    """What the questions before a copy chose (§000085).
+
+    Attributes:
+        include: The folders below `specs/` to copy, or empty for all.
+        keep: The text of each changed template or skill that stays as it is.
+    """
+
+    include: tuple[str, ...]
+    keep: Mapping[Path, str] = field(default_factory=dict)
+
+
+type Review = Callable[[Path, str], Plan]
+
+
 def fetch_copy(
     project: Project,
     repo: str,
@@ -508,7 +609,8 @@ def fetch_copy(
     own: str | None,
     *,
     kit_files: bool,
-) -> tuple[str, tuple[str, ...]]:
+    review: Review | None = None,
+) -> tuple[str, tuple[str, ...], tuple[str, ...]]:
     """Replace the copy of one repository with its rules at one ref, and migrate the copy.
 
     Args:
@@ -520,9 +622,11 @@ def fetch_copy(
         own: The kit commit or ref of the project, or None.
         kit_files: True to also replace the templates, the skills, the CI file and the MCP
             server entry from the kit.
+        review: Asks the questions before the copy, with the checkout and its commit, or None.
 
     Returns:
-        The commit of the copy and the descriptions of the migrations of the copy that ran.
+        The commit of the copy, the descriptions of the migrations of the copy that ran, and
+        the folders of the copy.
 
     Raises:
         KitError: The kit is too old, or the repository uses a newer kit than the project.
@@ -538,11 +642,14 @@ def fetch_copy(
             raise KitError(
                 f"{repo} at {commit} needs the kit at {theirs} or later; run specs update first"
             )
-        copy_rules(source, project, repo, include)
+        plan = review(source, commit) if review else Plan(include)
+        copy_rules(source, project, repo, plan.include)
         ran = migrate_copy(history, project.upstream_dir / repo, theirs)
         if kit_files:
             install_kit_files(source, project, commit)
-    return commit, ran
+        for path, text in plan.keep.items():
+            write_text(path, text)
+    return commit, ran, plan.include
 
 
 def _lock(project: Project, repo: str, ref: str, commit: str, include: tuple[str, ...]) -> None:
@@ -604,18 +711,226 @@ def sync_copies(project: Project, history: History) -> tuple[str, ...]:
         include = normal_include(project.config.include.get(repo, ()))
         entry = lock.get(repo)
         fetch = entry.commit if entry is not None and entry.ref == ref else ref
-        commit, done = fetch_copy(project, repo, fetch, include, history, own, kit_files=False)
+        commit, done, _ = fetch_copy(project, repo, fetch, include, history, own, kit_files=False)
         _lock(project, repo, ref, commit, include)
         ran.extend(done)
     return tuple(dict.fromkeys(ran))
 
 
-def init(root: Path, forge: str | None) -> tuple[Project, str]:
-    """Write `specs.toml` and copy the kit at its tag with the highest version (§000066).
+def tracked(root: Path) -> tuple[str, ...]:
+    """Return the files that git tracks in a project.
 
     Args:
         root: The root of the project.
-        forge: `github`, `gitlab`, `codeberg`, or None to read it from `git remote origin`.
+
+    Returns:
+        The paths relative to the root, or nothing outside a git repository.
+    """
+    try:
+        return tuple(run_command("git", "ls-files", cwd=root).splitlines())
+    except KitError:
+        return ()
+
+
+def remote_base(root: Path) -> str:
+    """Return the default branch of `origin`, as git knows it, else `origin/main`.
+
+    Args:
+        root: The root of the project.
+
+    Returns:
+        The branch, for example `origin/develop`.
+    """
+    try:
+        found = run_command(
+            "git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD", cwd=root
+        ).strip()
+    except KitError:
+        found = ""
+    return found or "origin/main"
+
+
+def code_dir_choices(
+    files: tuple[str, ...], suffixes: frozenset[str]
+) -> tuple[tuple[str, bool], ...]:
+    """Return the folders for `code_dirs`, checked when they hold a file of `suffixes`.
+
+    Args:
+        files: The tracked files.
+        suffixes: The file types of the code.
+
+    Returns:
+        Each top folder that is not hidden and not `specs`, and True when it holds code.
+    """
+    tops = sorted({f.split("/")[0] for f in files if "/" in f} - {"specs"})
+    return tuple(
+        (
+            top,
+            any(f.startswith(f"{top}/") and Path(f).suffix in suffixes for f in files),
+        )
+        for top in tops
+        if not top.startswith(".")
+    )
+
+
+def suffix_choices(
+    files: tuple[str, ...], dirs: tuple[str, ...], default: frozenset[str]
+) -> tuple[tuple[str, bool], ...]:
+    """Return the file types for `code_suffixes`, checked when a file of `dirs` has them.
+
+    Args:
+        files: The tracked files.
+        dirs: The folders with code.
+        default: The default file types.
+
+    Returns:
+        The default file types and the types in `dirs`, each with True when `dirs` has it.
+    """
+    found = {
+        Path(f).suffix for f in files if Path(f).suffix and any(f.startswith(f"{d}/") for d in dirs)
+    }
+    return tuple((s, s in found) for s in sorted(default | found))
+
+
+def _features_answer(ask: Ask) -> tuple[str, ...]:
+    """Ask for the parts of the kit until `claude` comes only with `agents` (§000084).
+
+    Args:
+        ask: The questions.
+
+    Returns:
+        The parts that are on.
+    """
+    picked = ask.checkbox("Parts of the kit?", tuple((f, True) for f in FEATURES))
+    if "claude" in picked and "agents" not in picked:
+        ask.show("claude needs agents: CLAUDE.md imports AGENTS.md")
+        return _features_answer(ask)
+    return picked
+
+
+@dataclass(frozen=True, slots=True)
+class Start:
+    """The answers of the questions of `init` (§000085).
+
+    Attributes:
+        forge: The forge.
+        base_ref: The base branch.
+        code_dirs: The folders with code.
+        code_suffixes: The file types of the code.
+        features: The parts of the kit that are on.
+        owner: The login to write to `git config --local <forge>.user`, or empty.
+    """
+
+    forge: str
+    base_ref: str
+    code_dirs: tuple[str, ...]
+    code_suffixes: tuple[str, ...]
+    features: tuple[str, ...]
+    owner: str
+
+
+def _owner_known(root: Path, forge: str) -> bool:
+    """Return True when git knows the login of the user on a forge.
+
+    Args:
+        root: The root of the project.
+        forge: The forge.
+
+    Returns:
+        True when `git config <forge>.user` has a value.
+    """
+    try:
+        return bool(run_command("git", "config", f"{forge}.user", cwd=root).strip())
+    except KitError:
+        return False
+
+
+def ask_start(root: Path, forge: str | None, ask: Ask) -> Start:
+    """Ask the questions of `init`, or take their proposals (§000085).
+
+    Args:
+        root: The root of the project.
+        forge: The forge of `--forge`, or None.
+        ask: The questions.
+
+    Returns:
+        The answers.
+
+    Raises:
+        KitError: The forge is unknown without a terminal.
+        Cancelled: The user does not run the command.
+    """
+    try:
+        detected = forge or detect_forge(root)
+    except KitError:
+        if not ask.interactive:
+            raise
+        detected = None
+    found = forge or ask.select("Forge?", FORGES, detected)
+    base = ask.text(
+        "Base branch (base_ref)?", remote_base(root), lambda t: None if t else "type a branch"
+    )
+    files = tracked(root)
+    default = Config().code_suffixes
+    dir_choices = code_dir_choices(files, default)
+    dirs = ask.checkbox("Folders with code (code_dirs)?", dir_choices) if dir_choices else ()
+    suffixes = (
+        ask.checkbox(
+            "File types of the code (code_suffixes)?", suffix_choices(files, dirs, default)
+        )
+        if dirs
+        else tuple(sorted(default))
+    )
+    owner = (
+        ""
+        if _owner_known(root, found)
+        else ask.text(f"Your login on {found}, the owner of new specs (empty: none)?", "")
+    )
+    start = Start(found, base, dirs, suffixes, _features_answer(ask), owner.strip())
+    ask.show(
+        "\n".join(
+            (
+                f"forge = {start.forge}",
+                f"base_ref = {start.base_ref}",
+                f"code_dirs = {', '.join(start.code_dirs) or '-'}",
+                f"code_suffixes = {', '.join(start.code_suffixes) or '-'}",
+                f"features on = {', '.join(start.features) or '-'}",
+                *((f"git config --local {found}.user {start.owner}",) if start.owner else ()),
+            )
+        )
+    )
+    if not ask.confirm("Run?", True):
+        raise Cancelled("cancelled; no file changed")
+    return start
+
+
+def _write_start(root: Path, start: Start) -> None:
+    """Write the answers of `init` to `specs.toml` and to git.
+
+    Args:
+        root: The root of the project.
+        start: The answers.
+    """
+    values: tuple[tuple[str, Value], ...] = (
+        ("forge", start.forge),
+        ("base_ref", start.base_ref),
+        ("code_dirs", start.code_dirs),
+        ("code_suffixes", start.code_suffixes),
+        *((f"features.{f}", f in start.features) for f in FEATURES),
+    )
+    write_settings(root, lambda doc: set_keys(doc, values))
+    if start.owner:
+        with suppress(KitError):
+            run_command("git", "config", "--local", f"{start.forge}.user", start.owner, cwd=root)
+
+
+def init(root: Path, forge: str | None, ask: Ask | None = None) -> tuple[Project, str]:
+    """Ask the questions, write `specs.toml` and copy the kit at its highest tag (§000066).
+
+    Args:
+        root: The root of the project.
+        forge: `github`, `gitlab`, `codeberg`, or None to ask or to read `git remote origin`.
+        ask: The questions, or None to take the proposals.
 
     Returns:
         The project and the commit of the kit.
@@ -627,15 +942,16 @@ def init(root: Path, forge: str | None) -> tuple[Project, str]:
         raise KitError("the project must not be the kit itself")
     if (root / CONFIG_NAME).exists():
         raise KitError(f"{CONFIG_NAME} exists; run specs install or specs update")
-    found = forge or detect_forge(root)
-    check_forge(root, found)
+    start = ask_start(root, forge, ask or Proposals())
+    check_forge(root, start.forge)
     ref = default_ref(KIT_REPO)
     with lazy_history() as history, checkout(KIT_REPO, ref) as source:
         commit = run_command("git", "-C", str(source), "rev-parse", "HEAD").strip()
         check_program(history, commit)
         if not templates(source).is_dir():
             raise KitError(f"the kit at {commit} has no templates; it is too old")
-        write_text(root / CONFIG_NAME, package_data("specs.toml").replace("{forge}", found))
+        write_text(root / CONFIG_NAME, package_data("specs.toml").replace("{forge}", start.forge))
+        _write_start(root, start)
         (root / "specs").mkdir(exist_ok=True)
         project = Project.open(root)
         copy_rules(source, project, KIT_REPO)
@@ -643,6 +959,29 @@ def init(root: Path, forge: str | None) -> tuple[Project, str]:
         install_kit_files(source, project, commit)
         _lock(project, KIT_REPO, ref, commit, ())
     return Project.open(root), commit
+
+
+def offer_lines(root: Path, features: Mapping[str, bool], ask: Ask) -> None:
+    """Offer to add the missing line to an `.envrc` and a `CLAUDE.md` that exist (§000085).
+
+    Args:
+        root: The root of the project.
+        features: The switches of `[features]`.
+        ask: The questions.
+    """
+    for name, line, switch in (
+        (".envrc", "use flake", "envrc"),
+        ("CLAUDE.md", "@AGENTS.md", "claude"),
+    ):
+        path = root / name
+        text = path.read_text(encoding="utf-8") if path.is_file() else None
+        if (
+            features.get(switch, True)
+            and text is not None
+            and line not in text.splitlines()
+            and ask.confirm(f"Add the line {line} to {name}?", False)
+        ):
+            write_text(path, f"{text.rstrip()}\n{line}\n" if text.strip() else f"{line}\n")
 
 
 def _repo_name(repo: str) -> str:
@@ -657,8 +996,221 @@ def _repo_name(repo: str) -> str:
     return KIT_REPO if repo == "kit" else repo
 
 
+def two_levels(folder: Path) -> tuple[str, ...]:
+    """Return the kind folders of a `specs/` folder and their direct folders.
+
+    Args:
+        folder: The `specs/` folder of a checkout.
+
+    Returns:
+        The paths, for example `style` and `style/python`, sorted.
+    """
+    return tuple(
+        sorted(
+            p.relative_to(folder).as_posix()
+            for p in (*folder.glob("*"), *folder.glob("*/*"))
+            if p.is_dir() and not any(part.startswith(".") for part in p.relative_to(folder).parts)
+        )
+    )
+
+
+def _covered(path: str, include: tuple[str, ...]) -> bool:
+    """Return True when a folder of `include` holds `path` or is below it.
+
+    Args:
+        path: The folder below `specs/`.
+        include: The folders of the copy.
+
+    Returns:
+        True when the copy holds the folder.
+    """
+    return any(path == f or path.startswith(f"{f}/") or f.startswith(f"{path}/") for f in include)
+
+
+def _changed_kit_files(project: Project, source: Path, old: str) -> Mapping[Path, tuple[str, str]]:
+    """Return each template and skill that a person changed, with its text and its new text.
+
+    A file is changed when it is not the same as in the kit at `old` and not the same as in the
+    new kit.
+
+    Args:
+        project: The project.
+        source: The checkout of the new kit.
+        old: The commit of the kit in `specs.lock`.
+
+    Returns:
+        The local text and the text of the new kit of each changed file.
+    """
+    pairs = (
+        *(
+            (
+                project.templates_dir / rel,
+                templates(source) / rel,
+                ("specs/.templates", ".specs/templates"),
+                rel,
+            )
+            for rel in _rel_files(project.templates_dir)
+        ),
+        *(
+            (
+                project.root / ".claude" / "skills" / skill / rel,
+                source / ".claude" / "skills" / skill / rel,
+                (f".claude/skills/{skill}",),
+                rel,
+            )
+            for skill in (
+                s.name for s in sorted((project.root / ".claude" / "skills").glob("spec-*"))
+            )
+            if project.config.on("skills")
+            for rel in _rel_files(project.root / ".claude" / "skills" / skill)
+        ),
+    )
+    differs = tuple(
+        (local, new, bases, rel)
+        for local, new, bases, rel in pairs
+        if local.read_text(encoding="utf-8")
+        != (new.read_text(encoding="utf-8") if new.is_file() else None)
+    )
+    if not differs:
+        return {}
+    with checkout(KIT_REPO, old) as before:
+        return {
+            local: (
+                local.read_text(encoding="utf-8"),
+                new.read_text(encoding="utf-8") if new.is_file() else "",
+            )
+            for local, new, bases, rel in differs
+            if local.read_text(encoding="utf-8")
+            not in tuple(
+                (before / base / rel).read_text(encoding="utf-8")
+                for base in bases
+                if (before / base / rel).is_file()
+            )
+        }
+
+
+def _rel_files(folder: Path) -> tuple[Path, ...]:
+    """Return the files below a folder, relative to it.
+
+    Args:
+        folder: The folder.
+
+    Returns:
+        The paths, sorted; nothing when the folder does not exist.
+    """
+    return (
+        tuple(sorted(p.relative_to(folder) for p in folder.rglob("*") if p.is_file()))
+        if folder.is_dir()
+        else ()
+    )
+
+
+def _keep_answers(
+    project: Project, changed: Mapping[Path, tuple[str, str]], ask: Ask
+) -> Mapping[Path, str]:
+    """Ask for each changed template and skill: overwrite, keep or cancel (§000085).
+
+    Args:
+        project: The project.
+        changed: The local text and the new text of each changed file.
+        ask: The questions.
+
+    Returns:
+        The local text of each file that stays.
+
+    Raises:
+        Stop: A file changed, and nobody can answer.
+        Cancelled: The user cancelled.
+    """
+    if changed and not ask.interactive:
+        names = ", ".join(str(p.relative_to(project.root)) for p in changed)
+        raise Stop(f"a person changed {names}; run specs update on a terminal without --yes")
+    keep: dict[Path, str] = {}
+    for path, (local, new) in changed.items():
+        rel = str(path.relative_to(project.root))
+        ask.show(
+            "".join(
+                difflib.unified_diff(
+                    local.splitlines(keepends=True),
+                    new.splitlines(keepends=True),
+                    f"{rel} (yours)",
+                    f"{rel} (kit)",
+                )
+            )
+        )
+        match ask.select(f"{rel} changed. What to do?", ("overwrite", "keep", "cancel"), "keep"):
+            case "keep":
+                keep[path] = local
+            case "cancel":
+                raise Cancelled("cancelled; the files of the repositories before stay updated")
+            case _:
+                pass
+    return keep
+
+
+def _update_review(
+    project: Project, repo: str, ref: str, include: tuple[str, ...], ask: Ask
+) -> Review:
+    """Return the questions of `update` for one repository (§000085).
+
+    Args:
+        project: The project.
+        repo: The repository.
+        ref: The new ref.
+        include: The folders of the copy now.
+        ask: The questions.
+
+    Returns:
+        The function that asks before the copy.
+    """
+
+    def review(source: Path, commit: str) -> Plan:
+        entry = read_lock(project.root).get(repo)
+        chosen = include
+        if include and ask.interactive and entry is not None:
+            with checkout(repo, entry.commit) as before:
+                old = set(two_levels(before / "specs"))
+            fresh = tuple(
+                f for f in two_levels(source / "specs") if f not in old and not _covered(f, include)
+            )
+            added = (
+                ask.checkbox(
+                    f"New folders of {repo} for include?", tuple((f, False) for f in fresh)
+                )
+                if fresh
+                else ()
+            )
+            chosen = normal_include((*include, *added))
+        new = rules_in(source / "specs", repo, chosen)
+        broken = broken_references(project, repo, new)
+        if broken:
+            ask.show("\n".join(broken))
+        if broken and not ask.confirm(
+            "Update anyway?",
+            False,
+            risk=f"the new version of {repo} replaces or removes rules that project rules name",
+        ):
+            raise Cancelled(f"cancelled; the copy of {repo} did not change")
+        keep = (
+            _keep_answers(project, _changed_kit_files(project, source, entry.commit), ask)
+            if repo == KIT_REPO and entry is not None
+            else {}
+        )
+        old_rules = rules_in(project.upstream_dir / repo, repo)
+        ask.show(
+            change_lines(
+                repo, project.config.upstream.get(repo), ref, commit, rule_changes(old_rules, new)
+            )
+        )
+        if not ask.confirm("Run?", True):
+            raise Cancelled(f"cancelled; the copy of {repo} did not change")
+        return Plan(chosen, keep)
+
+    return review
+
+
 def update(
-    project: Project, repo: str | None, ref: str | None
+    project: Project, repo: str | None, ref: str | None, ask: Ask | None = None
 ) -> tuple[tuple[tuple[str, str], ...], tuple[str, ...]]:
     """Resolve the ref of one or of each repository again, and replace its copy (§000067).
 
@@ -669,6 +1221,7 @@ def update(
         project: The project.
         repo: The repository, `kit`, or None for each repository of `specs.toml`.
         ref: The new tag, branch or commit, or None to resolve the ref of `specs.toml` again.
+        ask: The questions, or None to take the proposals.
 
     Returns:
         The repository and its new commit for each update, and the migrations that ran.
@@ -676,6 +1229,7 @@ def update(
     Raises:
         KitError: The repository is not in `specs.toml`, or git fails.
     """
+    questions = ask or Proposals()
     name = None if repo is None else _repo_name(repo)
     if name is not None:
         _check_repo(name)
@@ -694,7 +1248,17 @@ def update(
         check_program(history, own)
         for target in targets:
             current = Project.open(project.root)
-            wanted = ref or current.config.upstream.get(target) or default_ref(target)
+            now = current.config.upstream.get(target)
+            wanted = (
+                ref
+                or (
+                    choose_ref(questions, target, now)
+                    if now and questions.interactive and newer_tag(target, now)
+                    else None
+                )
+                or now
+                or default_ref(target)
+            )
             include = normal_include(current.config.include.get(target, ()))
             if target == KIT_REPO:
                 ran.extend(migrate_project(history, project.root, own))
@@ -704,28 +1268,90 @@ def update(
                     for d in migrate_copy(history, project.upstream_dir / other, own)
                 )
             fresh = Project.open(project.root)
-            commit, copied = fetch_copy(
-                fresh, target, wanted, include, history, own, kit_files=target == KIT_REPO
+            commit, copied, chosen = fetch_copy(
+                fresh,
+                target,
+                wanted,
+                include,
+                history,
+                own,
+                kit_files=target == KIT_REPO,
+                review=_update_review(fresh, target, wanted, include, questions),
             )
             set_ref(fresh, target, wanted)
-            _lock(fresh, target, wanted, commit, include)
+            if chosen != include:
+                set_include(fresh, target, chosen)
+            _lock(fresh, target, wanted, commit, chosen)
             own = commit if target == KIT_REPO else own
             done.append((target, commit))
             ran.extend(copied)
     return tuple(done), tuple(dict.fromkeys(ran))
 
 
+def repo_error(repo: str) -> str | None:
+    """Return why a repository name cannot be added, or None.
+
+    Args:
+        repo: The name.
+
+    Returns:
+        The error, or None when git can read the repository.
+    """
+    if not re.fullmatch(REPO, repo):
+        return "type <host>/<group>/.../<repo>"
+    try:
+        run_command("git", "ls-remote", "--heads", f"https://{repo}.git")
+    except KitError:
+        return f"git cannot read https://{repo}.git"
+    return None
+
+
+def _add_review(repo: str, ref: str, include: tuple[str, ...], ask: Ask) -> Review:
+    """Return the questions of `add` (§000085).
+
+    Args:
+        repo: The repository.
+        ref: The ref.
+        include: The folders of `--include`.
+        ask: The questions.
+
+    Returns:
+        The function that asks before the copy.
+    """
+
+    def review(source: Path, commit: str) -> Plan:
+        folders = two_levels(source / "specs")
+        picked = (
+            ask.checkbox(f"Folders of {repo} to copy?", tuple((f, True) for f in folders))
+            if not include and folders
+            else include
+        )
+        chosen = () if not include and set(picked) == set(folders) else normal_include(picked)
+        changes = rule_changes({}, rules_in(source / "specs", repo, chosen))
+        ask.show(change_lines(repo, None, ref, commit, changes))
+        if not ask.confirm("Run?", True):
+            raise Cancelled("cancelled; no file changed")
+        return Plan(chosen)
+
+    return review
+
+
 def add(
-    project: Project, repo: str, ref: str | None, include: tuple[str, ...] = ()
+    project: Project,
+    repo: str | None,
+    ref: str | None,
+    include: tuple[str, ...] = (),
+    ask: Ask | None = None,
 ) -> tuple[str, tuple[str, ...]]:
     """Add the copy of a new repository (§000068).
 
     Args:
         project: The project.
-        repo: The repository as `<host>/<group>/.../<repo>`.
+        repo: The repository as `<host>/<group>/.../<repo>`, or None to ask for it.
         ref: The tag, the branch or the commit, or None for the tag with the highest version,
             else the default branch.
         include: The folders below `specs/` to copy, or empty for all.
+        ask: The questions, or None to take the proposals.
 
     Returns:
         The commit of the new copy and the migrations that ran.
@@ -733,17 +1359,63 @@ def add(
     Raises:
         KitError: The repository is in `specs.toml` already, or git fails.
     """
-    _check_repo(repo)
-    if repo in project.config.upstream:
-        raise KitError(f"{repo} is in specs.toml; run specs update {repo} <ref>")
+    questions = ask or Proposals()
+    name = repo or questions.text("Repository (<host>/<group>/.../<repo>)?", "", repo_error)
+    _check_repo(name)
+    if name in project.config.upstream:
+        raise KitError(f"{name} is in specs.toml; run specs update {name} <ref>")
     folders = normal_include(include)
-    wanted = ref or default_ref(repo)
+    wanted = ref or (
+        choose_ref(questions, name, default_ref(name))
+        if questions.interactive
+        else default_ref(name)
+    )
     with lazy_history() as history:
         own = own_ref(project)
         check_program(history, own)
-        commit, ran = fetch_copy(project, repo, wanted, folders, history, own, kit_files=False)
-    set_ref(project, repo, wanted)
-    if folders:
-        set_include(project, repo, folders)
-    _lock(project, repo, wanted, commit, folders)
+        commit, ran, chosen = fetch_copy(
+            project,
+            name,
+            wanted,
+            folders,
+            history,
+            own,
+            kit_files=False,
+            review=_add_review(name, wanted, folders, questions),
+        )
+    set_ref(project, name, wanted)
+    if chosen:
+        set_include(project, name, chosen)
+    _lock(project, name, wanted, commit, chosen)
     return commit, ran
+
+
+def remove(project: Project, repo: str) -> str:
+    """Remove the copy of a repository, its table in `specs.toml` and its entry in `specs.lock`.
+
+    Args:
+        project: The project.
+        repo: The repository.
+
+    Returns:
+        The full name of the repository.
+
+    Raises:
+        KitError: The repository is the kit, or it is not in `specs.toml`.
+    """
+    name = _repo_name(repo)
+    if name == KIT_REPO:
+        raise KitError("the kit cannot be removed; switch its parts off in [features]")
+    if name not in project.config.upstream:
+        raise KitError(f"{name} is not in specs.toml")
+    try:
+        write_settings(project.root, lambda doc: drop_repo(doc, name))
+    except SettingError as error:
+        raise KitError(str(error)) from error
+    remove_tree(project.upstream_dir / name)
+    for parent in (project.upstream_dir / name).parents:
+        if parent == project.upstream_dir or not parent.is_dir() or any(parent.iterdir()):
+            break
+        parent.rmdir()
+    drop_locked(project.root, frozenset(project.config.upstream) - {name})
+    return name

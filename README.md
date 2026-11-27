@@ -53,15 +53,20 @@ nix run github:frederikbeimgraben/specs/<commit> -- <command>
 | --- | --- |
 | `check` | Checks the specs and the `§` references. It changes no file. |
 | `install` | Loads each copy that does not agree with `specs.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (000083). |
-| `init [<dir>] [--forge github\|gitlab\|codeberg]` | Adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
+| `init [<dir>] [--forge github\|gitlab\|codeberg]` | Asks for the settings, then adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
 | `update [<repo> [<ref>]]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `specs.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `specs` in `flake.nix`. |
-| `add <repo> [<ref>] [--include <folder>]...` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
+| `add [<repo> [<ref>]] [--include <folder>]...` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
+| `configure [<key> <value>]` | Changes `specs.toml` in a menu, or sets one key such as `features.mcp false`, then installs (000086). |
+| `remove <repo>` | Removes the copy of a different repository, then installs (000087). |
 | `new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` | Makes a new spec from its template, with the next number and the paths of `scope`. |
 | `resolve <id>` | Prints the long form of an ID, for example `C/specs/format/000012` for `000012`. |
 | `show <id>` | Prints the full text of a spec. |
 | `list` | Lists every rule. |
 | `search <text>` | Lists the rules that hold a text. |
-| `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search` and `new`. |
+| `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search`, `new`, `configure` and `remove`. |
+
+On a terminal, `init`, `add`, `update` and `configure` ask questions. `-y` takes the proposals
+instead, as does a run without a terminal (000085).
 
 A project runs the command at the commit of the kit in `specs.lock`. `init` and `update` write
 this commit into the CI file, into `.mcp.json` and into the input `specs` of `flake.nix`.

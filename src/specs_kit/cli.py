@@ -3,9 +3,11 @@
 Usage:
     specs check
     specs install
-    specs init [<dir>] [--forge github|gitlab|codeberg]
-    specs update [<repo> [<ref>]]
-    specs add <repo> [<ref>] [--include <folder>]...
+    specs init [<dir>] [--forge github|gitlab|codeberg] [--yes]
+    specs update [<repo> [<ref>]] [--yes]
+    specs add [<repo> [<ref>]] [--include <folder>]... [--yes]
+    specs configure [<key> <value>] [--yes]
+    specs remove <repo>
     specs new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]
     specs resolve <id>
     specs show <id>
@@ -13,7 +15,8 @@ Usage:
     specs search <text>
     specs mcp
 
-Each command except `mcp` takes `--raw` or `--json`.
+Each command except `mcp` takes `--raw` or `--json`. On a terminal, `init`, `add`, `update` and
+`configure` ask questions; `--yes` takes the proposals instead (§000085).
 """
 
 from __future__ import annotations
@@ -28,11 +31,13 @@ from rich.console import Group, RenderableType
 from rich.text import Text
 
 from specs_kit import data, queries
+from specs_kit.ask import Ask, Cancelled, Stop, asker
 from specs_kit.changes import Mark, lines, recording
 from specs_kit.check import run
+from specs_kit.configure import configure, set_value
 from specs_kit.devshell import init_flake, update_flake
 from specs_kit.install import install
-from specs_kit.kit import KitError, add, init, update
+from specs_kit.kit import KitError, add, init, offer_lines, remove, update
 from specs_kit.mcp_server import serve
 from specs_kit.new import NewError, new
 from specs_kit.project import KIT_REPO, ConfigError, Project
@@ -56,9 +61,22 @@ def parser() -> argparse.ArgumentParser:
     renew.add_argument("repo", nargs="?", help="a repository, or kit; without it each one")
     renew.add_argument("ref", nargs="?", help="a new tag, branch or commit")
     more = commands.add_parser("add", help="add the copy of a repository")
-    more.add_argument("repo")
+    more.add_argument("repo", nargs="?", help="the repository; without it the command asks")
     more.add_argument("ref", nargs="?", help="a tag, branch or commit; else the newest tag")
     more.add_argument("--include", action="append", default=[], metavar="folder")
+    setting = commands.add_parser("configure", help="change specs.toml, then install")
+    setting.add_argument("key", nargs="?", help="for example features.mcp; without it a menu")
+    setting.add_argument("value", nargs="?", help="for example false, 25, origin/main or src,lib")
+    commands.add_parser("remove", help="remove the copy of a repository").add_argument("repo")
+    for name in ("init", "update", "add", "configure"):
+        commands.choices[name].add_argument(
+            "-y",
+            "--yes",
+            "--non-interactive",
+            dest="yes",
+            action="store_true",
+            help="ask nothing; take the proposals",
+        )
     create = commands.add_parser("new", help="create a new spec from its template")
     create.add_argument("kind")
     create.add_argument("path", metavar="area/topic")
@@ -228,6 +246,45 @@ def _lines(text: str, hints: tuple[str, ...]) -> str:
     return "\n".join((text, *hints))
 
 
+def _ask(args: argparse.Namespace, mode: Mode) -> Ask:
+    """Return the questions on a terminal, else the proposals (§000085).
+
+    Args:
+        args: The parsed command line.
+        mode: The form of the output.
+
+    Returns:
+        The questions, or the proposals with `--yes`, with `--json` or without a terminal.
+    """
+    return asker(yes=bool(getattr(args, "yes", False)), json=mode is Mode.JSON)
+
+
+def _configure(project: Project, args: argparse.Namespace, mode: Mode) -> str:
+    """Change `specs.toml` with the menu or with one key and its value (§000086).
+
+    Args:
+        project: The project.
+        args: The parsed command line.
+        mode: The form of the output.
+
+    Returns:
+        The message.
+
+    Raises:
+        KitError: Only a key without a value, or no terminal for the menu.
+    """
+    ask = _ask(args, mode)
+    match args.key, args.value:
+        case str() as key, str() as value:
+            return set_value(project, key, value)
+        case str(), None:
+            raise KitError("usage: specs configure [<key> <value>]")
+        case _ if not ask.interactive:
+            raise KitError("specs configure needs a terminal, or a key and a value")
+        case _:
+            return "saved specs.toml" if configure(project, ask) else "specs.toml did not change"
+
+
 def dispatch(args: argparse.Namespace) -> int:
     """Run one command and record the files it changes.
 
@@ -261,13 +318,15 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             hints = install(project)
             return _check(True, mode, log, ("installed", hints), project.root)
         case "init":
-            project, commit = init(Path(args.dir), args.forge)
+            ask = _ask(args, mode)
+            project, commit = init(Path(args.dir), args.forge, ask)
+            offer_lines(project.root, project.config.features, ask)
             hints = (*init_flake(project.root, commit, project.config.features), *install(project))
             text = f"installed the kit in {project.root}"
             return _check(True, mode, log, (text, hints), project.root)
         case "update":
             project = Project.open()
-            done, ran = update(project, args.repo, args.ref)
+            done, ran = update(project, args.repo, args.ref, _ask(args, mode))
             kit = dict(done).get(KIT_REPO)
             hints = (
                 *(f"migrated: {d}" for d in ran),
@@ -278,9 +337,19 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             return _check(True, mode, log, (text, hints), project.root)
         case "add":
             project = Project.open()
-            commit, ran = add(project, args.repo, args.ref, tuple(args.include))
+            commit, ran = add(project, args.repo, args.ref, tuple(args.include), _ask(args, mode))
             hints = (*(f"migrated: {d}" for d in ran), *install(Project.open(project.root)))
             return _check(True, mode, log, (f"added at {commit}", hints), project.root)
+        case "configure":
+            project = Project.open()
+            text = _configure(project, args, mode)
+            hints = install(Project.open(project.root))
+            return _check(True, mode, log, (text, hints), project.root)
+        case "remove":
+            project = Project.open()
+            text = f"removed {remove(project, args.repo)}"
+            hints = install(Project.open(project.root))
+            return _check(True, mode, log, (text, hints), project.root)
         case "new":
             project = Project.open()
             path = new(
@@ -336,7 +405,15 @@ def main() -> None:
     args = parser().parse_args()
     try:
         sys.exit(dispatch(args))
-    except (KitError, NewError, ConfigError, queries.QueryError, OSError) as error:
+    except (
+        KitError,
+        NewError,
+        ConfigError,
+        queries.QueryError,
+        Cancelled,
+        Stop,
+        OSError,
+    ) as error:
         match _mode(args):
             case Mode.JSON:
                 sys.stdout.write(data.dumps({"error": str(error)}))

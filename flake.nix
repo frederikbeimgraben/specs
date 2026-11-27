@@ -27,7 +27,9 @@
           dependencies = with pkgs.python313Packages; [
             jsonschema
             mcp
+            questionary
             rich
+            tomlkit
           ];
           makeWrapperArgs = [
             "--set"
@@ -59,7 +61,9 @@
               ps.jsonschema
               ps.mcp
               ps.pytest
+              ps.questionary
               ps.rich
+              ps.tomlkit
             ]))
             pkgs.ruff
             pkgs.basedpyright

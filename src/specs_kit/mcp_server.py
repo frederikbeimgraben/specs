@@ -1,4 +1,4 @@
-"""The MCP server `specs` in stdio mode. Only the tools `install` and `new` write."""
+"""The MCP server `specs` in stdio mode. Only `install`, `new`, `configure` and `remove` write."""
 
 from __future__ import annotations
 
@@ -6,7 +6,9 @@ from mcp.server.mcpserver import MCPServer
 
 from specs_kit import queries
 from specs_kit.changes import lines, recording
+from specs_kit.configure import set_value
 from specs_kit.install import install as install_project
+from specs_kit.kit import remove as remove_repo
 from specs_kit.new import new as new_spec
 from specs_kit.project import Project
 
@@ -19,6 +21,21 @@ def check() -> str:
     return queries.check(Project.open())[1]
 
 
+def _installed(project: Project, head: tuple[str, ...]) -> str:
+    """Run `specs install` and return the messages, the hints, the report and the changed files.
+
+    Args:
+        project: The project.
+        head: The messages before the hints.
+
+    Returns:
+        The text.
+    """
+    hints = install_project(Project.open(project.root))
+    _, report = queries.check(Project.open(project.root), write=True)
+    return "".join(f"{h}\n" for h in (*head, *hints)) + report
+
+
 @server.tool()
 def install() -> str:
     """Load the copies, write each missing file, the index and AGENTS.md, then check.
@@ -27,13 +44,35 @@ def install() -> str:
     """
     project = Project.open()
     with recording() as log:
-        hints = install_project(project)
-        _, report = queries.check(Project.open(project.root), write=True)
-        return (
-            "".join(f"{h}\n" for h in hints)
-            + report
-            + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
-        )
+        text = _installed(project, ())
+        return text + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+
+
+@server.tool()
+def configure(key: str, value: str) -> str:
+    """Set one key of specs.toml, then run install. Returns the report and the changed files.
+
+    Args:
+        key: forge, base_ref, code_dirs, code_suffixes, max_elements or features.<switch>.
+        value: The plain value, for example false, 25, origin/main or src,lib.
+    """
+    project = Project.open()
+    with recording() as log:
+        text = _installed(project, (set_value(project, key, value),))
+        return text + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
+
+
+@server.tool()
+def remove(repo: str) -> str:
+    """Remove the copy of a repository from specs.toml, specs.lock and specs/.upstream/.
+
+    Args:
+        repo: The full name of the repository. The kit cannot be removed.
+    """
+    project = Project.open()
+    with recording() as log:
+        text = _installed(project, (f"removed {remove_repo(project, repo)}",))
+        return text + "".join(f"{mark} {file}\n" for mark, file in lines(log, project.root))
 
 
 @server.tool()

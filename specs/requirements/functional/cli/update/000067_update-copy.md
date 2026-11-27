@@ -2,7 +2,7 @@
 id: "000067"
 title: specs update resolves the refs again and replaces the copies
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
@@ -20,7 +20,8 @@ scope:
 
 # specs update resolves the refs again and replaces the copies
 
-`specs update [<repo> [<ref>]]` must update the copies below `specs/.upstream/` (000048):
+`specs update [<repo> [<ref>]] [-y]` must update the copies below `specs/.upstream/` (000048),
+after the questions of 000085:
 
 | Form | Effect |
 | --- | --- |
