@@ -72,6 +72,13 @@ def test_changed_files_are_sorted_and_relative(kit: Kit, empty: Path) -> None:
     assert all(not p.startswith("/") for p in paths)
 
 
+def test_the_report_comes_after_the_files(kit: Kit, empty: Path) -> None:
+    """The changed files come before the report of the check, and the report is the last line."""
+    out = kit.run(empty, "init", "--forge", "github", "--raw").out.splitlines()
+    assert re.fullmatch(r"[0-9]+ specs, [0-9]+ errors", out[-1])
+    assert max(i for i, line in enumerate(out) if re.match(r"^[AMD] ", line)) < len(out) - 1
+
+
 def test_a_write_with_the_same_content_is_no_change(kit: Kit, project: Path) -> None:
     """`specs install` on a current project lists no file."""
     out = kit.run(project, "install", "--raw").out

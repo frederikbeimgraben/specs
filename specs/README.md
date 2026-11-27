@@ -84,13 +84,13 @@ specs/
 | [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | specs check checks the specs | approved |
 | [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | specs configure changes the settings in specs.toml | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | specs init adds the kit to a project | approved |
-| [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | specs install brings a project to the state of its settings | approved |
+| [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | specs install brings a project to the state of its settings | draft |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | approved |
 | [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | approved |
 | [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | approved |
 | [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | specs formats its output for a terminal | approved |
-| [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | approved |
+| [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | draft |
 | [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | specs prints its data as JSON | approved |
 | [F/cli/questions/000085](/specs/requirements/functional/cli/questions/000085_questions.md) | init, add and update ask questions on a terminal | approved |
 | [F/cli/remove/000087](/specs/requirements/functional/cli/remove/000087_remove.md) | specs remove removes the copy of a different repository | approved |
