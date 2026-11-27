@@ -2,7 +2,7 @@
 id: "000084"
 title: specs.toml switches the optional parts of the kit on and off
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
