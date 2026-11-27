@@ -8,7 +8,7 @@ updated: 2026-11-27
 tests:
   - tests/test_check.py:test_check_passes_after_init
   - tests/test_check.py:test_check_without_write_changes_no_file
-  - tests/test_check.py:test_check_write_writes_index_and_copy
+  - tests/test_check.py:test_check_write_writes_the_index
   - tests/test_check.py:test_check_finds_a_rule_without_must
   - tests/test_check.py:test_check_finds_a_bad_file_name
   - tests/test_check.py:test_check_finds_a_missing_key

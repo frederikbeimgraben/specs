@@ -40,7 +40,7 @@ def test_check_without_write_changes_no_file(kit: Kit, project: Path) -> None:
     assert (project / "specs" / "README.md").read_text(encoding="utf-8") == before
 
 
-def test_check_write_writes_index_and_copy(kit: Kit, project: Path) -> None:
+def test_check_write_writes_the_index(kit: Kit, project: Path) -> None:
     """`specs check --write` writes the index."""
     _rule(project)
     result = kit.run(project, "check", "--write", "--raw")
