@@ -29,8 +29,8 @@ the current folder. It must write these files:
 | `.mcp.json` | The MCP server `specs` at the `ref` of the kit. Other servers stay. |
 
 Without `--forge`, the command must take the forge from `git remote origin`. It must stop with
-an error and change no file when `specs.toml` exists, when the forge is unknown, when `.gitlab-
-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when the program does
-not come from a clean commit of the kit.
+an error and change no file when `specs.toml` exists, when the forge is unknown, when
+`.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when the
+program does not come from a clean commit of the kit.
 
 Reason: One command gives a project the same start as every other project.
