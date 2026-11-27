@@ -15,9 +15,37 @@
       forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
       rev = self.rev or "dirty";
       version = (builtins.fromTOML (builtins.readFile ./pyproject.toml)).project.version;
+      vsix =
+        pkgs:
+        pkgs.buildNpmPackage {
+          pname = "specs-vscode";
+          inherit version;
+          src = ./editors/code;
+          npmDepsHash = "sha256-kbBblIG6mSFtEdlQuKp4vRsmWMeUt4ZcJjTuCnTC2mA=";
+          dontNpmBuild = true;
+          nativeBuildInputs = [
+            pkgs.esbuild
+            pkgs.typescript
+            pkgs.vsce
+          ];
+          buildPhase = ''
+            runHook preBuild
+            tsc -p .
+            esbuild src/extension.ts --bundle --minify --platform=node --format=cjs \
+              --external:vscode --outfile=out/extension.js
+            vsce package --no-dependencies --skip-license --out specs.vsix
+            runHook postBuild
+          '';
+          installPhase = ''
+            runHook preInstall
+            install -Dm644 specs.vsix $out/specs.vsix
+            runHook postInstall
+          '';
+        };
     in
     {
       packages = forAll (pkgs: {
+        vsix = vsix pkgs;
         default = pkgs.python313Packages.buildPythonApplication {
           pname = "specs";
           inherit version;
@@ -39,6 +67,9 @@
             "--set"
             "SPECS_KIT_REV"
             rev
+            "--set"
+            "SPECS_VSIX"
+            "${vsix pkgs}/specs.vsix"
             "--prefix"
             "PATH"
             ":"
