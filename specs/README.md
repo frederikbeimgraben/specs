@@ -86,7 +86,7 @@ specs/
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | specs install brings a project to the state of its settings | approved |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | specs list prints every rule | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | specs mcp runs the MCP server | draft |
-| [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | draft |
+| [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | specs migrates a project and its copies to a new kit | approved |
 | [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | specs new makes a new spec from its template | approved |
 | [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | specs formats its output for a terminal | approved |
 | [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | specs lists the files that a command changes | draft |
