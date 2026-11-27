@@ -79,6 +79,24 @@ def listing(project: Project) -> str:
     return "".join(f"{_line(s)}\n" for s in project.all_specs())
 
 
+def matches(project: Project, text: str) -> tuple[Spec, ...]:
+    """Return each rule whose title or text holds `text`, without case.
+
+    Args:
+        project: The project.
+        text: The text to find.
+
+    Returns:
+        The rules.
+    """
+    needle = text.casefold()
+    return tuple(
+        s
+        for s in project.all_specs()
+        if needle in s.title.casefold() or needle in s.body.casefold()
+    )
+
+
 def search(project: Project, text: str) -> str:
     """Return one line for each rule whose title or text holds `text`, without case.
 
@@ -89,12 +107,7 @@ def search(project: Project, text: str) -> str:
     Returns:
         The lines.
     """
-    needle = text.casefold()
-    return "".join(
-        f"{_line(s)}\n"
-        for s in project.all_specs()
-        if needle in s.title.casefold() or needle in s.body.casefold()
-    )
+    return "".join(f"{_line(s)}\n" for s in matches(project, text))
 
 
 def check(project: Project) -> tuple[bool, str]:
