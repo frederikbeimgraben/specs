@@ -2,7 +2,7 @@
 id: "000085"
 title: init, add and update ask questions on a terminal
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 tests:
