@@ -35,11 +35,11 @@ text. The server must check the project:
 3. When the client saves a file: the whole project, from the files on the disk. The server
    must remove each diagnostic of a file that has no error now.
 
-On a reference to a rule, the server must give a hover and a definition. In a spec, a
-reference is a rule ID in the short or the long form (000047), also in the front matter. In the
-code, a reference is a `§` reference (000017). The hover must show the long form, the title, the status and the text of the rule
-after the front matter. The definition must give the first line of the file of the
-rule. The server must not write a file.
+On a reference to a rule, the server must give a hover and a definition. In a spec, a reference
+is a rule ID in the short or the long form (000047), also in the front matter. In the code, a
+reference is a `§` reference (000017). The hover must show the long form, the title, the status
+and the text of the rule after the front matter. The definition must give the first line of the
+file of the rule. The server must not write a file.
 
 Reason: The editor shows the errors of the check at their line while a person writes, and the
 text of a rule without a change of file.
