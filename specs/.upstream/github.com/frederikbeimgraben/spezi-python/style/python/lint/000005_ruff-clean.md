@@ -1,15 +1,13 @@
 ---
-id: "000064"
+id: "000005"
 title: ruff reports no warning
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - pyproject.toml
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
-  - pyproject.toml
+  - specs/
 ---
 
 # ruff reports no warning

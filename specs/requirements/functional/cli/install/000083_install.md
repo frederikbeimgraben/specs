@@ -14,6 +14,7 @@ tests:
   - tests/test_install.py:test_install_stops_for_a_broken_mcp_file
   - tests/test_install.py:test_install_stops_for_mcp_servers_that_are_no_object
   - tests/test_transitive.py:test_install_restores_a_transitive_copy
+  - tests/test_install.py:test_install_adds_the_line_to_gitattributes
 implementation:
   - src/spezi/install.py
   - src/spezi/kit.py
@@ -40,12 +41,14 @@ It must do these steps in this order:
    the copy again at the commit that the `spezi.lock` in the copy of its direct upstream names
    (spec 000092), and write this commit to `spezi.lock`. Remove each copy and each entry of
    `spezi.lock` whose repository is not in `spezi.toml` and not in a list `transitive`.
-5. Write each file of the table (spec 000066) that does not exist: the templates, the skills, the
+5. When `specs/.upstream/` holds a copy, add the line `specs/.upstream/** -text` to
+   `.gitattributes` when the file does not hold it (spec 000048).
+6. Write each file of the table (spec 000066) that does not exist: the templates, the skills, the
    CI file, the entry `spezi` in `.mcp.json`, `.envrc` and `CLAUDE.md`, each only when its
    switch in `[features]` is on (spec 000084). A file that exists must not change, also when it is
    not the same as in the kit. Remove each part whose switch is off (spec 000084).
-6. Write the index `specs/README.md` (spec 000007) and the block in `AGENTS.md` (spec 000079).
-7. Run `spezi check` (spec 000065). Print its own message, the hints, the changed files (spec 000077)
+7. Write the index `specs/README.md` (spec 000007) and the block in `AGENTS.md` (spec 000079).
+8. Run `spezi check` (spec 000065). Print its own message, the hints, the changed files (spec 000077)
    and then the report of the check. End with the exit code 1 when the check finds errors.
 
 When `.mcp.json` is no valid JSON, is not a JSON object, or has a `mcpServers` that is not an

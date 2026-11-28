@@ -17,6 +17,8 @@ max_elements = 25
 
 # The optional parts of the kit (spec 000084). true: specs install writes the part and keeps it.
 # false: specs install removes it. specs init and specs update also follow these switches.
+repo = "github.com/frederikbeimgraben/spezi"
+
 [features]
 # The MCP server specs in .mcp.json.
 mcp = true
@@ -38,3 +40,6 @@ envrc = true
 # specs update resolves ref again, specs add adds a repository, specs install changes no ref.
 # include is optional: the folders below specs/ that the copy holds, for example ["style/python/"].
 # Without include, the copy holds all rules. specs add --include sets it.
+
+[upstream."github.com/frederikbeimgraben/spezi-python"]
+ref = "main"

@@ -1,0 +1,7 @@
+# Written by spezi install, spezi update and spezi add (000082). Do not edit.
+
+[upstream."github.com/frederikbeimgraben/spezi-python"]
+ref = "main"
+commit = "40ed360ca1a4b40e19104ababb705914e4228a33"
+include = []
+hash = "sha256-Jk9J7XisWj4G7DJQkt9YsAH0rv0pgIHFuqJ/ZmUpH5M="

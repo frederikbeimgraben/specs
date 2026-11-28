@@ -56,6 +56,8 @@ TOP_KEYS = frozenset(
     }
 )
 REPO_KEYS = frozenset({"ref", "include", "transitive"})
+ATTRIBUTES_NAME = ".gitattributes"
+UPSTREAM_ATTRIBUTE = "specs/.upstream/** -text"
 FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
@@ -665,6 +667,12 @@ class Project:
             and any(c.name in TOP_FOLDERS or c.name == "README.md" for c in p.iterdir())
         )
         return frozenset(r for r in roots if not any(r.startswith(f"{o}/") for o in roots))
+
+    def needs_attribute(self) -> bool:
+        """Return True when a copy exists and `.gitattributes` lacks the line of (spec 000048)."""
+        path = self.root / ATTRIBUTES_NAME
+        lines = path.read_text(encoding="utf-8").splitlines() if path.is_file() else ()
+        return bool(self.copies()) and UPSTREAM_ATTRIBUTE not in (s.strip() for s in lines)
 
     def load(self) -> tuple[tuple[Spec, ...], tuple[str, ...]]:
         """Parse every rule of the project.

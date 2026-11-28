@@ -7,10 +7,13 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_a_copy_keeps_a_folder_named_upstream
+  - tests/test_install.py:test_install_adds_the_line_to_gitattributes
+  - tests/test_install.py:test_check_finds_a_missing_line_in_gitattributes
 implementation:
   - src/spezi/changes.py
   - src/spezi/check.py
   - src/spezi/kit.py
+  - src/spezi/install.py
 scope:
   - specs/
 ---
@@ -35,11 +38,18 @@ commands must change the copy, its `ref` and its entry in `spezi.lock`:
 | `spezi update [<repo> [<ref>]]` | Resolves the `ref` of one repository, or of each, again and replaces its copy (spec 000067). |
 | `spezi install` | Loads each copy again that does not agree with `spezi.lock`, and changes no `ref` and no commit (spec 000083). |
 
+When `specs/.upstream/` holds a copy, `.gitattributes` in the root of the project must hold the
+line `specs/.upstream/** -text`. `spezi install` must add this line when it is missing, and must
+not change the other lines. A command must not remove the line.
+
 Reason: The copy lets an agent and the check read the rules without a network. One `ref` makes
 an update of the rules one diff in one pull request. With `include`, a project takes only the
-rules that it needs, and an agent cannot read and follow the other rules.
+rules that it needs, and an agent cannot read and follow the other rules. Git on Windows can
+change the line ends of a file at checkout. The line in `.gitattributes` stops this, so the
+copy keeps the bytes of its hash.
 
 Test: `spezi check` checks that each repository of `spezi.toml` has a copy, each copy has
 a repository in `spezi.toml` or in a list `transitive` (spec 000092), each folder of `include` is in the copy, the copy holds no file
 outside the folders of `include` other than `spezi.lock` and the hash of the copy is the hash
-in `spezi.lock`.
+in `spezi.lock`. When `specs/.upstream/` holds a copy, it checks that `.gitattributes` holds
+the line `specs/.upstream/** -text`.
