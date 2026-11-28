@@ -2,7 +2,7 @@
 id: "000090"
 title: The CI migrates demo projects from each migration
 kind: workflow
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 implementation:
