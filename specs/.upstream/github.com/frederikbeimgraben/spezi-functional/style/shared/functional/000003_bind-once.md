@@ -1,14 +1,13 @@
 ---
-id: "000054"
+id: "000003"
 title: A local is bound once
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
+  - specs/
 ---
 
 # A local is bound once

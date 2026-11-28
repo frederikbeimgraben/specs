@@ -1,14 +1,13 @@
 ---
-id: "000056"
+id: "000005"
 title: Comprehensions instead of loops
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
+  - specs/
 ---
 
 # Comprehensions instead of loops

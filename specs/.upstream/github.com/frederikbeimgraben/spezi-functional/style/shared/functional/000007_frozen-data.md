@@ -1,14 +1,13 @@
 ---
-id: "000058"
+id: "000007"
 title: Data types are frozen by default
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
+  - specs/
 ---
 
 # Data types are frozen by default
@@ -16,4 +15,4 @@ scope:
 A data type must be immutable unless a write needs it. Its collection fields must be
 immutable collections too.
 
-Reason: 000055 needs data that cannot change.
+Reason: 000004 needs data that cannot change.

@@ -1,14 +1,13 @@
 ---
-id: "000052"
+id: "000001"
 title: A function body has one shape
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
+  - specs/
 ---
 
 # A function body has one shape
