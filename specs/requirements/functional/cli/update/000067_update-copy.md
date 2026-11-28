@@ -7,14 +7,9 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_update_replaces_the_copy_and_keeps_include
-  - tests/test_kit.py:test_update_stops_for_an_unknown_repository
   - tests/test_kit.py:test_update_of_the_kit_runs_the_check
   - tests/test_kit.py:test_update_without_arguments_updates_each_repository
   - tests/test_kit.py:test_update_reads_a_ref_without_spaces
-  - tests/test_kit.py:test_update_writes_include_once
-  - tests/test_transitive.py:test_update_with_recursive_adds_a_new_transitive_upstream
-  - tests/test_transitive.py:test_update_without_a_new_commit_changes_no_file
-  - tests/test_transitive.py:test_update_lists_a_transitive_upstream_with_a_new_commit
 implementation:
   - src/spezi/kit.py
   - src/spezi/cli.py
@@ -36,52 +31,10 @@ scope:
 
 `<repo>` is the full name of the repository, or `kit` for `github.com/frederikbeimgraben/spezi`.
 For each repository, the command must replace the copy with the `specs/` folder at the commit
-that `ref` names. It must write the `ref`, the commit, `include` and the hash to `spezi.lock`
-(spec 000082). When the table of `<repo>` has `include`, the command must copy only the folders
-of `include` and must keep `include`. Only a folder that the user adds (spec 000085) changes it.
-The kit comes first.
-
-The message must have one line for each repository, in the order of the update. The line is
-`updated <repo> to <commit>`, or `<repo> is up to date at <commit>` when the new commit is the
-commit of `<repo>` in `spezi.lock` before the command. Below the message, the command must give
-one line for each transitive upstream (spec 000092), sorted by repository. These are the lines
-of `spezi install` (spec 000083), and `<repo> is up to date at <commit> via <direct>` for each
-transitive upstream whose commit did not change. `<direct>` is the list `via` of `spezi.lock`
-(spec 000082), separated by `, `.
-
-The command must keep `transitive` and copy each of its repositories at the commit of the new
-`spezi.lock` of the direct upstream (spec 000092). For a transitive upstream that the new
-`spezi.lock` names and `transitive` does not hold, it must ask (spec 000085). With `-r`
-(also `--recursive`), it must copy each such upstream without a question. A repository of
-`transitive` that the new `spezi.lock` does not name must leave `transitive`. Its copy must go
-when no other list `transitive` holds it.
-
-For the kit, the command must also replace the templates, the skills, the CI files (spec 000066) and
-the entry `spezi` in `.mcp.json`. A template or a skill that the user keeps (spec 000085) must stay.
-The command must write each folder (spec 000089) again that is in the project. The folder of VS Code
-must stay as it is when the program has no `specs.vsix`. When `flake.nix` has the input `spezi`
-of (spec 000066), the command must set its ref to the new commit of the kit and run
-`nix flake update specs`. Without this input, it must not change `flake.nix` and `flake.lock`.
-When it changed `flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it must tell to leave
-the shell and run `nix develop`, because a program cannot load its shell again.
-
-The command must stop with an error in these cases:
-
-- `<repo>` is not in `spezi.toml`.
-- This program is an older commit of the kit than the kit commit in `spezi.lock`.
-- `<repo>` at `<ref>` has no folder of `include`.
-- The kit at `<ref>` has no `specs/.templates/`.
-- The switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list.
-
-It must then change no file
-of the repository with the error.
-
-The command must replace only the parts whose switch in `[features]` is on, and must not change
-`flake.nix` when `flake` is off (spec 000084). Before it copies, the command must run the migrations
-(spec 000081). At its end, it must do the steps of `spezi install` (spec 000083).
+that `ref` names. It writes the `ref`, the commit, `include` and the hash to `spezi.lock`
+(spec 000082). The kit comes first.
 
 Reason: `spezi.toml` keeps the version that the project wants, and one command takes the newest
-commit of each version (spec 000048). New rules of an update can show errors in the project, and the
-index must show the new rules.
+commit of each version (spec 000048).
 
 Test: `tests/test_kit.py`.

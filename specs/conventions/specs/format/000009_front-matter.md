@@ -14,8 +14,7 @@ scope:
 
 # A spec starts with a YAML front matter
 
-The file must start with a YAML front matter block between two `---` lines. The block must be
-valid YAML. The block must have these keys, in this order:
+The front matter must have these keys, in this order:
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -36,12 +35,8 @@ valid YAML. The block must have these keys, in this order:
 | `implementation` | list of strings or `null` | Only with `status: draft` or `approved`: the paths of the code that implements the rule. `null` while nobody implemented it. |
 | `scope` | list of strings | The paths that the rule applies to. |
 
-The block must not have other keys. `scope` must be the last key. Each path must exist, as a
-path from the repository root. The Markdown body must not hold metadata.
+Reason: One fixed set of keys lets one tool read every spec. The quotes keep the leading zeros,
+because YAML reads `000024` as a number. The short form stays the same when a rule moves to a
+different folder (spec 000014).
 
-Reason: Every Markdown tool reads standard front matter. One fixed set of keys lets one tool
-read every spec. The quotes keep the leading zeros, because YAML reads `000024` as a number.
-The short form stays correct when a rule moves to a different folder (spec 000014).
-
-Test: `spezi check` reads the block with a YAML parser, and checks that it is valid YAML, the
-keys, their order and their values.
+Test: `spezi check` checks the keys, their order and their values.

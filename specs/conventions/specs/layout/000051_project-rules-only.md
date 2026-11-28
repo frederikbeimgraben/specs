@@ -4,7 +4,7 @@ title: specs/ holds the rules of the project and the files of the kit
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 implementation:
   - src/spezi/project.py
 scope:
@@ -13,8 +13,7 @@ scope:
 
 # specs/ holds the rules of the project and the files of the kit
 
-`specs/` must hold the rules of the project in its kind folders (spec 000004). All other files of
-the kit must be in these places of `specs/`:
+All files of the kit in `specs/` that are not rules must be in these places:
 
 | Path | Content |
 | --- | --- |
@@ -22,7 +21,8 @@ the kit must be in these places of `specs/`:
 | `specs/.upstream/` | The copies of the rules of different repositories (spec 000048). |
 | `specs/.templates/` | The templates for a new spec (spec 000008). |
 
-The settings must be in `spezi.toml` in the root of the repository.
+The rules are in the kind folders (spec 000004). The settings are in `spezi.toml`
+(spec 000078).
 
 Reason: All files of the specs are in one folder. The hidden folders keep the files of the kit,
 which change with `spezi update`, out of the way of a reader of the rules.

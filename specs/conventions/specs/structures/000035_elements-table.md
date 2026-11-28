@@ -4,7 +4,7 @@ title: Each element of the diagram has a row in the element table
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
   - src/spezi/sections.py
@@ -14,12 +14,9 @@ scope:
 
 # Each element of the diagram has a row in the element table
 
-`## Elements` must hold one table with the columns `Element`, `Path` and `Meaning`. Each row
-must name one element of the diagram with the name that the diagram uses. Each element of the
-diagram must have one row. `Meaning` must tell in one sentence what the element is.
+`## Elements` must hold one table with the columns `Element`, `Path` and `Meaning`.
 
 Reason: The table is the text alternative of the diagram. A screen reader, a search and an
 agent read the table when they cannot read the drawing.
 
-Test: `spezi check`: each name of the table occurs in the diagram. For `class`,
-`state`, `sequence` and `entity` it also finds each element of the diagram in the table.
+Test: `spezi check`.

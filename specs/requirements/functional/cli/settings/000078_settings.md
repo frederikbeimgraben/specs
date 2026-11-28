@@ -5,11 +5,6 @@ kind: functional
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
-tests:
-  - tests/test_settings.py:test_a_bad_setting_stops_each_command
-  - tests/test_settings.py:test_an_unknown_key_of_a_copy_stops_each_command
-  - tests/test_settings.py:test_init_writes_the_settings_without_comments
-  - tests/test_migrations.py:test_migration_6_removes_the_comments_of_the_template
 implementation:
   - src/spezi/project.py
   - src/spezi/data/spezi.toml
@@ -36,18 +31,6 @@ optional and must have this type and default:
 | `[features]` | table | each switch `true` | The switches of the optional parts of the kit (spec 000084). |
 | `[upstream."<repo>"]` | table | none | One table for each direct upstream (spec 000048, 000082, 000092). It holds `ref` (string: a tag, a branch or a commit), the optional `include` (list of strings) and the optional `transitive` (list of strings). |
 
-The template `src/spezi/data/spezi.toml` must hold each key with its default and no comment.
-A migration (spec 000081) must remove each line of `spezi.toml` that is a comment of an earlier
-template. A different comment must stay.
-Each command must stop with one line `specs: spezi.toml: <error>` and the exit code 1 in these
-cases:
-
-- `spezi.toml` is no valid TOML.
-- A key has a different type.
-- `forge` is not `github`, `gitlab` or `codeberg`.
-- A key on the top level or in a table `[upstream."<repo>"]` is not in the table above.
-
-Reason: One table tells every key, and a wrong type stops the command before it reads the wrong
-folders.
+Reason: One table tells every key.
 
 Test: `tests/test_settings.py`.

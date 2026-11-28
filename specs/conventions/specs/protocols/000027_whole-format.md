@@ -1,10 +1,10 @@
 ---
 id: "000027"
-title: A protocol spec describes one whole format
+title: A protocol spec has fixed sections
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
   - src/spezi/sections.py
@@ -13,14 +13,10 @@ scope:
   - specs/
 ---
 
-# A protocol spec describes one whole format
+# A protocol spec has fixed sections
 
-A protocol spec must describe one data exchange format as a whole: one message, one payload,
-one file or one export. One format must not spread over several specs. Two formats must not
-share one spec.
-
-The body must have the `#` title, the rule text and then exactly these `##` sections, in this
-order:
+The body of a protocol spec must have the `#` title, the rule text and then exactly these `##`
+sections, in this order:
 
 | Section | Content |
 | --- | --- |
@@ -29,8 +25,6 @@ order:
 | `## Example` | At least one complete example in a code block (spec 000029). |
 | `## Compatibility` | What a receiver must accept, so that a compatible change does not break it (spec 000030). |
 
-The labels `Reason:` and `Test:` come after the last section.
-
-Reason: A receiver builds against a format as a whole. One file then holds the full contract.
+Reason: One file holds the full contract.
 
 Test: `spezi check` checks the headings and their order.

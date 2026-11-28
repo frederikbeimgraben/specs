@@ -4,11 +4,14 @@ title: A spec has a front matter, a body and links to other specs
 kind: structure
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 diagram: class
 implementation:
   - src/spezi/project.py
   - specs/.templates/TEMPLATE.md
+  - specs/.templates/TEMPLATE-protocol.md
+  - specs/conventions/specs/format/000010_status.md
+  - specs/conventions/specs/layout/000004_tree.md
 scope:
   - specs/
   - src/spezi/project.py
@@ -17,8 +20,7 @@ scope:
 # A spec has a front matter, a body and links to other specs
 
 The class `Spec` in `src/spezi/project.py` and the keys of the templates must agree with this
-diagram. A new key of the front matter must change the diagram and the rule of the front matter (spec 000009) in the same pull
-request.
+diagram.
 
 ## Diagram
 

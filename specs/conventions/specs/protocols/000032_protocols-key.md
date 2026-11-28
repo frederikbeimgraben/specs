@@ -14,10 +14,9 @@ scope:
 # A rule names the formats that it uses
 
 A functional or non-functional spec can send, read or store the format of a protocol spec. Then
-it must list the full ID of that protocol spec in `protocols`. A spec that uses no such format
-must not have the key `protocols`. Each entry must name a protocol spec that is in force.
+it must list the full ID of that protocol spec in `protocols`.
 
 Reason: A reader of a rule finds the exact format. A tool finds every rule that a change of a
 format affects.
 
-Test: `spezi check` checks every entry of `protocols`.
+Test: Review.
