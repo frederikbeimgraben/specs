@@ -27,6 +27,7 @@ in this file. The ID links to the rule.
 | [A/work/questions/000043](/specs/agents/work/questions/000043_ask-each-detail.md) | An agent asks the user about each open detail | approved |
 | [A/work/questions/000044](/specs/agents/work/questions/000044_follow-the-spec.md) | To follow a spec is not an assumption | approved |
 | [W/kit/migrations/000090](/specs/workflow/kit/migrations/000090_migration-ci.md) | The CI migrates demo projects from each migration | approved |
+| [W/kit/release/000091](/specs/workflow/kit/release/000091_release-workflow.md) | A tag publishes the package and the binaries | approved |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
 | [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |
