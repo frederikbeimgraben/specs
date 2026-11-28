@@ -370,6 +370,31 @@ def skills(source: Path) -> tuple[Path, ...]:
     return tuple(sorted(p for p in folder.glob("spec-*") if p.is_dir())) if folder.is_dir() else ()
 
 
+def read_mcp(path: Path) -> dict[str, object]:
+    """Read `.mcp.json`. A missing file gives an empty object.
+
+    Args:
+        path: The file `.mcp.json`.
+
+    Returns:
+        The object of the file.
+
+    Raises:
+        KitError: The file is no valid JSON, is not an object, or `mcpServers` is not an object.
+    """
+    try:
+        data: object = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    except json.JSONDecodeError as error:
+        raise KitError(f".mcp.json: no valid JSON: {error}") from error
+    match data:
+        case dict() if isinstance(data.get("mcpServers", {}), dict):
+            return cast("dict[str, object]", data)
+        case dict():
+            raise KitError(".mcp.json: mcpServers is not an object")
+        case _:
+            raise KitError(".mcp.json: the file is not a JSON object")
+
+
 def write_mcp(project: Project, ref: str) -> None:
     """Write the server `specs` into `.mcp.json`. Keep the other servers.
 
@@ -378,11 +403,7 @@ def write_mcp(project: Project, ref: str) -> None:
         ref: The commit of the kit.
     """
     path = project.root / ".mcp.json"
-    data = (
-        cast("dict[str, object]", json.loads(path.read_text(encoding="utf-8")))
-        if path.is_file()
-        else {}
-    )
+    data = read_mcp(path)
     servers = cast("dict[str, object]", data.get("mcpServers", {}))
     server = {
         "command": "nix",
