@@ -136,7 +136,9 @@ def check(project: Project, *, write: bool = False) -> tuple[bool, str]:
         write: True to write the index and `AGENTS.md` first, as `spezi install` does.
 
     Returns:
-        True without errors, and the report.
+        True without errors, and the report with the errors, the warnings and the counts.
     """
-    count, errors = run(project, write=write)
-    return not errors, "".join(f"{e}\n" for e in errors) + f"{summary(count, errors)}\n"
+    count, errors, warnings = run(project, write=write)
+    return not errors, "".join(f"{e}\n" for e in (*errors, *warnings)) + (
+        f"{summary(count, errors, warnings)}\n"
+    )

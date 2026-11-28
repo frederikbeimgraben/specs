@@ -29,7 +29,7 @@ def test_check_passes_after_init(kit: Kit, project: Path) -> None:
     """A new project has no errors and exit code 0, and the check counts the rules of the kit."""
     result = kit.run(project, "check", "--raw")
     assert result.code == 0
-    assert re.search(r"(^|\n)0 specs, [1-9][0-9]* upstream, 0 errors\n$", result.out)
+    assert re.search(r"(^|\n)0 specs, [1-9][0-9]* upstream, 0 errors, 0 warnings\n$", result.out)
 
 
 def test_check_changes_no_file(kit: Kit, project: Path) -> None:

@@ -51,6 +51,7 @@ TOP_KEYS = frozenset(
         "code_dirs",
         "code_suffixes",
         "max_elements",
+        "ste",
         "features",
         "upstream",
         "own",
@@ -122,6 +123,7 @@ class Config:
         code_dirs: The folders with code that refers to rules (spec 000017).
         code_suffixes: The file types of the code.
         max_elements: The highest count of elements in one structure diagram.
+        ste: True to check the rules of ASD-STE100 (spec 000093).
         upstream: The `ref` of each repository with a copy below `specs/.upstream/` (spec 000048).
         include: The folders of each repository that the copy holds; empty for all (spec 000048).
         transitive: The transitive upstreams that the copy of each repository brings (spec 000092).
@@ -138,6 +140,7 @@ class Config:
         {".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"}
     )
     max_elements: int = 25
+    ste: bool = True
     upstream: Mapping[str, str | None] = MappingProxyType({})
     include: Mapping[str, tuple[str, ...]] = MappingProxyType({})
     transitive: Mapping[str, tuple[str, ...]] = MappingProxyType({})
@@ -484,6 +487,26 @@ def _number(data: Mapping[str, object], key: str, default: int) -> int:
     return value
 
 
+def _switch(data: Mapping[str, object], key: str, default: bool) -> bool:
+    """Return a key of `spezi.toml` that is true or false.
+
+    Args:
+        data: The table.
+        key: The key.
+        default: The value without the key.
+
+    Returns:
+        The value.
+
+    Raises:
+        ConfigError: The value is not true or false.
+    """
+    value = data.get(key, default)
+    if not isinstance(value, bool):
+        raise ConfigError(f"spezi.toml: {key} must be true or false")
+    return value
+
+
 def _upstream(data: Mapping[str, object]) -> Mapping[str, Mapping[str, object]]:
     """Return the tables below `upstream` of `spezi.toml`.
 
@@ -599,6 +622,7 @@ def read_config(path: Path) -> Config:
             _texts(data, "code_suffixes", tuple(sorted(default.code_suffixes)))
         ),
         max_elements=_number(data, "max_elements", default.max_elements),
+        ste=_switch(data, "ste", default.ste),
         upstream={repo: _text(table, "ref", "") or None for repo, table in upstream.items()},
         include={repo: _texts(table, "include", ()) for repo, table in upstream.items()},
         transitive={repo: _texts(table, "transitive", ()) for repo, table in upstream.items()},
