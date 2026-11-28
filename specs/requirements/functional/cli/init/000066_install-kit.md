@@ -2,9 +2,9 @@
 id: "000066"
 title: spezi init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_init_writes_the_kit_files
   - tests/test_kit.py:test_init_ci_runs_on_the_base_branch
@@ -23,7 +23,7 @@ scope:
 
 # spezi init adds the kit to a project
 
-`spezi init [<dir>] [--forge github|gitlab|codeberg] [-y]` must add the kit to the project in
+`spezi init [<dir>] [--forge github|gitlab|codeberg] [-y] [-r]` must add the kit to the project in
 `<dir>`, or in the current folder. First it must ask the questions of 000085, and it must write
 the answers to `spezi.toml`. It must write these files:
 
@@ -33,6 +33,7 @@ the answers to `spezi.toml`. It must write these files:
 | `spezi.lock` | The commit that this `ref` names, and the hash of the copy of the kit (000082). |
 | `specs/` | An empty folder for the rules of the project. |
 | `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit (000048). |
+| `specs/.upstream/<repo>/` | The transitive upstreams of the kit that the user chooses, or each with `-r` (000092, 000085). |
 | `specs/.templates/` | The templates of the kit at this commit. |
 | `.claude/skills/spezi-*` | The skills of the kit. |
 | `.github/workflows/spezi.yml`, `.gitlab/ci/spezi.yml` or `.forgejo/workflows/spezi.yml` | The CI job for the forge, which runs `spezi check` at the commit of the kit. On GitHub and Codeberg, it runs for each pull request and for each push to the branch of `base_ref`, for example `develop` for `origin/develop`. For Codeberg, the job runs on the hosted Forgejo Actions runner `codeberg-small`. |

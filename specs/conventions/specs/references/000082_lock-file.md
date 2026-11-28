@@ -2,9 +2,9 @@
 id: "000082"
 title: spezi.lock holds the commit and the hash of each copy
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 implementation:
   - src/spezi/lock.py
   - src/spezi/check.py
@@ -18,7 +18,7 @@ scope:
 
 `ref` in `spezi.toml` must name a tag, a branch or a commit of the repository. The file
 `spezi.lock` in the root of the repository must hold one table for each repository of
-`spezi.toml`, in TOML:
+`spezi.toml` and for each copy of a transitive upstream (000092), in TOML:
 
 ```toml
 [upstream."github.com/frederikbeimgraben/spezi"]
@@ -32,12 +32,14 @@ hash = "sha256-<base64>"
 | --- | --- |
 | `ref` | The `ref` of `spezi.toml` that gave the commit. |
 | `commit` | The commit of the copy below `specs/.upstream/` (000048). |
-| `include` | The `include` of `spezi.toml`, or an empty list. |
+| `include` | The `include` of `spezi.toml`, or an empty list. For a transitive upstream, the union of 000092. |
+| `via` | Only for a transitive upstream: the direct upstreams that name it in `transitive`, sorted. A transitive upstream has no `ref`. |
 | `hash` | The SHA-256 hash of the copy. For each file of the copy, in the order of the sorted paths, the hash takes the path below the copy, a null byte, the length of the content, a null byte and the content. It is written as `sha256-` and the hash in Base64. |
 
 Only `spezi install`, `spezi update`, `spezi add` and `spezi init` must write `spezi.lock`
 (000083). A person or an agent must not change it. `spezi check` must show an error when
-`spezi.toml` and `spezi.lock` do not name the same repositories, when `ref` or `include` of an
+`spezi.lock` does not name each repository of `spezi.toml` and each copy of 000092, and no
+other, when `ref` or `include` of an
 entry is not the same as in `spezi.toml`, or when the hash of a copy is not the hash of its
 entry.
 

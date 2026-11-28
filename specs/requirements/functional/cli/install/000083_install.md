@@ -2,7 +2,7 @@
 id: "000083"
 title: spezi install brings a project to the state of its settings
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -35,7 +35,9 @@ It must do these steps in this order:
    Else it must resolve `ref` again and write the new commit to `spezi.lock`. A copy that a
    person changed agrees no more, so the command loads it again and lists its files as changed
    (000077).
-4. Remove each entry of `spezi.lock` whose repository is not in `spezi.toml`.
+4. Load each copy of a transitive upstream (000092) that does not agree with `spezi.lock`, at
+   the commit of `spezi.lock`. Remove each entry of `spezi.lock` whose repository is not in
+   `spezi.toml` and is no transitive upstream of 000092.
 5. Write each file of the table of 000066 that does not exist: the templates, the skills, the
    CI file, the entry `spezi` in `.mcp.json`, `.envrc` and `CLAUDE.md`, each only when its
    switch in `[features]` is on (000084). A file that exists must not change, also when it is

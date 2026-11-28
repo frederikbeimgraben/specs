@@ -2,9 +2,9 @@
 id: "000068"
 title: spezi add adds the copy of a different repository
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_add_copies_the_rules
   - tests/test_kit.py:test_add_with_include_copies_only_the_folders
@@ -19,7 +19,7 @@ scope:
 
 # spezi add adds the copy of a different repository
 
-`spezi add [<repo> [<ref>]] [-y]` must ask the questions of 000085, and must then copy the
+`spezi add [<repo> [<ref>]] [-y] [-r]` must ask the questions of 000085, and must then copy the
 `specs/` folder of `<repo>` at `<ref>` to `specs/.upstream/<repo>/`, add `[upstream."<repo>"]`
 with `<ref>` as given as `ref` to `spezi.toml`, and write the entry of `<repo>` to `spezi.lock`
 (000082). Without `<ref>`, the command must take or propose the tag with the highest version,
@@ -31,6 +31,10 @@ only these folders below `specs/` and must write them as `include` to the table 
 folder below a different folder of `include` must not go to `include`. The command must stop
 with an error and change no file when `<repo>` is in `spezi.toml` already, or when `<repo>` at
 `<ref>` has no folder of `--include`.
+
+The command must then copy the transitive upstreams of 000092 that the user chooses (000085), and
+write them as `transitive` to the table. With `-r` (also `--recursive`), it must copy each
+transitive upstream without a question.
 
 Before it copies, the command must run the migrations of 000081. It must stop with an error when
 this program is an older commit of the kit than the kit commit in `spezi.lock`.

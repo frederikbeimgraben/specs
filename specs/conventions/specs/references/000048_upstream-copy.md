@@ -2,7 +2,7 @@
 id: "000048"
 title: The rules of a different repository are an unchanged copy
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -23,6 +23,7 @@ a commit, and `spezi.lock` must hold the commit of the copy (000082). When the t
 repository in `spezi.toml` has `include`, the copy must hold only the folders below `specs/` that
 `include` names, for example `include = ["style/python/"]`, and no other file. A folder of `include` must be a path of kebab-case folder names below `specs/`.
 The copy must not hold the hidden folders of the repository, for example `specs/.upstream/`.
+The copy of a direct upstream must also hold the `spezi.lock` of the repository (000092).
 When the repository uses an older kit, the copy must hold its rules after the migrations of
 000081, and else no change. A person or an agent must not change a file of the copy. Only these
 commands must change the copy, its `ref` and its entry in `spezi.lock`:
@@ -39,4 +40,4 @@ rules that it needs, and an agent cannot read and follow the other rules.
 
 Test: `spezi check` checks that each repository of `spezi.toml` has a copy, each copy has
 a repository in `spezi.toml`, each folder of `include` is in the copy, the copy holds no file
-outside the folders of `include` and the hash of the copy is the hash in `spezi.lock`.
+outside the folders of `include` other than `spezi.lock` and the hash of the copy is the hash in `spezi.lock`.

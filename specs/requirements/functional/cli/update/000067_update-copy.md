@@ -2,7 +2,7 @@
 id: "000067"
 title: spezi update resolves the refs again and replaces the copies
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -22,7 +22,7 @@ scope:
 
 # spezi update resolves the refs again and replaces the copies
 
-`spezi update [<repo> [<ref>]] [-y]` must update the copies below `specs/.upstream/` (000048),
+`spezi update [<repo> [<ref>]] [-y] [-r]` must update the copies below `specs/.upstream/` (000048),
 after the questions of 000085:
 
 | Form | Effect |
@@ -37,6 +37,12 @@ that `ref` names, and write the `ref`, the commit, `include` and the hash to `sp
 (000082). When the table of `<repo>` has `include`, the command must copy only the folders of
 `include` and must keep `include`. Only a folder that the user adds (000085) changes it. The
 kit comes first.
+
+The command must keep `transitive` and copy each of its repositories at the commit of the new
+`spezi.lock` of the direct upstream (000092). For a transitive upstream that the new
+`spezi.lock` names and `transitive` does not hold, it must ask as 000085 tells. With `-r`
+(also `--recursive`), it must copy each such upstream without a question. A repository of
+`transitive` that the new `spezi.lock` does not name must leave `transitive` and lose its copy.
 
 For the kit, the command must also replace the templates, the skills, the CI files of 000066 and
 the entry `spezi` in `.mcp.json`. A template or a skill that the user keeps (000085) must stay.
