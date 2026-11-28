@@ -17,12 +17,13 @@ BEGIN = "<!-- spezi:begin (written by spezi install, do not edit) -->"
         ("max_elements = 25", "max_elements = 0", "max_elements"),
         ('forge = "github"', "forge = [", "spezi.toml"),
         ('forge = "github"', 'forge = "gitea"', "forge must be github, gitlab, codeberg"),
+        ("code_dirs = []", "code_dir = []", "unknown key code_dir"),
     ],
 )
 def test_a_bad_setting_stops_each_command(
     kit: Kit, project: Path, old: str, new: str, message: str
 ) -> None:
-    """A wrong type, a wrong forge or no valid TOML stops the command with one line and code 1."""
+    """A wrong type or forge, an unknown key or no valid TOML stops the command with code 1."""
     path = project / "spezi.toml"
     text = path.read_text(encoding="utf-8")
     assert old in text
@@ -71,3 +72,15 @@ def test_a_file_without_block_gets_it_at_the_end(kit: Kit, project: Path) -> Non
     assert kit.run(project, "check", "--raw").code == 1
     assert kit.run(project, "install", "--raw").code == 0
     assert path.read_text(encoding="utf-8").startswith(f"# Mine\n\n{BEGIN}")
+
+
+def test_an_unknown_key_of_a_copy_stops_each_command(kit: Kit, project: Path) -> None:
+    """An unknown key in a table `[upstream."<repo>"]` stops the command with one line."""
+    path = project / "spezi.toml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace('\nref = "', '\nrev = "x"\nref = "', 1),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert result.err.startswith("spezi: spezi.toml: unknown key rev in [upstream.")

@@ -43,6 +43,10 @@ PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
 STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
 IN_FORCE = frozenset({"draft", "approved"})
 FORGES = ("github", "gitlab", "codeberg")
+TOP_KEYS = frozenset(
+    {"forge", "base_ref", "code_dirs", "code_suffixes", "max_elements", "features", "upstream"}
+)
+REPO_KEYS = frozenset({"ref", "include"})
 FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
@@ -477,7 +481,34 @@ def _upstream(data: Mapping[str, object]) -> Mapping[str, Mapping[str, object]]:
     tables = cast("Mapping[str, object]", value) if isinstance(value, dict) else None
     if tables is None or not all(isinstance(t, dict) for t in tables.values()):
         raise ConfigError('spezi.toml: upstream must hold one table [upstream."<repo>"] each')
-    return cast("Mapping[str, Mapping[str, object]]", tables)
+    found = cast("Mapping[str, Mapping[str, object]]", tables)
+    match next(
+        ((repo, key) for repo, table in found.items() for key in table if key not in REPO_KEYS),
+        None,
+    ):
+        case (repo, key):
+            raise ConfigError(f'spezi.toml: unknown key {key} in [upstream."{repo}"]')
+        case None:
+            return found
+
+
+def _known(data: Mapping[str, object]) -> Mapping[str, object]:
+    """Return the table of `spezi.toml` when each key of its top level is known (§000078).
+
+    Args:
+        data: The whole file.
+
+    Returns:
+        The same table.
+
+    Raises:
+        ConfigError: A key is unknown.
+    """
+    match next((key for key in data if key not in TOP_KEYS), None):
+        case str(key):
+            raise ConfigError(f"spezi.toml: unknown key {key}")
+        case None:
+            return data
 
 
 def _features(data: Mapping[str, object]) -> Mapping[str, bool]:
@@ -538,7 +569,7 @@ def read_config(path: Path) -> Config:
     Returns:
         The settings.
     """
-    data = _load_toml(path)
+    data = _known(_load_toml(path))
     default = Config()
     upstream = _upstream(data)
     return Config(

@@ -7,6 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_settings.py:test_a_bad_setting_stops_each_command
+  - tests/test_settings.py:test_an_unknown_key_of_a_copy_stops_each_command
 implementation:
   - src/spezi/project.py
   - src/spezi/data/spezi.toml
@@ -31,8 +32,9 @@ optional and must have this type and default:
 | `[upstream."<repo>"]` | table | none | One table for each copy, with `ref` (string: a tag, a branch or a commit) and the optional `include` (list of strings) (000048, 000082). |
 
 The template `src/spezi/data/spezi.toml` must hold each key with its default and a comment.
-When `spezi.toml` is no valid TOML, when a key has a different type, or when `forge` is not
-`github`, `gitlab` or `codeberg`, each command must stop with one line
+When `spezi.toml` is no valid TOML, when a key has a different type, when `forge` is not
+`github`, `gitlab` or `codeberg`, or when a key on the top level or in a table
+`[upstream."<repo>"]` is not in the table above, each command must stop with one line
 `specs: spezi.toml: <error>` and the exit code 1.
 
 Reason: One table tells every key, and a wrong type stops the command before it reads the wrong
