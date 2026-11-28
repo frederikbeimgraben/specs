@@ -56,6 +56,8 @@ TOP_KEYS = frozenset(
     }
 )
 REPO_KEYS = frozenset({"ref", "include", "transitive"})
+ATTRIBUTES_NAME = ".gitattributes"
+UPSTREAM_ATTRIBUTE = "specs/.upstream/** -text"
 FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
@@ -666,6 +668,12 @@ class Project:
         )
         return frozenset(r for r in roots if not any(r.startswith(f"{o}/") for o in roots))
 
+    def needs_attribute(self) -> bool:
+        """Return True when a copy exists and `.gitattributes` lacks the line of §000048."""
+        path = self.root / ATTRIBUTES_NAME
+        lines = path.read_text(encoding="utf-8").splitlines() if path.is_file() else ()
+        return bool(self.copies()) and UPSTREAM_ATTRIBUTE not in (s.strip() for s in lines)
+
     def load(self) -> tuple[tuple[Spec, ...], tuple[str, ...]]:
         """Parse every rule of the project.
 
@@ -712,16 +720,37 @@ class Project:
     def load_upstream(self) -> tuple[Spec, ...]:
         """Parse every rule of the copies below `specs/.upstream/`. Skip a file that is no rule.
 
+        `copy_errors` gives the errors of the skipped files.
+
         Returns:
             The specs of the copies.
         """
-        parsed = (
-            parse_spec(path, self.upstream_dir / repo, repo)
+        return tuple(spec for _, (spec, errors) in self._parse_upstream() if spec and not errors)
+
+    def copy_errors(self) -> tuple[str, ...]:
+        """Return the errors of each rule of the copies that the program cannot read (§000065).
+
+        Returns:
+            One error per problem, as `<path>: <message>`.
+        """
+        return tuple(
+            f"{path.relative_to(self.root).as_posix()}: {e}"
+            for path, (_, errors) in self._parse_upstream()
+            for e in errors
+        )
+
+    def _parse_upstream(self) -> tuple[tuple[Path, tuple[Spec | None, tuple[str, ...]]], ...]:
+        """Parse each Markdown file below a folder of each copy.
+
+        Returns:
+            The path, the spec or None, and the errors of each file.
+        """
+        return tuple(
+            (path, parse_spec(path, self.upstream_dir / repo, repo))
             for repo in sorted(self.copies())
             for path in sorted((self.upstream_dir / repo).rglob("*.md"))
             if path.relative_to(self.upstream_dir / repo).parent != Path()
         )
-        return tuple(spec for spec, errors in parsed if spec and not errors)
 
     def all_specs(self) -> tuple[Spec, ...]:
         """Return the rules of the project, then the rules of the copies."""

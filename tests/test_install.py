@@ -90,3 +90,22 @@ def test_install_stops_for_mcp_servers_that_are_no_object(kit: Kit, project: Pat
     assert result.code == 1, result.out + result.err
     assert "spezi: .mcp.json: mcpServers is not an object" in result.err
     assert path.read_text(encoding="utf-8") == '{"mcpServers": []}\n'
+
+
+def test_install_adds_the_line_to_gitattributes(kit: Kit, project: Path) -> None:
+    """`spezi install` adds the line for the copies and keeps the other lines."""
+    path = project / ".gitattributes"
+    path.write_text("*.png binary", encoding="utf-8")
+    result = kit.run(project, "install", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert path.read_text(encoding="utf-8") == "*.png binary\nspecs/.upstream/** -text\n"
+    again = kit.run(project, "install", "--raw")
+    assert not _changes(again.out)
+
+
+def test_check_finds_a_missing_line_in_gitattributes(kit: Kit, project: Path) -> None:
+    """`spezi check` finds a copy without the line in `.gitattributes`."""
+    (project / ".gitattributes").unlink()
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert ".gitattributes: the line 'specs/.upstream/** -text' is missing" in result.out

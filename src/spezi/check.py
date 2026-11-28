@@ -12,6 +12,7 @@ from __future__ import annotations
 import re
 import subprocess
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
 
 from spezi.agents import AGENTS, block, merge
@@ -20,6 +21,7 @@ from spezi.context import Context, Errors, where
 from spezi.index import index
 from spezi.lock import LOCK_NAME, read_lock, tree_hash
 from spezi.project import (
+    ATTRIBUTES_NAME,
     FILE_NAME,
     IN_FORCE,
     KINDS_BY_PREFIX,
@@ -29,6 +31,7 @@ from spezi.project import (
     REPO,
     SHORT,
     STATUSES,
+    UPSTREAM_ATTRIBUTE,
     Project,
     Spec,
     hidden,
@@ -527,6 +530,14 @@ def _upstream_errors(project: Project) -> Errors:
             for e in _include_errors(project, repo, include)
         ),
         *_transitive_errors(project, want, copies),
+        *(
+            (
+                f"{ATTRIBUTES_NAME}: the line {UPSTREAM_ATTRIBUTE!r} is missing; run spezi install"
+                " (000048)",
+            )
+            if project.needs_attribute()
+            else ()
+        ),
     )
 
 
@@ -906,7 +917,33 @@ def with_line(root: Path, error: str) -> str:
     )
 
 
-def run(project: Project, *, write: bool) -> tuple[int, Errors]:
+@dataclass(frozen=True, slots=True)
+class Count:
+    """The counts of a check (§000065).
+
+    Attributes:
+        specs: The rules of the project.
+        upstream: The rules of the copies below `specs/.upstream/`.
+    """
+
+    specs: int
+    upstream: int
+
+
+def summary(count: Count, errors: Errors) -> str:
+    """Return the last line of the check (§000065).
+
+    Args:
+        count: The counts.
+        errors: The errors.
+
+    Returns:
+        The line, for example `0 specs, 89 upstream, 0 errors`.
+    """
+    return f"{count.specs} specs, {count.upstream} upstream, {len(errors)} errors"
+
+
+def run(project: Project, *, write: bool) -> tuple[Count, Errors]:
     """Run every check. With `write`, write the index, its copy and `AGENTS.md` first.
 
     Args:
@@ -914,7 +951,7 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
         write: True to write `specs/README.md` and `AGENTS.md`.
 
     Returns:
-        The count of specs and the errors.
+        The counts of the rules of the project and of the copies, and the errors.
     """
     specs, layout = project.load()
     copied = project.load_upstream()
@@ -930,10 +967,11 @@ def run(project: Project, *, write: bool) -> tuple[int, Errors]:
     if write and agents is not None:
         write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
-    return len(specs), tuple(
+    return Count(len(specs), len(copied)), tuple(
         with_line(project.root, e)
         for e in (
             *layout,
+            *project.copy_errors(),
             *_upstream_errors(project),
             *_lock_errors(project),
             *_check_replaces(ctx, specs, raw),

@@ -12,6 +12,7 @@ from rich.table import Table
 from rich.text import Text
 
 from spezi.changes import Mark
+from spezi.check import Count, summary
 from spezi.project import Spec
 
 STATUS_STYLE: Mapping[str, str] = {
@@ -71,22 +72,22 @@ def spec_text(text: str) -> Group:
     )
 
 
-def report(count: int, errors: tuple[str, ...]) -> Group:
+def report(count: Count, errors: tuple[str, ...]) -> Group:
     """Return the errors of the check in red and a summary.
 
     Args:
-        count: The count of specs.
+        count: The counts of the rules of the project and of the copies.
         errors: The errors.
 
     Returns:
         The report.
     """
-    summary = f"{count} specs, {len(errors)} errors"
+    line = summary(count, errors)
     return Group(
         *(Text.assemble(("✗ ", "bold red"), (e, "red")) for e in errors),
-        Text(f"✓ {summary}", style="bold green")
+        Text(f"✓ {line}", style="bold green")
         if not errors
-        else Text(f"✗ {summary}", style="bold red"),
+        else Text(f"✗ {line}", style="bold red"),
     )
 
 
