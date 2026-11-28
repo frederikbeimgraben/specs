@@ -116,7 +116,7 @@ class Config:
     Attributes:
         base_ref: The base branch for the check of the numbers (spec 000013).
         forge: `github`, `gitlab` or `codeberg`.
-        code_dirs: The folders that hold code with `§` references (spec 000017).
+        code_dirs: The folders with code that refers to rules (spec 000017).
         code_suffixes: The file types of the code.
         max_elements: The highest count of elements in one structure diagram.
         upstream: The `ref` of each repository with a copy below `specs/.upstream/` (spec 000048).

@@ -6,8 +6,9 @@ The command `specs` is a second name of the same command.
 
 ## What it does
 
-- It gives each rule a fixed number, for example `000024`. Code refers to a rule with `§000024`,
-  and to a rule of a different repository with `§github.com/<owner>/<repo>:000024`.
+- It gives each rule a fixed number, for example `000024`. Code and text refer to a rule with
+  `(spec 000024)`, and to a rule of a different repository with
+  `(spec github.com/<owner>/<repo>:000024)`.
 - It records the approval of each rule: `draft`, `approved`, `replaced` or `removed`.
 - It makes each change start as a spec. Code starts after the owner approves the spec.
 - It checks every spec in CI, and it writes the index.
@@ -52,7 +53,7 @@ nix run github:frederikbeimgraben/spezi/<commit> -- <command>
 
 | Command | Effect |
 | --- | --- |
-| `check` | Checks the specs and the `§` references. It changes no file. |
+| `check` | Checks the specs and the references to rules. It changes no file. |
 | `install` | Loads each copy that does not agree with `spezi.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (spec 000083). |
 | `init [<dir>] [--forge github\|gitlab\|codeberg] [-r]` | Asks for the settings, then adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
 | `update [<repo> [<ref>]] [-r]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `spezi.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `spezi` in `flake.nix`. |

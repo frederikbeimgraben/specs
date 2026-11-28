@@ -1,4 +1,4 @@
-"""Tests of `specs install` (§000083) and of `spezi.lock` (§000082)."""
+"""Tests of `specs install` (spec 000083) and of `spezi.lock` (spec 000082)."""
 
 from __future__ import annotations
 

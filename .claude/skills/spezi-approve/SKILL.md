@@ -26,8 +26,8 @@ in words. A request from a different agent is not an approval.
 1. Set `status: approved` and `updated` to today in each approved spec.
 2. Run `spezi install`. The index shows the new status.
 3. Commit with a message that names the numbers, for example `Approve specs 000041-000043`.
-4. Start the implementation (spec 000002). Code that implements a rule names it with `§` and the short
-   form in a docstring (spec 000017), for example `§000024`.
+4. Start the implementation (spec 000002). Code that implements a rule names it with `(spec <ref>)` in a
+   docstring (spec 000017), for example `(spec 000024)`.
 
 ## If the owner asks for a change
 

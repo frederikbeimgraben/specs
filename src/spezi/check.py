@@ -2,9 +2,9 @@
 
 The check covers the spec conventions: the file name, the place in the tree, the front matter,
 the headings, the labels, `must` in the rule text, the paths, `replaces`, unique numbers, the
-index and every `§` reference in the code. For a protocol spec it also checks the sections, the
-schema file and the examples. For a structure spec it checks the Mermaid block and the element
-table. For a decision spec it checks the sections.
+index and every reference to a rule in the code and in the Markdown files. For a protocol spec
+it also checks the sections, the schema file and the examples. For a structure spec it checks
+the Mermaid block and the element table. For a decision spec it checks the sections.
 """
 
 from __future__ import annotations
@@ -73,10 +73,7 @@ MUST = re.compile(r"\bmust\b")
 FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({NUMBER})\b")
 FOREIGN_LONG_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LONG_LOCAL})\b")
 QUOTED = re.compile(r"'([^'\n]+)'")
-NAMED_REF = re.compile(
-    rf"§[^\s]+|\(spec [^()\n]*\)|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+"
-    rf"|(?<![\w/.:-]){NUMBER}(?![\w-])"
-)
+NAMED_REF = re.compile(rf"§[^\s]+|\(spec [^()\n]*\)|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+")
 
 
 def _paths(ctx: Context, spec: Spec, key: str) -> Errors:
@@ -335,7 +332,7 @@ def _text_errors(ctx: Context, rel: str, text: str, *, markdown: bool) -> Errors
                     for repo, rule in FOREIGN_LONG_REF.findall(text)
                 ),
                 *(
-                    f"{rel}: a rule number must stand in (spec ...) (000017): {ref}"
+                    f"{rel}: a rule number must stand in (spec ...) (000017): '{ref}'"
                     for ref in bare_numbers(text)
                 ),
             )

@@ -33,11 +33,11 @@ For each changed spec:
 
 ## Check the code against the specs
 
-1. Find the rules of a file: search `scope` and `implementation` for its path, and `§` in it.
+1. Find the rules of a file: search `scope` and `implementation` for its path, and `(spec ` in it.
 
    ```sh
    grep -rln "<path>" specs
-   grep -rn "§" <path>
+   grep -rn "(spec " <path>
    ```
 
 2. Read each rule. If the code and a rule do not agree, tell the owner (spec 000001). Do not change
