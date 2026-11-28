@@ -60,19 +60,19 @@ risk must then stop the command with an error. Ctrl+C must stop the command with
 | `<ref>`, only when it is not given and the repository has a tag with a higher version than its `ref`: the choices of `spezi add` | The `ref` of `spezi.toml` |
 | The transitive upstreams that the new `spezi.lock` of the repository names and `transitive` does not hold, when `-r` is not given: a checklist | None. With `-r`, all without a question. |
 | For a repository with `include`: the folders of the new version that the old version does not have and `include` does not hold | No folder. A chosen folder goes to `include`. |
-| A project rule in force names a rule of the repository in `replaces` or in its text, and the new version replaces or removes that rule: update anyway? | No, with a risk. The question lists each such reference. |
-| For the kit: a template or a skill is not the same as in the kit at the commit of `spezi.lock` and not the same as in the new kit: overwrite, keep or cancel? | A risk. The question shows the diff from the file of the project to the file of the new kit. `keep` keeps the file of the project. |
+| A project rule in force names a rule of the repository in `replaces` or in its text. The new version replaces or removes that rule. Update anyway? | No, with a risk. The question lists each such reference. |
+| For the kit: a template or a skill is not the same as in the kit at the commit of `spezi.lock`. It is also not the same as in the new kit. Overwrite, keep or cancel? | A risk. The question shows the diff from the file of the project to the file of the new kit. `keep` keeps the file of the project. |
 
 Before the copy of each repository, `spezi init`, `spezi add` and `spezi update` must show a
 summary and ask `Run?`, with the proposal yes. The summary of `spezi init` must show the
-answers. The summary of `spezi add` and `spezi update` must show the old and the new `ref`, the
-new commit, and each new, changed and removed rule as `A`, `M` or `D` with its number and its
-title. When the user answers no, or cancels, the command must stop with an error before it
-changes the copy of this repository. A repository that `spezi update` updated before stays
-updated. `spezi init` must not change a file before the answer to `Run?`.
+answers. The summary of `spezi add` and `spezi update` must show the old and the new `ref` and
+the new commit. It must also show each new, changed and removed rule as `A`, `M` or `D` with its
+number and its title. When the user answers no, or cancels, the command must stop with an error
+before it changes the copy of this repository. A repository that `spezi update` updated before
+stays updated. `spezi init` must not change a file before the answer to `Run?`.
 
 Reason: A person sees and chooses each setting and each version before a command changes the
-project, and a script or an agent gets the same result as before without questions. A change
-that can break the project never happens without a person.
+project. A script or an agent gets the same result as before without questions. A change that
+can break the project never happens without a person.
 
 Test: `tests/test_questions.py`.

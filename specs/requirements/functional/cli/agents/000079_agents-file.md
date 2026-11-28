@@ -23,13 +23,13 @@ scope:
 
 # spezi writes the rules for agents to AGENTS.md
 
-When the switch `agents` of `[features]` is on (spec 000084), `spezi install` must write one block
-to `AGENTS.md` in the root of the project. The block must start with the line
+When the switch `agents` of `[features]` is on (spec 000084), `spezi install` must write one
+block to `AGENTS.md` in the root of the project. The block must start with the line
 `<!-- spezi:begin (written by spezi install, do not edit) -->` and end with the line
 `<!-- spezi:end -->`. Between these lines, the block must hold a short text that tells an agent
-how to use the rules, and the table of `specs/README.md` (spec 000007) with only the A and W rules
-that have the status `approved`, first the rules of the project and then the rules of the
-copies (spec 000049).
+how to use the rules. Then it must hold the table of `specs/README.md` (spec 000007) with only
+the A and W rules that have the status `approved`. The rules of the project must come first,
+then the rules of the copies (spec 000049).
 
 | State of `AGENTS.md` | `spezi install` |
 | --- | --- |

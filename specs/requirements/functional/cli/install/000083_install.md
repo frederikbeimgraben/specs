@@ -38,9 +38,9 @@ It must do these steps in this order:
    Else it must resolve `ref` again and write the new commit to `spezi.lock`. A copy that a
    person changed agrees no more, so the command loads it again and lists its files as changed
    (spec 000077).
-4. For each repository of a list `transitive` whose copy does not agree with `spezi.lock`, load
-   the copy again at the commit that the `spezi.lock` in the copy of its direct upstream names
-   (spec 000092), and write this commit to `spezi.lock`. Remove each copy and each entry of
+4. Find each repository of a list `transitive` whose copy does not agree with `spezi.lock`.
+   Load its copy again at the commit that the `spezi.lock` in the copy of its direct upstream
+   names (spec 000092). Write this commit to `spezi.lock`. Remove each copy and each entry of
    `spezi.lock` whose repository is not in `spezi.toml` and not in a list `transitive`.
    For each transitive upstream that had no entry in `spezi.lock` before, give the hint
    `installed <repo> at <commit> via <direct>`. For each transitive upstream whose commit
@@ -49,17 +49,20 @@ It must do these steps in this order:
    repository.
 5. When `specs/.upstream/` holds a copy, add the line `specs/.upstream/** -text` to
    `.gitattributes` when the file does not hold it (spec 000048).
-6. Write each file of the table (spec 000066) that does not exist: the templates, the skills, the
-   CI file, the entry `spezi` in `.mcp.json`, `.envrc` and `CLAUDE.md`, each only when its
-   switch in `[features]` is on (spec 000084). A file that exists must not change, also when it is
-   not the same as in the kit. Remove each part whose switch is off (spec 000084).
+6. Write each file of the table (spec 000066) that does not exist, but only when its switch in
+   `[features]` is on (spec 000084). These files are the templates, the skills, the CI file, the
+   entry `spezi` in `.mcp.json`, `.envrc` and `CLAUDE.md`. A file that exists must not change, also
+   when it is not the same as in the kit. Remove each part whose switch is off (spec 000084).
 7. Write the index `specs/README.md` (spec 000007) and the block in `AGENTS.md` (spec 000079).
 8. Run `spezi check` (spec 000065). Print its own message, the hints, the changed files (spec 000077)
    and then the report of the check. End with the exit code 1 when the check finds errors.
 
-When `.mcp.json` is no valid JSON, is not a JSON object, or has a `mcpServers` that is not an
-object, the command must stop with an error that names `.mcp.json`, and must not change
-`.mcp.json`.
+The command must stop with an error that names `.mcp.json` and must not change `.mcp.json`
+when one of these is true:
+
+- `.mcp.json` is no valid JSON.
+- `.mcp.json` is not a JSON object.
+- `.mcp.json` has a `mcpServers` that is not an object.
 
 When each copy agrees with `spezi.lock` and this program is the kit at the commit of
 `spezi.lock`, the command must not use the network. `spezi init`, `spezi update` and

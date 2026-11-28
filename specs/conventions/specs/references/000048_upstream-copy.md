@@ -25,18 +25,18 @@ scope:
 The rules of a different repository must be a copy of its `specs/` folder below
 `specs/.upstream/<host>/<group>/.../<repo>/`. `ref` in `spezi.toml` must name a tag, a branch or
 a commit, and `spezi.lock` must hold the commit of the copy (spec 000082). When the table of the
-repository in `spezi.toml` has `include`, the copy must hold only the folders below `specs/` that
-`include` names, for example `include = ["style/python/"]`, and no other file. A folder of
+repository in `spezi.toml` has `include`, the copy must hold only the folders below `specs/`
+that `include` names, for example `include = ["style/python/"]`, and no other file. A folder of
 `include` must be a path of kebab-case folder names below `specs/`. When the `spezi.toml` of the
 repository has `own` (spec 000078), the copy must not hold the folders below `specs/` that `own`
 names, for example `own = ["requirements/"]`. These folders hold the rules that apply only to
 the repository itself. A folder of `own` that `include` names, or that holds a folder of
-`include`, must be in the copy.
-The copy must not hold the hidden folders of the repository, for example `specs/.upstream/`.
-The copy of a direct upstream must also hold the `spezi.lock` of the repository (spec 000092).
-When the repository uses an older kit, the copy must hold its rules after the migrations of
-(spec 000081), and else no change. A person or an agent must not change a file of the copy. Only these
-commands must change the copy, its `ref` and its entry in `spezi.lock`:
+`include`, must be in the copy. The copy must not hold the hidden folders of the repository, for
+example `specs/.upstream/`. The copy of a direct upstream must also hold the `spezi.lock` of the
+repository (spec 000092). When the repository uses an older kit, the copy must hold its rules
+after the migrations of (spec 000081), and else no change. A person or an agent must not change
+a file of the copy. Only these commands must change the copy, its `ref` and its entry in
+`spezi.lock`:
 
 | Command | Effect |
 | --- | --- |
@@ -54,8 +54,13 @@ rules that it needs, and an agent cannot read and follow the other rules. Git on
 change the line ends of a file at checkout. The line in `.gitattributes` stops this, so the
 copy keeps the bytes of its hash.
 
-Test: `spezi check` checks that each repository of `spezi.toml` has a copy, each copy has
-a repository in `spezi.toml` or in a list `transitive` (spec 000092), each folder of `include` is in the copy, the copy holds no file
-outside the folders of `include` other than `spezi.lock` and the hash of the copy is the hash
-in `spezi.lock`. When `specs/.upstream/` holds a copy, it checks that `.gitattributes` holds
+Test: `spezi check` checks these conditions:
+
+- Each repository of `spezi.toml` has a copy.
+- Each copy has a repository in `spezi.toml` or in a list `transitive` (spec 000092).
+- Each folder of `include` is in the copy.
+- The copy holds no file outside the folders of `include` other than `spezi.lock`.
+- The hash of the copy is the hash in `spezi.lock`.
+
+When `specs/.upstream/` holds a copy, it checks that `.gitattributes` holds
 the line `specs/.upstream/** -text`.

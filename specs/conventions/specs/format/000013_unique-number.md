@@ -4,7 +4,7 @@ title: The number is the identity of a rule
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
   - spezi.toml
@@ -25,5 +25,5 @@ again.
 
 Reason: An old reference must not point to a different rule, also after a file moves.
 
-Test: `spezi check`: no number occurs two times, and no spec of a branch has a number
-that the base branch gave to a different spec after the branch left it.
+Test: `spezi check`: no number occurs two times. No spec of a branch has a number that the base
+branch gave to a different spec after the branch left it.

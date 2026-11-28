@@ -35,8 +35,8 @@ output:
 | `init`, `update`, `add`, `new`, `setup-ide` | Each line of the message with a green mark. Below it, each line of a repository (spec 000067, 000083) with a green mark, and each migration that ran (spec 000081) on its own line with a blue mark `↻` and without `migrated:`. |
 
 With the option `--raw` after the command, or when stdout is not a terminal, the command must
-print the plain text of its own spec, with no color and no table. With `--json`, the command
-must print JSON (spec 000080). The MCP server must always return the plain text.
+print the plain text of its own spec. The plain text has no color and no table. With `--json`,
+the command must print JSON (spec 000080). The MCP server must always return the plain text.
 
 The help of `spezi` and of each command must have color, with `rich-argparse`:
 

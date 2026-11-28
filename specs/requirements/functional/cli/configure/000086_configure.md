@@ -4,7 +4,7 @@ title: spezi configure changes the settings in spezi.toml
 kind: functional
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_configure.py:test_configure_sets_a_switch
   - tests/test_configure.py:test_configure_keeps_the_comments
@@ -24,9 +24,9 @@ scope:
 
 # spezi configure changes the settings in spezi.toml
 
-`spezi configure` must show a menu on a terminal. The menu must show each key of the table
-below with its value, one line for each repository of `[upstream]` with its `ref` and its
-`include`, and the items `add a repository`, `save` and `discard`.
+`spezi configure` must show a menu on a terminal. The menu must show each key of the table below
+with its value. It must also show one line for each repository of `[upstream]` with its `ref`
+and its `include`, and the items `add a repository`, `save` and `discard`.
 
 | Item | Question |
 | --- | --- |
@@ -47,9 +47,10 @@ changed, and must then stop without a change. Ctrl+C must stop without a change.
 `spezi install`. `<key>` must be `forge`, `base_ref`, `code_dirs`, `code_suffixes`,
 `max_elements` or `features.<switch>`. `<value>` must have the plain form of its key: `true` or
 `false`, a whole number, a text, or a list with a comma between the entries, for example
-`src,lib`. The command must stop with an error and change no file for a different key, for a
-value of a different form, or for a value that breaks a rule (spec 000078, 000084). Without a
-terminal, or with `-y`, `spezi configure` must stop with an error when it has no key and value.
+`src,lib`. The command must stop with an error and change no file for a different key or for a
+value of a different form. It must do the same for a value that breaks a rule
+(spec 000078, 000084). Without a terminal, or with `-y`, `spezi configure` must stop with an
+error when it has no key and value.
 
 `spezi configure` must change only the values in `spezi.toml`. The comments, the order of the
 keys and the lines that it does not change must stay.

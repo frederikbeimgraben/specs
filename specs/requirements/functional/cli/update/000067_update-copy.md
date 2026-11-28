@@ -36,10 +36,10 @@ scope:
 
 `<repo>` is the full name of the repository, or `kit` for `github.com/frederikbeimgraben/spezi`.
 For each repository, the command must replace the copy with the `specs/` folder at the commit
-that `ref` names, and write the `ref`, the commit, `include` and the hash to `spezi.lock`
-(spec 000082). When the table of `<repo>` has `include`, the command must copy only the folders of
-`include` and must keep `include`. Only a folder that the user adds (spec 000085) changes it. The
-kit comes first.
+that `ref` names. It must write the `ref`, the commit, `include` and the hash to `spezi.lock`
+(spec 000082). When the table of `<repo>` has `include`, the command must copy only the folders
+of `include` and must keep `include`. Only a folder that the user adds (spec 000085) changes it.
+The kit comes first.
 
 The message must have one line for each repository, in the order of the update:
 `updated <repo> to <commit>`, or `<repo> is up to date at <commit>` when the new commit is the
@@ -65,10 +65,15 @@ of (spec 000066), the command must set its ref to the new commit of the kit and 
 When it changed `flake.nix` in a devShell (`IN_NIX_SHELL`) without direnv, it must tell to leave
 the shell and run `nix develop`, because a program cannot load its shell again.
 
-The command must stop with an error when `<repo>` is not in `spezi.toml`, when this program is
-an older commit of the kit than the kit commit in `spezi.lock`, when `<repo>` at `<ref>` has no
-folder of `include`, when the kit at `<ref>` has no `specs/.templates/`, or when the switch
-`ci` is on and `.gitlab-ci.yml` has an `include` that is not a list. It must then change no file
+The command must stop with an error in these cases:
+
+- `<repo>` is not in `spezi.toml`.
+- This program is an older commit of the kit than the kit commit in `spezi.lock`.
+- `<repo>` at `<ref>` has no folder of `include`.
+- The kit at `<ref>` has no `specs/.templates/`.
+- The switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list.
+
+It must then change no file
 of the repository with the error.
 
 The command must replace only the parts whose switch in `[features]` is on, and must not change

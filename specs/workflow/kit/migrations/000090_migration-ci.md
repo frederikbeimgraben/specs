@@ -17,9 +17,9 @@ scope:
 # The CI migrates demo projects from each migration
 
 The kit must have a CI workflow that runs on each pull request and on each push to `main`. The
-workflow must get its start commits from `src/spezi/migrations/` (spec 000081): for each commit
-of a migration, the parent of that commit, one time for each commit. For each start commit, the
-workflow must migrate two demo projects:
+workflow must get its start commits from `src/spezi/migrations/` (spec 000081). For each commit
+of a migration, the start commit is the parent of that commit, one time for each commit. For
+each start commit, the workflow must migrate two demo projects:
 
 | Demo | Before the migration |
 | --- | --- |
