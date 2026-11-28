@@ -7,6 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 implementation:
   - src/spezi/check.py
+  - src/spezi/project.py
 scope:
   - specs/
 ---
