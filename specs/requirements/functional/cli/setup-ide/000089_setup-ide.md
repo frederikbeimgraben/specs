@@ -2,9 +2,9 @@
 id: "000089"
 title: spezi setup-ide adds the language server to Zed or VS Code
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_setup_ide.py:test_zed_gets_the_source_of_the_extension
   - tests/test_setup_ide.py:test_code_gets_the_vsix
@@ -16,11 +16,9 @@ implementation:
   - src/spezi/cli.py
   - src/spezi/kit.py
   - src/spezi/data/editors/
-  - editors/code/
   - flake.nix
 scope:
   - src/spezi/
-  - editors/
   - flake.nix
 ---
 
