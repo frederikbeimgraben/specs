@@ -7,6 +7,8 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_a_copy_keeps_a_folder_named_upstream
+  - tests/test_kit.py:test_init_leaves_out_the_own_folders_of_the_kit
+  - tests/test_kit.py:test_add_copies_an_own_folder_that_include_names
   - tests/test_install.py:test_install_adds_the_line_to_gitattributes
   - tests/test_install.py:test_check_finds_a_missing_line_in_gitattributes
 implementation:
@@ -25,7 +27,11 @@ The rules of a different repository must be a copy of its `specs/` folder below
 a commit, and `spezi.lock` must hold the commit of the copy (spec 000082). When the table of the
 repository in `spezi.toml` has `include`, the copy must hold only the folders below `specs/` that
 `include` names, for example `include = ["style/python/"]`, and no other file. A folder of
-`include` must be a path of kebab-case folder names below `specs/`.
+`include` must be a path of kebab-case folder names below `specs/`. When the `spezi.toml` of the
+repository has `own` (spec 000078), the copy must not hold the folders below `specs/` that `own`
+names, for example `own = ["requirements/"]`. These folders hold the rules that apply only to
+the repository itself. A folder of `own` that `include` names, or that holds a folder of
+`include`, must be in the copy.
 The copy must not hold the hidden folders of the repository, for example `specs/.upstream/`.
 The copy of a direct upstream must also hold the `spezi.lock` of the repository (spec 000092).
 When the repository uses an older kit, the copy must hold its rules after the migrations of

@@ -174,22 +174,30 @@ def _rmtree(folder: Path) -> None:
     shutil.rmtree(folder, ignore_errors=True)
 
 
-def _ignore(source: Path) -> Callable[[str, list[str]], set[str]]:
+def _ignore(source: Path, left_out: frozenset[str]) -> Callable[[str, list[str]], set[str]]:
     """Return the names that a copy of a `specs/` folder leaves out (spec 000048).
 
     Args:
         source: The folder to copy.
+        left_out: The folders below `source` to leave out, without slashes at the ends.
 
     Returns:
-        The function for `shutil.copytree`: each hidden name, and `upstream` at the top.
+        The function for `shutil.copytree`: each hidden name, `upstream` at the top, and each
+        folder of `left_out`.
     """
     top = str(source)
     return lambda folder, names: {
-        n for n in names if n.startswith(".") or (folder == top and n == "upstream")
+        n
+        for n in names
+        if n.startswith(".")
+        or (folder == top and n == "upstream")
+        or (Path(folder) / n).relative_to(source).as_posix() in left_out
     }
 
 
-def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> None:
+def replace_tree(
+    source: Path, target: Path, folders: Iterable[str] = (), left_out: Iterable[str] = ()
+) -> None:
     """Replace the folder `target` with a copy of `source`, and record each changed file.
 
     Without `folders`, the copy holds all of `source` except each hidden file or folder, for
@@ -200,15 +208,23 @@ def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> Non
         source: The folder to copy.
         target: The folder to replace.
         folders: The folders of `source` to copy, or empty for all of `source`.
+        left_out: The folders below `source` that the copy leaves out, also inside `folders`.
     """
+    skip = frozenset(f.strip("/") for f in left_out)
     old = _files(target)
     _rmtree(target)
     match tuple(folders):
         case ():
-            shutil.copytree(source, target, ignore=_ignore(source))
+            shutil.copytree(source, target, ignore=_ignore(source, skip))
         case chosen:
             for folder in chosen:
-                shutil.copytree(source / folder, target / folder)
+                shutil.copytree(
+                    source / folder,
+                    target / folder,
+                    ignore=lambda at, names: {
+                        n for n in names if (Path(at) / n).relative_to(source).as_posix() in skip
+                    },
+                )
     unlock(target)
     new = _files(target)
     for rel in sorted({*old, *new}):

@@ -53,6 +53,7 @@ TOP_KEYS = frozenset(
         "max_elements",
         "features",
         "upstream",
+        "own",
     }
 )
 REPO_KEYS = frozenset({"ref", "include", "transitive"})
@@ -126,6 +127,8 @@ class Config:
         transitive: The transitive upstreams that the copy of each repository brings (spec 000092).
         repo: The full name of the project, or empty (spec 000092).
         features: The switch of each optional part of the kit (spec 000084).
+        own: The folders below `specs/` that hold the rules of this repository only. A copy
+            of the repository leaves them out (spec 000048).
     """
 
     base_ref: str = "origin/main"
@@ -140,6 +143,7 @@ class Config:
     transitive: Mapping[str, tuple[str, ...]] = MappingProxyType({})
     repo: str = ""
     features: Mapping[str, bool] = MappingProxyType(dict.fromkeys(FEATURES, True))
+    own: tuple[str, ...] = ()
 
     def on(self, feature: str) -> bool:
         """Return True when the part of the kit is switched on.
@@ -600,6 +604,7 @@ def read_config(path: Path) -> Config:
         transitive={repo: _texts(table, "transitive", ()) for repo, table in upstream.items()},
         repo=_text(data, "repo", default.repo),
         features=_features(data),
+        own=_texts(data, "own", default.own),
     )
 
 
