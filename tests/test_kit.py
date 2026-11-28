@@ -96,6 +96,14 @@ def test_init_takes_the_forge_from_the_remote(kit: Kit, empty: Path) -> None:
     assert (empty / ".forgejo/workflows/spezi.yml").is_file()
 
 
+def test_init_reads_the_forge_from_the_host_only(kit: Kit, empty: Path) -> None:
+    """The forge comes from the host of the remote, not from the path of the repository."""
+    git(empty, "remote", "add", "origin", "git@github.com:me/gitlab-tools.git", env=kit.env)
+    result = kit.run(empty, "init", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert _config(empty)["forge"] == "github"
+
+
 def test_init_stops_when_the_kit_is_there(kit: Kit, project: Path) -> None:
     """`specs init` stops with an error when `spezi.toml` exists."""
     result = kit.run(project, "init", "--forge", "github", "--raw")

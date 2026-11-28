@@ -79,3 +79,17 @@ def test_update_follows_the_switches(kit: Kit, project: Path) -> None:
     assert result.code == 0, result.out + result.err
     assert not (project / ".claude/skills").exists()
     assert not (project / ".mcp.json").exists()
+
+
+def test_ci_off_does_not_read_the_gitlab_file(kit: Kit, project: Path) -> None:
+    """With `ci` off, `specs install` does not stop for a `.gitlab-ci.yml` it cannot change."""
+    _switch(project, ci=False)
+    path = project / "spezi.toml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace('forge = "github"', 'forge = "gitlab"'),
+        encoding="utf-8",
+    )
+    (project / ".gitlab-ci.yml").write_text("include: other.yml\n", encoding="utf-8")
+    result = kit.run(project, "install", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert (project / ".gitlab-ci.yml").read_text(encoding="utf-8") == "include: other.yml\n"

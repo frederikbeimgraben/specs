@@ -77,6 +77,9 @@ def package_data(name: str) -> str:
     return resources.files("spezi").joinpath("data", name).read_text(encoding="utf-8")
 
 
+REMOTE_HOST = re.compile(r"^(?:[a-z][a-z0-9+.-]*://)?(?:[^@/]+@)?([^/:]+)")
+
+
 def run_command(*args: str, cwd: Path | None = None) -> str:
     """Run a command and return its output.
 
@@ -454,19 +457,22 @@ def gitlab_root_text(root: Path) -> str | None:
             return f"{text.rstrip()}\n\ninclude:\n{GITLAB_INCLUDE}\n".lstrip()
 
 
-def check_forge(root: Path, forge: str) -> None:
+def check_forge(root: Path, forge: str, ci: bool) -> None:
     """Fail before a change when the kit cannot write its CI file for a forge.
+
+    With the switch `ci` off, the kit does not read `.gitlab-ci.yml` (§000084).
 
     Args:
         root: The root of the project.
         forge: The forge.
+        ci: The switch `ci` of `[features]`.
 
     Raises:
         KitError: The forge is unknown, or `.gitlab-ci.yml` cannot get the include.
     """
     if forge not in CI_FILES:
         raise KitError(f"spezi.toml: forge {forge!r} must be github, gitlab or codeberg")
-    if forge == "gitlab":
+    if forge == "gitlab" and ci:
         gitlab_root_text(root)
 
 
@@ -497,7 +503,7 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
         KitError: The forge in `spezi.toml` is unknown.
     """
     forge = project.config.forge
-    check_forge(project.root, forge)
+    check_forge(project.root, forge, project.config.on("ci"))
     data_name, target = CI_FILES[forge]
     config = project.config
     root_text = gitlab_root_text(project.root) if forge == "gitlab" and config.on("ci") else None
@@ -517,7 +523,7 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
 
 
 def detect_forge(root: Path) -> str:
-    """Return the forge of `git remote origin`.
+    """Return the forge of the host of `git remote origin`.
 
     Args:
         root: The root of the project.
@@ -532,7 +538,8 @@ def detect_forge(root: Path) -> str:
         url = run_command("git", "remote", "get-url", "origin", cwd=root)
     except KitError:
         url = ""
-    match ("gitlab" in url, "github" in url, "codeberg" in url):
+    host = next(iter(REMOTE_HOST.findall(url)), "").lower()
+    match ("gitlab" in host, "github" in host, "codeberg" in host):
         case (True, _, _):
             return "gitlab"
         case (False, True, _):
@@ -660,7 +667,7 @@ def fetch_copy(
         if repo == KIT_REPO and not templates(source).is_dir():
             raise KitError(f"the kit at {commit} has no templates; it is too old")
         if repo == KIT_REPO:
-            check_forge(project.root, project.config.forge)
+            check_forge(project.root, project.config.forge, project.config.on("ci"))
         theirs = None if repo == KIT_REPO else upstream_kit_ref(source)
         if theirs and own and theirs != own and not contains(history(), theirs, own):
             raise KitError(
@@ -967,7 +974,7 @@ def init(root: Path, forge: str | None, ask: Ask | None = None) -> tuple[Project
     if config_file(root).exists():
         raise KitError(f"{config_file(root).name} exists; run spezi install or spezi update")
     start = ask_start(root, forge, ask or Proposals())
-    check_forge(root, start.forge)
+    check_forge(root, start.forge, "ci" in start.features)
     ref = default_ref(KIT_REPO)
     with lazy_history() as history, checkout(KIT_REPO, ref) as source:
         commit = run_command("git", "-C", str(source), "rev-parse", "HEAD").strip()
