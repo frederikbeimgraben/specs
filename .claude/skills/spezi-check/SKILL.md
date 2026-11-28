@@ -18,7 +18,7 @@ Each error names the file and the rule number. Read that rule with `spezi show <
 the spec. Do not change a rule of the kit to make the check pass.
 
 `spezi.toml` sets `forge`, `base_ref`, `code_dirs`, `code_suffixes`, `max_elements` and
-`upstream` with `ref` and `include` (spec 000078).
+`upstream` with `ref` and `include`.
 
 ## Review what the checker cannot see
 

@@ -252,3 +252,22 @@ def test_check_finds_a_rule_of_a_copy_that_it_cannot_read(kit: Kit, project: Pat
     assert json.loads(kit.run(project, "check", "--json").out)["upstream"] == (
         json.loads(before.out)["upstream"] - 1
     )
+
+
+def test_check_finds_a_reference_to_an_own_rule_in_a_skill(kit: Kit, project: Path) -> None:
+    """A file that a project gets must not name a rule of the project in a folder of `own`."""
+    write_rule(project, "style/code/names", "000101", "names", "Names", "style", "Names: must.")
+    config = project / "spezi.toml"
+    config.write_text(
+        config.read_text(encoding="utf-8").replace("own = []", 'own = ["style/"]'),
+        encoding="utf-8",
+    )
+    skill = project / ".claude/skills/spezi-check/SKILL.md"
+    text = skill.read_text(encoding="utf-8")
+    skill.write_text(f"{text}\nSee (spec 000101).\n", encoding="utf-8")
+    line = len(text.splitlines()) + 2
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert f".claude/skills/spezi-check/SKILL.md:{line}: (spec 000101) names a rule of own" in (
+        result.out
+    )

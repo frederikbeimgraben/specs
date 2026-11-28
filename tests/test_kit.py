@@ -276,3 +276,10 @@ def test_a_copy_keeps_a_folder_named_upstream(tmp_path: Path) -> None:
     assert sorted(p.relative_to(copy).as_posix() for p in copy.rglob("*") if p.is_file()) == [
         "workflow/upstream/process/000001_one.md"
     ]
+
+
+def test_init_gives_the_skills_the_foreign_short_form(kit: Kit, project: Path) -> None:
+    """After init, the skills name the rules of the kit with the foreign short form."""
+    text = (project / ".claude/skills/spezi-approve/SKILL.md").read_text(encoding="utf-8")
+    assert "(spec github.com/frederikbeimgraben/spezi:000045)" in text
+    assert "(spec 000045)" not in text

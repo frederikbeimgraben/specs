@@ -1212,7 +1212,7 @@ def init(
         project = Project.open(root)
         copy_rules(source, project, KIT_REPO)
         write_repo(project, KIT_REPO, ref, None, start.transitive or None)
-        install_kit_files(source, project, commit)
+        install_kit_files(source, Project.open(root), commit)
         _lock(project, KIT_REPO, ref, commit, ())
     return Project.open(root), commit
 
@@ -1326,7 +1326,7 @@ def _changed_kit_files(project: Project, source: Path, old: str) -> Mapping[Path
         for local, new, bases, rel in pairs
         if local.read_text(encoding="utf-8")
         != (
-            for_project(project.config.upstream, new.read_text(encoding="utf-8"))
+            _project_form(project, local, new.read_text(encoding="utf-8"))
             if new.is_file()
             else None
         )
@@ -1337,16 +1337,36 @@ def _changed_kit_files(project: Project, source: Path, old: str) -> Mapping[Path
         return {
             local: (
                 local.read_text(encoding="utf-8"),
-                new.read_text(encoding="utf-8") if new.is_file() else "",
+                _project_form(project, local, new.read_text(encoding="utf-8"))
+                if new.is_file()
+                else "",
             )
             for local, new, bases, rel in differs
             if local.read_text(encoding="utf-8")
             not in tuple(
-                (before / base / rel).read_text(encoding="utf-8")
+                _project_form(project, local, (before / base / rel).read_text(encoding="utf-8"))
                 for base in bases
                 if (before / base / rel).is_file()
             )
         }
+
+
+def _project_form(project: Project, path: Path, text: str) -> str:
+    """Return a text of the kit as the project holds it.
+
+    Args:
+        project: The project.
+        path: The file of the project.
+        text: The text of the kit.
+
+    Returns:
+        The text with the foreign short form for a skill (spec 000017), else the text as it is.
+    """
+    return (
+        for_project(project.config.upstream, text)
+        if path.is_relative_to(project.root / ".claude" / "skills") and path.suffix == ".md"
+        else text
+    )
 
 
 def _rel_files(folder: Path) -> tuple[Path, ...]:
@@ -1452,7 +1472,7 @@ def _update_review(
         fresh = tuple(r for r in offers(project, repo, named) if r not in now)
         picked = ask_transitive(ask, repo, fresh, recursive)
         transitive = tuple(sorted({*(r for r in now if r in named), *picked}))
-        new = rules_in(source / "specs", repo, chosen)
+        new = rules_in(source / "specs", repo, chosen, own_folders(source, chosen))
         broken = broken_references(project, repo, new)
         if broken:
             ask.show("\n".join(broken))
@@ -1617,7 +1637,9 @@ def _add_review(
         )
         chosen = () if not include and set(picked) == set(folders) else normal_include(picked)
         transitive = ask_transitive(ask, repo, offers(project, repo, read_lock(source)), recursive)
-        changes = rule_changes({}, rules_in(source / "specs", repo, chosen))
+        changes = rule_changes(
+            {}, rules_in(source / "specs", repo, chosen, own_folders(source, chosen))
+        )
         ask.show(change_lines(repo, None, ref, commit, changes))
         if not ask.confirm("Run?", True):
             raise Cancelled("cancelled; no file changed")

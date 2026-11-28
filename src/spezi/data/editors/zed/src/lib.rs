@@ -1,4 +1,4 @@
-//! The Zed extension of the spezi kit: it starts `spezi lsp` (spec 000088, 000089).
+//! The Zed extension of the spezi kit: it starts `spezi lsp`.
 
 use zed_extension_api::{self as zed, LanguageServerId, Result, Worktree};
 

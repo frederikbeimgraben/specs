@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import tomllib
 from pathlib import Path
 
@@ -144,3 +145,50 @@ def test_update_stops_for_a_removed_rule_without_a_terminal(kit: Kit, project: P
         assert (project / "specs/.upstream" / RULES_REPO / "style").is_dir()
     finally:
         git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
+
+
+def test_add_shows_no_rule_of_an_own_folder(kit: Kit, project: Path) -> None:
+    """The summary of add shows no rule of a folder of `own`, which the copy leaves out."""
+    (kit.rules / "spezi.toml").write_text('own = ["style/"]\n', encoding="utf-8")
+    rev = kit.commit_rules()
+    script = Script([PROPOSAL, True])
+    try:
+        with inside(kit.env, project):
+            add(Project.open(project), RULES_REPO, rev, (), script)
+    finally:
+        git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
+    assert any("A 000002 An agent runs the tests" in s for s in script.shown)
+    assert not any("000001" in s for s in script.shown)
+
+
+def test_update_shows_no_rule_of_an_own_folder(kit: Kit, project: Path) -> None:
+    """The summary of update shows no rule of a folder of `own` as new on each run."""
+    (kit.rules / "spezi.toml").write_text('own = ["style/"]\n', encoding="utf-8")
+    rev = kit.commit_rules()
+    script = Script([True])
+    try:
+        assert kit.run(project, "add", RULES_REPO, rev, "--raw").code == 0
+        with inside(kit.env, project):
+            update(Project.open(project), RULES_REPO, None, script)
+    finally:
+        git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
+    assert not any("000001" in s for s in script.shown)
+
+
+def test_update_takes_a_skill_of_the_old_kit_as_unchanged(kit: Kit, project: Path) -> None:
+    """A skill in the form of the old kit for the project is not a change of a person."""
+    skill = kit.source / ".claude/skills/spezi-check/SKILL.md"
+    skill.write_text(f"{skill.read_text(encoding='utf-8')}\nMore text.\n", encoding="utf-8")
+    git(kit.source, "commit", "-qam", "change a skill", env=kit.env)
+    rev = git(kit.source, "rev-parse", "HEAD", env=kit.env).strip()
+    new = dataclasses.replace(kit, rev=rev, env={**kit.env, "SPEZI_KIT_REV": rev})
+    try:
+        result = new.run(project, "update", "kit", "--raw")
+    finally:
+        git(kit.source, "reset", "-q", "--hard", kit.rev, env=kit.env)
+    assert result.code == 0, result.out + result.err
+    assert (
+        (project / ".claude/skills/spezi-check/SKILL.md")
+        .read_text(encoding="utf-8")
+        .endswith("More text.\n")
+    )

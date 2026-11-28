@@ -37,8 +37,10 @@ from spezi.project import (
     source,
 )
 from spezi.refs import (
+    ITEM,
     bad_references,
     bare_numbers,
+    items,
     markdown_files,
     old_references,
     prose,
@@ -763,6 +765,64 @@ def _markdown_refs(ctx: Context, specs: Iterable[Spec]) -> Errors:
     )
 
 
+def _project_files(project: Project) -> Iterable[Path]:
+    """Return the files that `spezi init` and `spezi update` copy into a project (spec 000094).
+
+    Args:
+        project: The project.
+
+    Returns:
+        The skills, the templates and the files below `src/spezi/data/`, sorted.
+    """
+    return (
+        path
+        for folder in (
+            *sorted((project.root / ".claude" / "skills").glob("spezi-*")),
+            project.templates_dir,
+            project.root / "src" / "spezi" / "data",
+        )
+        for path in sorted(folder.rglob("*"))
+        if path.is_file()
+    )
+
+
+def _own_rule(ctx: Context, ref: str) -> bool:
+    """Return True when a short form names a rule of the project in a folder of `own`.
+
+    Args:
+        ctx: The context of the check.
+        ref: The short form.
+
+    Returns:
+        True for a rule below a folder of `own` (spec 000048).
+    """
+    repo, _, number = ref.rpartition(":")
+    spec = ctx.local.get(number) if repo in ("", ctx.project.config.repo) else None
+    rel = spec.path.relative_to(ctx.project.specs_dir).as_posix() if spec else ""
+    return any(rel.startswith(f"{o.strip('/')}/") for o in ctx.project.config.own)
+
+
+def _own_refs(ctx: Context) -> Errors:
+    """Check the files for projects for references to rules of `own` (spec 000094).
+
+    Args:
+        ctx: The context of the check.
+
+    Returns:
+        One error for each reference, as `<path>:<line>: <message>`.
+    """
+    return tuple(
+        f"{rel}:{text.count(chr(10), 0, item.start) + 1}: (spec {item.text}) names a rule of own"
+        for path in _project_files(ctx.project)
+        for rel in (path.relative_to(ctx.project.root).as_posix(),)
+        for text in (
+            prose(source(path, "ignore"), rel) if path.suffix == ".md" else source(path, "ignore"),
+        )
+        for item in items(text)
+        if ITEM.fullmatch(item.text) and _own_rule(ctx, item.text)
+    )
+
+
 def _git(project: Project, *args: str) -> str | None:
     """Run git in the project and return its output, or None when it fails.
 
@@ -1020,5 +1080,6 @@ def run(project: Project, *, write: bool) -> tuple[Count, Errors]:
             ),
             *_code_refs(ctx),
             *_markdown_refs(ctx, specs),
+            *_own_refs(ctx),
         )
     )
