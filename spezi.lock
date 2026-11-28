@@ -1,7 +1,13 @@
 # Written by spezi install, spezi update and spezi add (000082). Do not edit.
 
+[upstream."github.com/frederikbeimgraben/spezi-functional"]
+via = ["github.com/frederikbeimgraben/spezi-python"]
+commit = "3a2540b05154fed195594ed990477422e6e56caa"
+include = []
+hash = "sha256-TOWy2HO2J78tZimfGR+J5pIqq/nArK/oHxila01XQV8="
+
 [upstream."github.com/frederikbeimgraben/spezi-python"]
 ref = "main"
-commit = "40ed360ca1a4b40e19104ababb705914e4228a33"
+commit = "5c0516a1fe1beea6b96c53f561fe137186db71c5"
 include = []
-hash = "sha256-Jk9J7XisWj4G7DJQkt9YsAH0rv0pgIHFuqJ/ZmUpH5M="
+hash = "sha256-FKCBeCO+jcY7H21nklp4gffMmu2bBxCbnajI3b1BAZg="

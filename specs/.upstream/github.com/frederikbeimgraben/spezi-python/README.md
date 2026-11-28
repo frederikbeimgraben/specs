@@ -16,6 +16,7 @@ specs/
     python/  docs, functional, lint, typing, version
   .upstream/
     github.com/frederikbeimgraben/spezi/
+    github.com/frederikbeimgraben/spezi-functional/
 ```
 
 ## Index
@@ -35,6 +36,14 @@ The rules of different repositories that apply to this project (000049).
 
 | ID | Title | Status |
 | --- | --- | --- |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000001](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000001_body-shape.md) | A function body has one shape | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000002](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000002_readability-limit.md) | Readability limits the single expression | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000003](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000003_bind-once.md) | A local is bound once | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000004](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000004_no-mutation.md) | A value is not mutated | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000005](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000005_comprehensions.md) | Comprehensions instead of loops | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000006](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000006_exhaustive-match.md) | A branch on one value is an exhaustive match | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000007](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000007_frozen-data.md) | Data types are frozen by default | approved |
+| [github.com/frederikbeimgraben/spezi-functional:S/shared/functional/000008](/specs/.upstream/github.com/frederikbeimgraben/spezi-functional/style/shared/functional/000008_exceptions.md) | The exceptions of the functional style are named | approved |
 | [github.com/frederikbeimgraben/spezi:A/work/approval/000045](/specs/.upstream/github.com/frederikbeimgraben/spezi/agents/work/approval/000045_one-spec-per-question.md) | An agent asks for the approval of one spec in one question | approved |
 | [github.com/frederikbeimgraben/spezi:A/work/approval/000046](/specs/.upstream/github.com/frederikbeimgraben/spezi/agents/work/approval/000046_show-the-whole-spec.md) | An agent shows the whole spec for its approval | approved |
 | [github.com/frederikbeimgraben/spezi:A/work/questions/000043](/specs/.upstream/github.com/frederikbeimgraben/spezi/agents/work/questions/000043_ask-each-detail.md) | An agent asks the user about each open detail | approved |
@@ -106,12 +115,6 @@ The rules of different repositories that apply to this project (000049).
 | [github.com/frederikbeimgraben/spezi:F/cli/setup-ide/000089](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/setup-ide/000089_setup-ide.md) | spezi setup-ide adds the language server to Zed or VS Code | approved |
 | [github.com/frederikbeimgraben/spezi:F/cli/show/000071](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/show/000071_show-spec.md) | spezi show prints the full text of a spec | approved |
 | [github.com/frederikbeimgraben/spezi:F/cli/update/000067](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/update/000067_update-copy.md) | spezi update resolves the refs again and replaces the copies | approved |
-| [github.com/frederikbeimgraben/spezi:S/python/docs/000062](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
-| [github.com/frederikbeimgraben/spezi:S/python/functional/000063](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | approved |
-| [github.com/frederikbeimgraben/spezi:S/python/lint/000064](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | approved |
-| [github.com/frederikbeimgraben/spezi:S/python/lint/000075](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/python/lint/000075_ruff-format.md) | ruff format changes nothing | approved |
-| [github.com/frederikbeimgraben/spezi:S/python/typing/000061](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/python/typing/000061_strict-types.md) | Python code is strictly typed | approved |
-| [github.com/frederikbeimgraben/spezi:S/python/version/000060](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/python/version/000060_python-313.md) | Python code needs Python 3.13 or later | approved |
 | [github.com/frederikbeimgraben/spezi:S/shared/functional/000052](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000052_body-shape.md) | A function body has one shape | approved |
 | [github.com/frederikbeimgraben/spezi:S/shared/functional/000053](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000053_readability-limit.md) | Readability limits the single expression | approved |
 | [github.com/frederikbeimgraben/spezi:S/shared/functional/000054](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000054_bind-once.md) | A local is bound once | approved |
