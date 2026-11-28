@@ -102,7 +102,7 @@ specs/
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | spezi search finds rules by a text | approved |
 | [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | spezi.toml holds the settings of the spezi command | approved |
 | [F/cli/settings/000084](/specs/requirements/functional/cli/settings/000084_feature-switches.md) | spezi.toml switches the optional parts of the kit on and off | approved |
-| [F/cli/setup-ide/000089](/specs/requirements/functional/cli/setup-ide/000089_setup-ide.md) | spezi setup-ide adds the language server to Zed or VS Code | draft |
+| [F/cli/setup-ide/000089](/specs/requirements/functional/cli/setup-ide/000089_setup-ide.md) | spezi setup-ide adds the language server to Zed or VS Code | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | spezi show prints the full text of a spec | approved |
 | [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | spezi update resolves the refs again and replaces the copies | approved |
 | [S/shared/functional/000052](/specs/style/shared/functional/000052_body-shape.md) | A function body has one shape | approved |

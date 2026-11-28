@@ -2,7 +2,7 @@
 id: "000089"
 title: spezi setup-ide adds the language server to Zed or VS Code
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
