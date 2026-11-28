@@ -95,6 +95,13 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "setup-ide", help="write the extension of the language server for an editor"
     ).add_argument("editor", choices=("zed", "code"))
+    for name in ("init", "update", "add"):
+        commands.choices[name].add_argument(
+            "-r",
+            "--recursive",
+            action="store_true",
+            help="copy each transitive upstream without a question",
+        )
     for name in ("init", "update", "add", "configure", "setup-ide"):
         commands.choices[name].add_argument(
             "-y",
@@ -351,14 +358,14 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             return _check(True, mode, log, ("installed", hints), project.root)
         case "init":
             ask = _ask(args, mode)
-            project, commit = init(Path(args.dir), args.forge, ask)
+            project, commit = init(Path(args.dir), args.forge, ask, args.recursive)
             offer_lines(project.root, project.config.features, ask)
             hints = (*init_flake(project.root, commit, project.config.features), *install(project))
             text = f"installed the kit in {project.root}"
             return _check(True, mode, log, (text, hints), project.root)
         case "update":
             project = Project.open()
-            done, ran = update(project, args.repo, args.ref, _ask(args, mode))
+            done, ran = update(project, args.repo, args.ref, _ask(args, mode), args.recursive)
             kit = dict(done).get(KIT_REPO)
             hints = (
                 *(f"migrated: {d}" for d in ran),
@@ -370,7 +377,14 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             return _check(True, mode, log, (text, hints), project.root)
         case "add":
             project = Project.open()
-            commit, ran = add(project, args.repo, args.ref, tuple(args.include), _ask(args, mode))
+            commit, ran = add(
+                project,
+                args.repo,
+                args.ref,
+                tuple(args.include),
+                _ask(args, mode),
+                args.recursive,
+            )
             hints = (*(f"migrated: {d}" for d in ran), *install(Project.open(project.root)))
             return _check(True, mode, log, (f"added at {commit}", hints), project.root)
         case "configure":

@@ -54,9 +54,9 @@ nix run github:frederikbeimgraben/spezi/<commit> -- <command>
 | --- | --- |
 | `check` | Checks the specs and the `§` references. It changes no file. |
 | `install` | Loads each copy that does not agree with `spezi.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (000083). |
-| `init [<dir>] [--forge github\|gitlab\|codeberg]` | Asks for the settings, then adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
-| `update [<repo> [<ref>]]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `spezi.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `spezi` in `flake.nix`. |
-| `add [<repo> [<ref>]] [--include <folder>]...` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
+| `init [<dir>] [--forge github\|gitlab\|codeberg] [-r]` | Asks for the settings, then adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
+| `update [<repo> [<ref>]] [-r]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `spezi.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `spezi` in `flake.nix`. |
+| `add [<repo> [<ref>]] [--include <folder>]... [-r]` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
 | `configure [<key> <value>]` | Changes `spezi.toml` in a menu, or sets one key such as `features.mcp false`, then installs (000086). |
 | `remove <repo>` | Removes the copy of a different repository, then installs (000087). |
 | `new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` | Makes a new spec from its template, with the next number and the paths of `scope`. |
@@ -69,7 +69,10 @@ nix run github:frederikbeimgraben/spezi/<commit> -- <command>
 | `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search`, `new`, `configure` and `remove`. |
 
 On a terminal, `init`, `add`, `update` and `configure` ask questions. `-y` takes the proposals
-instead, as does a run without a terminal (000085).
+instead, as does a run without a terminal (000085). `init`, `add` and `update` also ask which
+upstreams of an upstream to copy, from its `spezi.lock`. `-r` takes each of them without a
+question. Without `-r`, a run without a terminal takes none. `repo` in `spezi.toml` names the
+project, so that a cycle of upstreams stops (000092).
 
 A project runs the command at the commit of the kit in `spezi.lock`. `init` and `update` write
 this commit into the CI file, into `.mcp.json` and into the input `spezi` of `flake.nix`.

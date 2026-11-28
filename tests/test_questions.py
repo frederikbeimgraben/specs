@@ -62,6 +62,7 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
             "origin/develop",
             ("src", "docs"),
             (".py", ".txt"),
+            "example.com/group/project",
             "someone",
             ("agents", "ci", "flake"),
             True,
@@ -74,6 +75,7 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
     assert config["base_ref"] == "origin/develop"
     assert config["code_dirs"] == ["src", "docs"]
     assert config["code_suffixes"] == [".py", ".txt"]
+    assert config["repo"] == "example.com/group/project"
     assert config["features"]["mcp"] is False  # type: ignore[index]
     assert config["features"]["ci"] is True  # type: ignore[index]
     assert git(empty, "config", "--local", "gitlab.user", env=kit.env).strip() == "someone"
@@ -83,7 +85,7 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
 
 def test_init_cancel_changes_no_file(kit: Kit, empty: Path) -> None:
     """An answer no to Run? stops init before it changes a file."""
-    script = Script(["github", PROPOSAL, "", PROPOSAL, False])
+    script = Script(["github", PROPOSAL, PROPOSAL, "", PROPOSAL, False])
     with inside(kit.env, empty), pytest.raises(Cancelled):
         init(empty, None, script)
     assert not (empty / "spezi.toml").exists()

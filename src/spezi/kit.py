@@ -22,7 +22,7 @@ from typing import cast
 
 from spezi.ask import Ask, Cancelled, Proposals, Stop
 from spezi.changes import remove_tree, replace_tree, write_text
-from spezi.lock import Locked, drop_locked, read_lock, set_locked, tree_hash
+from spezi.lock import LOCK_NAME, Locked, drop_locked, read_lock, set_locked, tree_hash
 from spezi.migrations import History, contains, migrate_copy, migrate_project
 from spezi.project import (
     CONFIG_NAME,
@@ -48,6 +48,7 @@ from spezi.settings import (
     set_repo,
     write_settings,
 )
+from spezi.transitive import kept, offers, wanted
 
 
 class KitError(Exception):
@@ -325,16 +326,25 @@ def normal_include(include: tuple[str, ...]) -> tuple[str, ...]:
     return folders
 
 
-def copy_rules(source: Path, project: Project, repo: str, include: tuple[str, ...] = ()) -> None:
+def copy_rules(
+    source: Path,
+    project: Project,
+    repo: str,
+    include: tuple[str, ...] = (),
+    *,
+    direct: bool = True,
+) -> None:
     """Replace the copy of one repository with its `specs/` folder or the folders of `include`.
 
-    The copy holds `specs/README.md` only without `include` (§000048).
+    The copy holds `specs/README.md` only without `include` (§000048). The copy of a direct
+    upstream also holds the `spezi.lock` of the repository (§000092).
 
     Args:
         source: The root of a checkout of the repository.
         project: The project.
         repo: The repository as `<host>/<group>/.../<repo>`.
         include: The folders below `specs/` to copy, or empty for all.
+        direct: True for a direct upstream, False for a transitive upstream.
 
     Raises:
         KitError: The checkout has no `specs/` folder, or a folder of `include`.
@@ -345,12 +355,21 @@ def copy_rules(source: Path, project: Project, repo: str, include: tuple[str, ..
     if missing:
         raise KitError(f"{repo} has no folder specs/{', specs/'.join(missing)}")
     replace_tree(source / "specs", project.upstream_dir / repo, include)
+    if direct and (source / LOCK_NAME).is_file():
+        write_text(
+            project.upstream_dir / repo / LOCK_NAME,
+            (source / LOCK_NAME).read_text(encoding="utf-8"),
+        )
 
 
 def write_repo(
-    project: Project, repo: str, ref: str, include: tuple[str, ...] | None = None
+    project: Project,
+    repo: str,
+    ref: str,
+    include: tuple[str, ...] | None = None,
+    transitive: tuple[str, ...] | None = None,
 ) -> None:
-    """Set `ref`, and `include` when given, of one repository in `spezi.toml`.
+    """Set `ref`, and `include` and `transitive` when given, of one repository in `spezi.toml`.
 
     The table is added when it is missing. The other lines of `spezi.toml` stay.
 
@@ -359,12 +378,13 @@ def write_repo(
         repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The tag, the branch or the commit.
         include: The folders of the copy, empty for all, or None to keep `include` as it is.
+        transitive: The transitive upstreams to copy (§000092), or None to keep them.
 
     Raises:
         KitError: The new `spezi.toml` breaks a rule of 000078.
     """
     try:
-        write_settings(project.root, lambda doc: set_repo(doc, repo, ref, include))
+        write_settings(project.root, lambda doc: set_repo(doc, repo, ref, include, transitive))
     except SettingError as error:
         raise KitError(str(error)) from error
 
@@ -622,10 +642,12 @@ class Plan:
     Attributes:
         include: The folders below `specs/` to copy, or empty for all.
         keep: The text of each changed template or skill that stays as it is.
+        transitive: The transitive upstreams to copy (§000092), or None to keep the list.
     """
 
     include: tuple[str, ...]
     keep: Mapping[Path, str] = field(default_factory=dict)
+    transitive: tuple[str, ...] | None = None
 
 
 type Review = Callable[[Path, str], Plan]
@@ -641,7 +663,8 @@ def fetch_copy(
     *,
     kit_files: bool,
     review: Review | None = None,
-) -> tuple[str, tuple[str, ...], tuple[str, ...]]:
+    direct: bool = True,
+) -> tuple[str, tuple[str, ...], Plan]:
     """Replace the copy of one repository with its rules at one ref, and migrate the copy.
 
     Args:
@@ -654,10 +677,11 @@ def fetch_copy(
         kit_files: True to also replace the templates, the skills, the CI file and the MCP
             server entry from the kit.
         review: Asks the questions before the copy, with the checkout and its commit, or None.
+        direct: True for a direct upstream, False for a transitive upstream (§000092).
 
     Returns:
         The commit of the copy, the descriptions of the migrations of the copy that ran, and
-        the folders of the copy.
+        the plan of the questions.
 
     Raises:
         KitError: The kit is too old, or the repository uses a newer kit than the project.
@@ -674,13 +698,13 @@ def fetch_copy(
                 f"{repo} at {commit} needs the kit at {theirs} or later; run spezi update first"
             )
         plan = review(source, commit) if review else Plan(include)
-        copy_rules(source, project, repo, plan.include)
+        copy_rules(source, project, repo, plan.include, direct=direct)
         ran = migrate_copy(history, project.upstream_dir / repo, theirs)
         if kit_files:
             install_kit_files(source, project, commit)
         for path, text in plan.keep.items():
             write_text(path, text)
-    return commit, ran, plan.include
+    return commit, ran, plan
 
 
 def _lock(project: Project, repo: str, ref: str, commit: str, include: tuple[str, ...]) -> None:
@@ -746,6 +770,121 @@ def sync_copies(project: Project, history: History) -> tuple[str, ...]:
         _lock(project, repo, ref, commit, include)
         ran.extend(done)
     return tuple(dict.fromkeys(ran))
+
+
+def _drop_copy(project: Project, repo: str) -> None:
+    """Remove the copy of one repository and each empty folder above it.
+
+    Args:
+        project: The project.
+        repo: The repository.
+    """
+    remove_tree(project.upstream_dir / repo)
+    for parent in (project.upstream_dir / repo).parents:
+        if parent == project.upstream_dir or not parent.is_dir() or any(parent.iterdir()):
+            break
+        parent.rmdir()
+
+
+def sync_transitive(project: Project, history: History) -> tuple[str, ...]:
+    """Load each copy of a transitive upstream again that does not agree with `spezi.lock`.
+
+    The commit and the folders come from the `spezi.lock` in the copy of each direct upstream.
+    A copy and an entry of `spezi.lock` that no table and no list `transitive` names go
+    (§000083, §000092). A repository with a conflict keeps its copy; the check shows the error.
+
+    Args:
+        project: The project.
+        history: Returns a clone of the kit with its history.
+
+    Returns:
+        The descriptions of the migrations of the copies that ran.
+    """
+    lock = read_lock(project.root)
+    own = own_ref(project)
+    stale = tuple(
+        (name, want)
+        for name, want in sorted(wanted(project).items())
+        if not (
+            (entry := lock.get(name)) is not None
+            and (entry.commit, entry.include, entry.via) == (want.commit, want.include, want.via)
+            and entry.hash == tree_hash(project.upstream_dir / name)
+        )
+    )
+    ran = tuple(
+        d
+        for name, want in stale
+        for d in _fetch_transitive(project, name, want.commit, want.include, want.via, history, own)
+    )
+    stay = kept(project)
+    for repo in sorted(project.copies() - stay):
+        _drop_copy(project, repo)
+    drop_locked(project.root, stay)
+    return tuple(dict.fromkeys(ran))
+
+
+def _fetch_transitive(
+    project: Project,
+    repo: str,
+    commit: str,
+    include: tuple[str, ...],
+    via: tuple[str, ...],
+    history: History,
+    own: str | None,
+) -> tuple[str, ...]:
+    """Replace the copy of one transitive upstream and write its entry to `spezi.lock`.
+
+    Args:
+        project: The project.
+        repo: The repository.
+        commit: The commit of the copy.
+        include: The folders of the copy, empty for all.
+        via: The direct upstreams that bring it.
+        history: Returns a clone of the kit with its history.
+        own: The kit commit or ref of the project, or None.
+
+    Returns:
+        The descriptions of the migrations of the copy that ran.
+    """
+    got, ran, _ = fetch_copy(
+        project, repo, commit, include, history, own, kit_files=False, direct=False
+    )
+    set_locked(
+        project.root,
+        repo,
+        Locked("", got, include, tree_hash(project.upstream_dir / repo), via),
+    )
+    return ran
+
+
+def ask_transitive(
+    ask: Ask, direct: str, offered: tuple[str, ...], recursive: bool
+) -> tuple[str, ...]:
+    """Ask which transitive upstreams of a direct upstream to copy (§000085).
+
+    Args:
+        ask: The questions.
+        direct: The direct upstream.
+        offered: The repositories that its copy can bring.
+        recursive: True for `-r`: each one without a question.
+
+    Returns:
+        The chosen repositories, sorted. Without a terminal and without `-r`, none.
+    """
+    match recursive, bool(offered) and ask.interactive:
+        case True, _:
+            return tuple(sorted(offered))
+        case False, True:
+            return tuple(
+                sorted(
+                    ask.checkbox(
+                        f"Transitive upstreams of {direct} to copy?",
+                        tuple((r, False) for r in offered),
+                    )
+                )
+            )
+        case _:
+            return ()
 
 
 def tracked(root: Path) -> tuple[str, ...]:
@@ -850,6 +989,8 @@ class Start:
         code_suffixes: The file types of the code.
         features: The parts of the kit that are on.
         owner: The login to write to `git config --local <forge>.user`, or empty.
+        repo: The full name of the project, or empty (§000092).
+        transitive: The transitive upstreams of the kit to copy (§000092).
     """
 
     forge: str
@@ -858,6 +999,8 @@ class Start:
     code_suffixes: tuple[str, ...]
     features: tuple[str, ...]
     owner: str
+    repo: str = ""
+    transitive: tuple[str, ...] = ()
 
 
 def _owner_known(root: Path, forge: str) -> bool:
@@ -876,13 +1019,51 @@ def _owner_known(root: Path, forge: str) -> bool:
         return False
 
 
-def ask_start(root: Path, forge: str | None, ask: Ask) -> Start:
+def remote_repo(root: Path) -> str:
+    """Return the full name of the project from the URL of `git remote origin`.
+
+    Args:
+        root: The root of the project.
+
+    Returns:
+        `<host>/<group>/.../<repo>`, or empty when there is no such remote.
+    """
+    try:
+        url = run_command("git", "remote", "get-url", "origin", cwd=root).strip()
+    except KitError:
+        return ""
+    found = re.fullmatch(r"(?:[a-z+]+://)?(?:[^@/]+@)?([^/:]+)[:/](.+?)(?:\.git)?/?", url)
+    name = f"{found.group(1)}/{found.group(2)}" if found else ""
+    return name if re.fullmatch(REPO, name) else ""
+
+
+def _repo_answer(text: str) -> str | None:
+    """Return why a text is no full name of a repository, or None.
+
+    Args:
+        text: The answer.
+
+    Returns:
+        The error, or None for an empty text or a valid name.
+    """
+    return None if not text or re.fullmatch(REPO, text) else "type <host>/<group>/.../<repo>"
+
+
+def ask_start(
+    root: Path,
+    forge: str | None,
+    ask: Ask,
+    kit_lock: Mapping[str, Locked] | None = None,
+    recursive: bool = False,
+) -> Start:
     """Ask the questions of `init`, or take their proposals (§000085).
 
     Args:
         root: The root of the project.
         forge: The forge of `--forge`, or None.
         ask: The questions.
+        kit_lock: The entries of the `spezi.lock` of the kit, or None for none.
+        recursive: True for `-r`: copy each transitive upstream of the kit without a question.
 
     Returns:
         The answers.
@@ -912,12 +1093,19 @@ def ask_start(root: Path, forge: str | None, ask: Ask) -> Start:
         if dirs
         else tuple(sorted(default))
     )
+    repo = ask.text(
+        "Full name of this project (repo, empty: none)?", remote_repo(root), _repo_answer
+    ).strip()
+    offered = tuple(sorted(r for r in (kit_lock or {}) if r not in (repo, KIT_REPO)))
+    transitive = ask_transitive(ask, KIT_REPO, offered, recursive)
     owner = (
         ""
         if _owner_known(root, found)
         else ask.text(f"Your login on {found}, the owner of new specs (empty: none)?", "")
     )
-    start = Start(found, base, dirs, suffixes, _features_answer(ask), owner.strip())
+    start = Start(
+        found, base, dirs, suffixes, _features_answer(ask), owner.strip(), repo, transitive
+    )
     ask.show(
         "\n".join(
             (
@@ -925,6 +1113,8 @@ def ask_start(root: Path, forge: str | None, ask: Ask) -> Start:
                 f"base_ref = {start.base_ref}",
                 f"code_dirs = {', '.join(start.code_dirs) or '-'}",
                 f"code_suffixes = {', '.join(start.code_suffixes) or '-'}",
+                f"repo = {start.repo or '-'}",
+                f"transitive = {', '.join(start.transitive) or '-'}",
                 f"features on = {', '.join(start.features) or '-'}",
                 *((f"git config --local {found}.user {start.owner}",) if start.owner else ()),
             )
@@ -947,6 +1137,7 @@ def _write_start(root: Path, start: Start) -> None:
         ("base_ref", start.base_ref),
         ("code_dirs", start.code_dirs),
         ("code_suffixes", start.code_suffixes),
+        *((("repo", start.repo),) if start.repo else ()),
         *((f"features.{f}", f in start.features) for f in FEATURES),
     )
     write_settings(root, lambda doc: set_keys(doc, values))
@@ -955,13 +1146,18 @@ def _write_start(root: Path, start: Start) -> None:
             run_command("git", "config", "--local", f"{start.forge}.user", start.owner, cwd=root)
 
 
-def init(root: Path, forge: str | None, ask: Ask | None = None) -> tuple[Project, str]:
+def init(
+    root: Path, forge: str | None, ask: Ask | None = None, recursive: bool = False
+) -> tuple[Project, str]:
     """Ask the questions, write `spezi.toml` and copy the kit at its highest tag (§000066).
+
+    The transitive upstreams of the kit come with the steps of `spezi install` (§000092).
 
     Args:
         root: The root of the project.
         forge: `github`, `gitlab`, `codeberg`, or None to ask or to read `git remote origin`.
         ask: The questions, or None to take the proposals.
+        recursive: True for `-r`: copy each transitive upstream of the kit without a question.
 
     Returns:
         The project and the commit of the kit.
@@ -973,20 +1169,20 @@ def init(root: Path, forge: str | None, ask: Ask | None = None) -> tuple[Project
         raise KitError("the project must not be the kit itself")
     if config_file(root).exists():
         raise KitError(f"{config_file(root).name} exists; run spezi install or spezi update")
-    start = ask_start(root, forge, ask or Proposals())
-    check_forge(root, start.forge, "ci" in start.features)
     ref = default_ref(KIT_REPO)
     with lazy_history() as history, checkout(KIT_REPO, ref) as source:
         commit = run_command("git", "-C", str(source), "rev-parse", "HEAD").strip()
         check_program(history, commit)
         if not templates(source).is_dir():
             raise KitError(f"the kit at {commit} has no templates; it is too old")
+        start = ask_start(root, forge, ask or Proposals(), read_lock(source), recursive)
+        check_forge(root, start.forge, "ci" in start.features)
         write_text(root / CONFIG_NAME, package_data(CONFIG_NAME).replace("{forge}", start.forge))
         _write_start(root, start)
         (root / "specs").mkdir(exist_ok=True)
         project = Project.open(root)
         copy_rules(source, project, KIT_REPO)
-        write_repo(project, KIT_REPO, ref)
+        write_repo(project, KIT_REPO, ref, None, start.transitive or None)
         install_kit_files(source, project, commit)
         _lock(project, KIT_REPO, ref, commit, ())
     return Project.open(root), commit
@@ -1180,7 +1376,12 @@ def _keep_answers(
 
 
 def _update_review(
-    project: Project, repo: str, ref: str, include: tuple[str, ...], ask: Ask
+    project: Project,
+    repo: str,
+    ref: str,
+    include: tuple[str, ...],
+    ask: Ask,
+    recursive: bool = False,
 ) -> Review:
     """Return the questions of `update` for one repository (§000085).
 
@@ -1190,6 +1391,7 @@ def _update_review(
         ref: The new ref.
         include: The folders of the copy now.
         ask: The questions.
+        recursive: True for `-r`: copy each new transitive upstream without a question.
 
     Returns:
         The function that asks before the copy.
@@ -1212,6 +1414,11 @@ def _update_review(
                 else ()
             )
             chosen = normal_include((*include, *added))
+        named = read_lock(source)
+        now = project.config.transitive.get(repo, ())
+        fresh = tuple(r for r in offers(project, repo, named) if r not in now)
+        picked = ask_transitive(ask, repo, fresh, recursive)
+        transitive = tuple(sorted({*(r for r in now if r in named), *picked}))
         new = rules_in(source / "specs", repo, chosen)
         broken = broken_references(project, repo, new)
         if broken:
@@ -1235,13 +1442,17 @@ def _update_review(
         )
         if not ask.confirm("Run?", True):
             raise Cancelled(f"cancelled; the copy of {repo} did not change")
-        return Plan(chosen, keep)
+        return Plan(chosen, keep, transitive if transitive != tuple(sorted(now)) else None)
 
     return review
 
 
 def update(
-    project: Project, repo: str | None, ref: str | None, ask: Ask | None = None
+    project: Project,
+    repo: str | None,
+    ref: str | None,
+    ask: Ask | None = None,
+    recursive: bool = False,
 ) -> tuple[tuple[tuple[str, str], ...], tuple[str, ...]]:
     """Resolve the ref of one or of each repository again, and replace its copy (§000067).
 
@@ -1253,6 +1464,7 @@ def update(
         repo: The repository, `kit`, or None for each repository of `spezi.toml`.
         ref: The new tag, branch or commit, or None to resolve the ref of `spezi.toml` again.
         ask: The questions, or None to take the proposals.
+        recursive: True for `-r`: copy each new transitive upstream without a question.
 
     Returns:
         The repository and its new commit for each update, and the migrations that ran.
@@ -1300,7 +1512,7 @@ def update(
             )
             include = normal_include(current.config.include.get(target, ()))
             fresh = Project.open(project.root)
-            commit, copied, chosen = fetch_copy(
+            commit, copied, plan = fetch_copy(
                 fresh,
                 target,
                 wanted,
@@ -1308,9 +1520,12 @@ def update(
                 history,
                 own,
                 kit_files=target == KIT_REPO,
-                review=_update_review(fresh, target, wanted, include, questions),
+                review=_update_review(fresh, target, wanted, include, questions, recursive),
             )
-            write_repo(fresh, target, wanted, chosen if chosen != include else None)
+            chosen = plan.include
+            write_repo(
+                fresh, target, wanted, chosen if chosen != include else None, plan.transitive
+            )
             _lock(fresh, target, wanted, commit, chosen)
             own = commit if target == KIT_REPO else own
             done.append((target, commit))
@@ -1336,14 +1551,23 @@ def repo_error(repo: str) -> str | None:
     return None
 
 
-def _add_review(repo: str, ref: str, include: tuple[str, ...], ask: Ask) -> Review:
+def _add_review(
+    project: Project,
+    repo: str,
+    ref: str,
+    include: tuple[str, ...],
+    ask: Ask,
+    recursive: bool = False,
+) -> Review:
     """Return the questions of `add` (§000085).
 
     Args:
+        project: The project.
         repo: The repository.
         ref: The ref.
         include: The folders of `--include`.
         ask: The questions.
+        recursive: True for `-r`: copy each transitive upstream without a question.
 
     Returns:
         The function that asks before the copy.
@@ -1357,11 +1581,12 @@ def _add_review(repo: str, ref: str, include: tuple[str, ...], ask: Ask) -> Revi
             else include
         )
         chosen = () if not include and set(picked) == set(folders) else normal_include(picked)
+        transitive = ask_transitive(ask, repo, offers(project, repo, read_lock(source)), recursive)
         changes = rule_changes({}, rules_in(source / "specs", repo, chosen))
         ask.show(change_lines(repo, None, ref, commit, changes))
         if not ask.confirm("Run?", True):
             raise Cancelled("cancelled; no file changed")
-        return Plan(chosen)
+        return Plan(chosen, transitive=transitive)
 
     return review
 
@@ -1372,6 +1597,7 @@ def add(
     ref: str | None,
     include: tuple[str, ...] = (),
     ask: Ask | None = None,
+    recursive: bool = False,
 ) -> tuple[str, tuple[str, ...]]:
     """Add the copy of a new repository (§000068).
 
@@ -1382,6 +1608,7 @@ def add(
             else the default branch.
         include: The folders below `specs/` to copy, or empty for all.
         ask: The questions, or None to take the proposals.
+        recursive: True for `-r`: copy each transitive upstream without a question.
 
     Returns:
         The commit of the new copy and the migrations that ran.
@@ -1403,7 +1630,7 @@ def add(
     with lazy_history() as history:
         own = own_ref(project)
         check_program(history, own)
-        commit, ran, chosen = fetch_copy(
+        commit, ran, plan = fetch_copy(
             project,
             name,
             wanted,
@@ -1411,10 +1638,10 @@ def add(
             history,
             own,
             kit_files=False,
-            review=_add_review(name, wanted, folders, questions),
+            review=_add_review(project, name, wanted, folders, questions, recursive),
         )
-    write_repo(project, name, wanted, chosen)
-    _lock(project, name, wanted, commit, chosen)
+    write_repo(project, name, wanted, plan.include, plan.transitive)
+    _lock(project, name, wanted, commit, plan.include)
     return commit, ran
 
 
@@ -1440,10 +1667,10 @@ def remove(project: Project, repo: str) -> str:
         write_settings(project.root, lambda doc: drop_repo(doc, name))
     except SettingError as error:
         raise KitError(str(error)) from error
-    remove_tree(project.upstream_dir / name)
-    for parent in (project.upstream_dir / name).parents:
-        if parent == project.upstream_dir or not parent.is_dir() or any(parent.iterdir()):
-            break
-        parent.rmdir()
-    drop_locked(project.root, frozenset(project.config.upstream) - {name})
+    _drop_copy(project, name)
+    drop_locked(
+        project.root,
+        frozenset(project.config.upstream) - {name}
+        | frozenset(r for r, e in read_lock(project.root).items() if e.via),
+    )
     return name

@@ -30,10 +30,11 @@ from spezi.kit import (
     read_mcp,
     skills,
     sync_copies,
+    sync_transitive,
     templates,
     write_mcp,
 )
-from spezi.lock import drop_locked, read_lock
+from spezi.lock import read_lock
 from spezi.migrations import migrate_project
 from spezi.project import KIT_REPO, Project, kit_rev, kit_source
 
@@ -132,8 +133,7 @@ def install(project: Project) -> tuple[str, ...]:
         check_program(history, own)
         ran = () if own is None else migrate_project(history, project.root, own)
         fresh = Project.open(project.root)
-        copied = sync_copies(fresh, history)
-    drop_locked(fresh.root, frozenset(fresh.config.upstream))
+        copied = (*sync_copies(fresh, history), *sync_transitive(fresh, history))
     locked = read_lock(fresh.root).get(KIT_REPO)
     if locked is not None:
         _kit_files(fresh, locked.commit)

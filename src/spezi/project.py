@@ -44,9 +44,18 @@ STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
 IN_FORCE = frozenset({"draft", "approved"})
 FORGES = ("github", "gitlab", "codeberg")
 TOP_KEYS = frozenset(
-    {"forge", "base_ref", "code_dirs", "code_suffixes", "max_elements", "features", "upstream"}
+    {
+        "repo",
+        "forge",
+        "base_ref",
+        "code_dirs",
+        "code_suffixes",
+        "max_elements",
+        "features",
+        "upstream",
+    }
 )
-REPO_KEYS = frozenset({"ref", "include"})
+REPO_KEYS = frozenset({"ref", "include", "transitive"})
 FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
@@ -112,6 +121,8 @@ class Config:
         max_elements: The highest count of elements in one structure diagram.
         upstream: The `ref` of each repository with a copy below `specs/.upstream/` (§000048).
         include: The folders of each repository that the copy holds; empty for all (§000048).
+        transitive: The transitive upstreams that the copy of each repository brings (§000092).
+        repo: The full name of the project, or empty (§000092).
         features: The switch of each optional part of the kit (§000084).
     """
 
@@ -124,6 +135,8 @@ class Config:
     max_elements: int = 25
     upstream: Mapping[str, str | None] = MappingProxyType({})
     include: Mapping[str, tuple[str, ...]] = MappingProxyType({})
+    transitive: Mapping[str, tuple[str, ...]] = MappingProxyType({})
+    repo: str = ""
     features: Mapping[str, bool] = MappingProxyType(dict.fromkeys(FEATURES, True))
 
     def on(self, feature: str) -> bool:
@@ -582,6 +595,8 @@ def read_config(path: Path) -> Config:
         max_elements=_number(data, "max_elements", default.max_elements),
         upstream={repo: _text(table, "ref", "") or None for repo, table in upstream.items()},
         include={repo: _texts(table, "include", ()) for repo, table in upstream.items()},
+        transitive={repo: _texts(table, "transitive", ()) for repo, table in upstream.items()},
+        repo=_text(data, "repo", default.repo),
         features=_features(data),
     )
 

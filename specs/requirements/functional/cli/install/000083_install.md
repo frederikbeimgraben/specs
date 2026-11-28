@@ -13,6 +13,7 @@ tests:
   - tests/test_install.py:test_install_loads_a_missing_copy
   - tests/test_install.py:test_install_stops_for_a_broken_mcp_file
   - tests/test_install.py:test_install_stops_for_mcp_servers_that_are_no_object
+  - tests/test_transitive.py:test_install_restores_a_transitive_copy
 implementation:
   - src/spezi/install.py
   - src/spezi/kit.py
@@ -35,7 +36,10 @@ It must do these steps in this order:
    Else it must resolve `ref` again and write the new commit to `spezi.lock`. A copy that a
    person changed agrees no more, so the command loads it again and lists its files as changed
    (000077).
-4. Remove each entry of `spezi.lock` whose repository is not in `spezi.toml`.
+4. For each repository of a list `transitive` whose copy does not agree with `spezi.lock`, load
+   the copy again at the commit that the `spezi.lock` in the copy of its direct upstream names
+   (000092), and write this commit to `spezi.lock`. Remove each copy and each entry of
+   `spezi.lock` whose repository is not in `spezi.toml` and not in a list `transitive`.
 5. Write each file of the table of 000066 that does not exist: the templates, the skills, the
    CI file, the entry `spezi` in `.mcp.json`, `.envrc` and `CLAUDE.md`, each only when its
    switch in `[features]` is on (000084). A file that exists must not change, also when it is

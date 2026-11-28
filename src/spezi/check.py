@@ -35,6 +35,7 @@ from spezi.project import (
     source,
 )
 from spezi.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
+from spezi.transitive import Wanted, conflicts, kept, missing, wanted
 
 KEYS = (
     "id",
@@ -496,10 +497,12 @@ def _upstream_errors(project: Project) -> Errors:
     """
     upstream = project.config.upstream
     copies = project.copies()
+    want = wanted(project)
     return (
         *(
-            f"specs/.upstream/{repo}: no repository of this name in spezi.toml (000048)"
-            for repo in sorted(copies - set(upstream))
+            f"specs/.upstream/{repo}: no repository of this name in spezi.toml or in a list"
+            " transitive (000048)"
+            for repo in sorted(copies - kept(project))
         ),
         *(
             f"spezi.toml: upstream {repo!r} is not <host>/<group>/.../<repo> (000047)"
@@ -523,6 +526,52 @@ def _upstream_errors(project: Project) -> Errors:
             if include and repo in copies
             for e in _include_errors(project, repo, include)
         ),
+        *_transitive_errors(project, want, copies),
+    )
+
+
+def _transitive_errors(
+    project: Project, want: Mapping[str, Wanted], copies: frozenset[str]
+) -> Errors:
+    """Check the copies of the transitive upstreams (§000092).
+
+    Args:
+        project: The project.
+        want: The wanted copy of each transitive upstream without a conflict.
+        copies: The repositories with a copy.
+
+    Returns:
+        The errors.
+    """
+    return (
+        *(
+            f"spezi.toml: transitive {name!r} of {direct!r} is not in"
+            f" specs/.upstream/{direct}/{LOCK_NAME} (000092)"
+            for name, direct in missing(project)
+        ),
+        *(
+            f"spezi.toml: {name!r} has different commits in the {LOCK_NAME} of"
+            f" {' and '.join(map(repr, directs))}; add a table for it to spezi.toml (000092)"
+            for name, directs in sorted(conflicts(project).items())
+        ),
+        *(
+            f"spezi.toml: transitive {name!r} has no copy in specs/.upstream/; run spezi install"
+            " (000092)"
+            for name in sorted(want)
+            if name not in copies
+        ),
+        *(
+            f"specs/.upstream/{name}/{LOCK_NAME}: the copy of a transitive upstream must not"
+            " hold it; run spezi install (000092)"
+            for name in sorted(want)
+            if (project.upstream_dir / name / LOCK_NAME).is_file()
+        ),
+        *(
+            e
+            for name, w in sorted(want.items())
+            if w.include and name in copies
+            for e in _include_errors(project, name, w.include)
+        ),
     )
 
 
@@ -538,15 +587,24 @@ def _lock_errors(project: Project) -> Errors:
     lock = read_lock(project.root)
     upstream = project.config.upstream
     copies = project.copies()
+    want = wanted(project)
     return (
         *(
             f"{LOCK_NAME}: no entry for {repo!r}; run spezi install (000082)"
-            for repo in sorted(upstream)
+            for repo in sorted({*upstream, *want})
             if repo not in lock
         ),
         *(
-            f"{LOCK_NAME}: {repo!r} is not in spezi.toml; run spezi install (000082)"
-            for repo in sorted(set(lock) - set(upstream))
+            f"{LOCK_NAME}: {repo!r} is not in spezi.toml or in a list transitive;"
+            " run spezi install (000082)"
+            for repo in sorted(set(lock) - kept(project))
+        ),
+        *(
+            f"{LOCK_NAME}: {repo!r} does not agree with the {LOCK_NAME} of {', '.join(w.via)};"
+            " run spezi install (000082)"
+            for repo, w in sorted(want.items())
+            if (entry := lock.get(repo)) is not None
+            and (entry.commit, entry.include, entry.via) != (w.commit, w.include, w.via)
         ),
         *(
             f"{LOCK_NAME}: {repo!r} does not agree with ref or include in spezi.toml;"
@@ -592,6 +650,7 @@ def _include_errors(project: Project, repo: str, include: tuple[str, ...]) -> Er
             " spezi.toml; run spezi install (000048)"
             for p in sorted(root.rglob("*"))
             if p.is_file()
+            and p.relative_to(root).as_posix() != LOCK_NAME
             and not any(p.relative_to(root).as_posix().startswith(f"{f}/") for f in folders)
         ),
     )
