@@ -12,7 +12,7 @@ The rules are in `specs/conventions/specs/` and `specs/workflow/specs/`, in a pr
 
 ## Steps
 
-1. Find the kind with the list in (spec 000004), then the kind folder and the topic folder `<area>/<topic>/`. If there is no topic
+1. Find the kind with the list (spec 000004), then the kind folder and the topic folder `<area>/<topic>/`. If there is no topic
    folder, make it. Use lower case and `-` (spec 000005).
 2. Search `specs/` for a rule that already covers the change. Change that rule instead of a new
    one (spec 000006).

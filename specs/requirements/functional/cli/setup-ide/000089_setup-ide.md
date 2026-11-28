@@ -57,7 +57,7 @@ For a suffix without a language name, the command must show a hint and skip the 
 The command must write the whole folder again when it exists. It must add the folder to
 `.gitignore`, except when git tracks a file of the folder or the folder is ignored already.
 
-For `code`, the command must then ask, with the questions of (spec 000085), whether to run
+For `code`, the command must then ask, with the questions (spec 000085), whether to run
 `code --install-extension .vscode/spezi/specs.vsix`. With `-y` or without a terminal, it must
 only show this command. For `zed`, it must show that the Zed action `zed: install dev extension`
 with the folder `.zed/spezi/` installs the extension, and that Zed needs rustup to build it.

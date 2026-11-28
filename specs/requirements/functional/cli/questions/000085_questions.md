@@ -41,7 +41,7 @@ risk must then stop the command with an error. Ctrl+C must stop the command with
 | `repo`, the full name of the project | The name from the URL of `git remote origin`, else empty. Empty gives no `repo`. |
 | The transitive upstreams of the kit to copy (spec 000092), when `-r` is not given: a checklist of the repositories in the `spezi.lock` of the kit without `repo` | None. With `-r`, all without a question. |
 | The login of the user, only when `git config <forge>.user` has no value | Empty. A login goes to `git config --local <forge>.user`. |
-| `[features]`, a checklist of the switches of (spec 000084) | Each switch on. `claude` without `agents` asks again. |
+| `[features]`, a checklist of the switches (spec 000084) | Each switch on. `claude` without `agents` asks again. |
 | For an `.envrc` without `use flake` and a `CLAUDE.md` without `@AGENTS.md`: add the line? | No |
 
 `spezi add`:

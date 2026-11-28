@@ -26,8 +26,8 @@ output:
 
 | Command | Formatted output |
 | --- | --- |
-| `check` | Each error in red, then the line with the counts of (spec 000065), green without errors. |
-| `list`, `search` | A table with the columns of (spec 000072), with a color for each status. |
+| `check` | Each error in red, then the line with the counts (spec 000065), green without errors. |
+| `list`, `search` | A table with the columns (spec 000072), with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
 | `init`, `update`, `add`, `new`, `setup-ide` | The message with a green mark. |

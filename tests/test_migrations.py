@@ -80,7 +80,7 @@ def test_update_changes_the_old_paths_in_the_specs(kit: Kit, project: Path) -> N
         "conventions/specs/format",
         "000100",
         "templates",
-        "Rule 000100",
+        "Rule templates",
         "convention",
         "A spec must copy `.specs/templates/TEMPLATE.md`, see `.specs/index.md` and"
         " `.specs/upstream/`.",

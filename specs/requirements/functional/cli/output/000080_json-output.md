@@ -27,13 +27,13 @@ print its data as JSON, indented with two spaces, also on a terminal. `--json` a
 
 | Command | JSON |
 | --- | --- |
-| `list`, `search` | A list with one rule object for each line of (spec 000072). |
+| `list`, `search` | A list with one rule object for each line (spec 000072). |
 | `resolve` | The rule object. |
 | `show` | `long`, `path`, `meta` with the front matter as an object, and `body` with the text after the front matter. |
 | `check` | `specs` with the count of the rules of the project, `upstream` with the count of the rules of the copies (spec 000065), `errors`, and `changed` (spec 000077). |
 | `init`, `update`, `add`, `new`, `setup-ide` | `message`, `hints`, `check` with `specs`, `upstream` and `errors` or `null`, and `changed`. |
 
-A rule object must hold `kind` (the kind letter), `id` (the short form of (spec 000047)), `long` (the
+A rule object must hold `kind` (the kind letter), `id` (the short form (spec 000047)), `long` (the
 long form), `status`, `title` and `path`. An error object must hold `file`, `line` (a whole
 number from 1), `message` and `rule` (the number of the rule that the error names), and `null`
 for a part that the error line does not have. Each object of `changed` must hold `mark` and

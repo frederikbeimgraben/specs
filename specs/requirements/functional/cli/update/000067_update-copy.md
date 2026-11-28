@@ -24,7 +24,7 @@ scope:
 # spezi update resolves the refs again and replaces the copies
 
 `spezi update [<repo> [<ref>]] [-y] [-r]` must update the copies below `specs/.upstream/`
-(spec 000048), after the questions of (spec 000085):
+(spec 000048), after the questions (spec 000085):
 
 | Form | Effect |
 | --- | --- |
@@ -41,14 +41,14 @@ kit comes first.
 
 The command must keep `transitive` and copy each of its repositories at the commit of the new
 `spezi.lock` of the direct upstream (spec 000092). For a transitive upstream that the new
-`spezi.lock` names and `transitive` does not hold, it must ask as (spec 000085) tells. With `-r`
+`spezi.lock` names and `transitive` does not hold, it must ask (spec 000085). With `-r`
 (also `--recursive`), it must copy each such upstream without a question. A repository of
 `transitive` that the new `spezi.lock` does not name must leave `transitive`. Its copy must go
 when no other list `transitive` holds it.
 
-For the kit, the command must also replace the templates, the skills, the CI files of (spec 000066) and
+For the kit, the command must also replace the templates, the skills, the CI files (spec 000066) and
 the entry `spezi` in `.mcp.json`. A template or a skill that the user keeps (spec 000085) must stay.
-The command must write each folder of (spec 000089) again that is in the project. The folder of VS Code
+The command must write each folder (spec 000089) again that is in the project. The folder of VS Code
 must stay as it is when the program has no `specs.vsix`. When `flake.nix` has the input `spezi`
 of (spec 000066), the command must set its ref to the new commit of the kit and run
 `nix flake update specs`. Without this input, it must not change `flake.nix` and `flake.lock`.
@@ -63,7 +63,7 @@ of the repository with the error.
 
 The command must replace only the parts whose switch in `[features]` is on, and must not change
 `flake.nix` when `flake` is off (spec 000084). Before it copies, the command must run the migrations
-of (spec 000081). At its end, it must do the steps of `spezi install` (spec 000083).
+(spec 000081). At its end, it must do the steps of `spezi install` (spec 000083).
 
 Reason: `spezi.toml` keeps the version that the project wants, and one command takes the newest
 commit of each version (spec 000048). New rules of an update can show errors in the project, and the

@@ -17,7 +17,7 @@ scope:
 
 # spezi resolve prints the long form of an ID
 
-`spezi resolve <id>` must print the long form of (spec 000047) for a short or a long form, for
+`spezi resolve <id>` must print the long form (spec 000047) for a short or a long form, for
 example `C/specs/format/000012` for `000012`. It must stop with an error when no rule of the
 project or of a copy has this ID.
 

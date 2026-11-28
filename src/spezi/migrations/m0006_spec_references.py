@@ -5,7 +5,7 @@ reference in a Markdown file as the bare rule number. The migration writes each 
 `(spec <ref>)`. A list of references in one pair of parentheses becomes one list, and a range
 `<a> to <b>` becomes the list of each number from `a` to `b`. In a Markdown file, the migration
 does not change the front matter, a code block, text in backticks or a table that `spezi`
-writes.
+writes. In a rule, it does not change the `#` heading, which repeats the title.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ BARE_SINGLE = re.compile(rf"({BARE})")
 type Change = Callable[[re.Match[str]], str]
 
 RANGE = re.compile(rf"({RULE}) to ({RULE})")
+HEADING = re.compile(r"^# .*$", re.MULTILINE)
 
 
 def _expand(match: re.Match[str]) -> str:
@@ -76,6 +77,18 @@ def _code(text: str) -> str:
     return OLD_SINGLE.sub(lambda m: f"(spec {m[1]})", OLD_GROUP.sub(lambda m: _list(m[1]), text))
 
 
+def _rule(rel: str) -> bool:
+    """Return True for a rule, whose `#` heading repeats the title.
+
+    Args:
+        rel: The path below the root of the project, or empty for a rule of a copy.
+
+    Returns:
+        True for a Markdown file below `specs/` that is not the index.
+    """
+    return rel == "" or (rel.startswith("specs/") and rel != "specs/README.md")
+
+
 def _step(text: str, rel: str, pattern: re.Pattern[str], change: Change) -> str:
     """Change each match of a pattern that lies in the prose and in no reference.
 
@@ -88,7 +101,8 @@ def _step(text: str, rel: str, pattern: re.Pattern[str], change: Change) -> str:
     Returns:
         The new text.
     """
-    mask = prose(text, rel)
+    plain = prose(text, rel)
+    mask = HEADING.sub(lambda m: " " * len(m[0]), plain) if _rule(rel) else plain
     spans = tuple((m.start(), m.end()) for m in SPEC_REF.finditer(text))
     return pattern.sub(
         lambda m: (

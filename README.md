@@ -28,7 +28,7 @@ The command `specs` is a second name of the same command.
 | agent | `A` | `specs/agents/` | What only an agent must do or must not do. |
 | decision | `D` | `specs/decisions/` | One design decision with its alternatives. |
 
-(spec 000004) tells which kind a rule gets.
+One rule tells which kind a rule gets (spec 000004).
 
 ## Layout of a project
 

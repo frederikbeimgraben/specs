@@ -25,12 +25,12 @@ scope:
 # spezi init adds the kit to a project
 
 `spezi init [<dir>] [--forge github|gitlab|codeberg] [-y] [-r]` must add the kit to the project
-in `<dir>`, or in the current folder. First it must ask the questions of (spec 000085), and it must write
+in `<dir>`, or in the current folder. First it must ask the questions (spec 000085), and it must write
 the answers to `spezi.toml`. It must write these files:
 
 | File | Content |
 | --- | --- |
-| `spezi.toml` | The settings, with the answers of (spec 000085) and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in (spec 000068). |
+| `spezi.toml` | The settings, with the answers (spec 000085) and the `ref` of the kit: the tag of the kit with the highest version, else its default branch (spec 000068). |
 | `spezi.lock` | The commit that this `ref` names, the hash of the copy of the kit, and the entry of each copy of a transitive upstream (spec 000082). |
 | `specs/` | An empty folder for the rules of the project. |
 | `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit, with its `spezi.lock` (spec 000048). |

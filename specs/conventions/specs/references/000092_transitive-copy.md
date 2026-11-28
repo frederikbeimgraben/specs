@@ -50,7 +50,8 @@ hold the union of the two `include` lists. An empty `include` is all rules. When
 different commits, `spezi check` must show an error that names the repository and both direct
 upstreams. A table for the repository in `spezi.toml` of the project removes the error.
 
-A copy of a transitive upstream follows (spec 000048) and (spec 000049) like a copy of a direct upstream.
+A copy of a transitive upstream follows the same rules as a copy of a direct upstream
+(spec 000048, 000049).
 Only `spezi init`, `spezi add` and `spezi update` must change `transitive` (spec 000085).
 
 Reason: A rule of an upstream can refer to a rule of its own upstream. The copy of that

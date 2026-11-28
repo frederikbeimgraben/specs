@@ -36,6 +36,6 @@ correct when a rule moves. The two commands give the kind, the path and the text
 search by hand.
 
 Test: `spezi check` finds each reference to a different repository, checks that it uses the
-short form and checks that the rule exists in the copy of (spec 000048). It finds each number in the
+short form and checks that the rule exists in the copy (spec 000048). It finds each number in the
 text of a spec and each `§` reference in the code, and checks that it names a rule of the
 project with the status `draft` or `approved`.

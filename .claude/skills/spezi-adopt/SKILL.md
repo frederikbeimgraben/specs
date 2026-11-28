@@ -39,7 +39,7 @@ description: Add the spec format of frederikbeimgraben/spezi to a new or an exis
 3. Compare the rules of the project with the kit rules in `specs/.upstream/`. If a project rule
    contradicts a kit rule, ask the owner which one applies. Replace the kit rule with
    `replaces`, or change the project rule (spec 000050).
-4. Move the project specs to the kind folders of (spec 000004). A moved rule keeps its number (spec 000014).
+4. Move the project specs to the kind folders (spec 000004). A moved rule keeps its number (spec 000014).
 
 ## Update the kit
 

@@ -42,7 +42,7 @@ the block is not current. `spezi init` must create `CLAUDE.md` with the line
 `@AGENTS.md` when it does not exist. When `CLAUDE.md` exists without that line, `spezi init`
 must not change it and must print the line to add. A block that starts with the older line
 `<!-- specs:begin (written by specs check --write, do not edit) -->` or with the markers of the
-old name `specs` gets the new lines through the migrations of (spec 000081).
+old name `specs` gets the new lines through the migrations (spec 000081).
 
 Reason: An agent finds every rule that applies in the file that it reads first, and the file
 stays current with the specs. Claude Code reads `AGENTS.md` through the import in `CLAUDE.md`.

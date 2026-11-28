@@ -12,7 +12,7 @@ scope:
 
 # To follow a spec is not an assumption
 
-A detail that a spec settles is not an open detail of (spec 000043). This includes an agent rule. An
+A detail that a spec settles is not an open detail (spec 000043). This includes an agent rule. An
 agent must follow the spec and must not ask the user about that detail.
 
 Reason: A question about a settled detail costs the time of the user and gives no new

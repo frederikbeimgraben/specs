@@ -13,7 +13,7 @@ scope:
 
 # Each rule of a different repository applies unless a project rule replaces it
 
-Each rule of a copy of (spec 000048) with the status `draft` or `approved` must apply to the project.
+Each rule of a copy (spec 000048) with the status `draft` or `approved` must apply to the project.
 A rule that must not apply must be in `replaces` of a project rule with the status `draft` or
 `approved`. A rule that the project drops without a new rule must be in `replaces` of a decision
 spec (spec 000042). A reference must not point to a replaced rule.

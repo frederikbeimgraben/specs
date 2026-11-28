@@ -17,7 +17,7 @@ scope:
 # A spec has a front matter, a body and links to other specs
 
 The class `Spec` in `src/spezi/project.py` and the keys of the templates must agree with this
-diagram. A new key of the front matter must change the diagram and (spec 000009) in the same pull
+diagram. A new key of the front matter must change the diagram and the rule of the front matter (spec 000009) in the same pull
 request.
 
 ## Diagram
@@ -80,4 +80,4 @@ classDiagram
 Reason: The diagram shows in one view how the parts of a spec and the links between specs fit
 together.
 
-Test: Review. `spezi check` checks the keys of (spec 000009).
+Test: Review. `spezi check` checks the keys (spec 000009).
