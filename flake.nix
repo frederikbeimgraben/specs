@@ -61,6 +61,7 @@
             mcp
             pygls
             questionary
+            rich-argparse
             rich
             tomlkit
           ];
@@ -99,6 +100,7 @@
               ps.pygls
               ps.pytest
               ps.questionary
+              ps.rich-argparse
               ps.rich
               ps.tomlkit
             ]))

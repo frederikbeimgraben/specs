@@ -24,13 +24,18 @@ Each command except `mcp` and `lsp` takes `--raw` or `--json`. On a terminal, `i
 from __future__ import annotations
 
 import argparse
+import io
+import os
 import sys
 from collections.abc import Callable, Mapping
 from enum import Enum, auto
 from pathlib import Path
+from typing import TYPE_CHECKING, ClassVar, override
 
-from rich.console import Group, RenderableType
+from rich.console import Console, Group, RenderableType
+from rich.style import StyleType
 from rich.text import Text
+from rich_argparse import RichHelpFormatter
 
 from spezi import data, ide, lsp, queries
 from spezi.ask import Ask, Cancelled, Stop, asker
@@ -45,12 +50,70 @@ from spezi.new import NewError, new
 from spezi.project import KIT_REPO, ConfigError, Project
 from spezi.view import console, done, file_list, report, spec_text, table
 
+if TYPE_CHECKING:
+    from _typeshed import SupportsWrite
+
+
+class _Help(RichHelpFormatter):
+    """The help in the colors of the other output, with the words of argparse (§000076)."""
+
+    styles: ClassVar[dict[str, StyleType]] = {
+        **RichHelpFormatter.styles,
+        "argparse.prog": "bold cyan",
+        "argparse.args": "bold cyan",
+        "argparse.groups": "bold",
+        "argparse.metavar": "cyan",
+    }
+    group_name_formatter: ClassVar[Callable[[str], str]] = str
+    help_markup: ClassVar[bool] = False
+    text_markup: ClassVar[bool] = False
+
+
+def _colored(stream: SupportsWrite[str]) -> bool:
+    """Tell if the help on a stream has color (§000076).
+
+    Args:
+        stream: The stream of the help.
+
+    Returns:
+        True when the stream is a terminal and `NO_COLOR` is not set.
+    """
+    match stream:
+        case io.TextIOBase():
+            return stream.isatty() and "NO_COLOR" not in os.environ
+        case _:
+            return False
+
+
+class _Parser(argparse.ArgumentParser):
+    """A parser that colors its help and its usage only on a terminal (§000076)."""
+
+    @override
+    def _get_formatter(self) -> argparse.HelpFormatter:
+        """Return the formatter, with color for each stream.
+
+        Returns:
+            The formatter.
+        """
+        return _Help(prog=self.prog, console=Console(force_terminal=True))
+
+    @override
+    def _print_message(self, message: str, file: SupportsWrite[str] | None = None) -> None:
+        """Write a message, plain when its stream must have no color.
+
+        Args:
+            message: The message, with color.
+            file: The stream, or None for stderr.
+        """
+        stream = file or sys.stderr
+        super()._print_message(
+            message if _colored(stream) else Text.from_ansi(message).plain, stream
+        )
+
 
 def parser() -> argparse.ArgumentParser:
     """Return the parser of the command line."""
-    root = argparse.ArgumentParser(
-        prog="spezi", description="Check and manage the specs of a project."
-    )
+    root = _Parser(prog="spezi", description="Check and manage the specs of a project.")
     commands = root.add_subparsers(dest="command", required=True)
     commands.add_parser("check", help="check the specs; change no file")
     commands.add_parser(
