@@ -4,17 +4,18 @@ title: A spec starts with a YAML front matter
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
+  - src/spezi/project.py
 scope:
   - specs/
 ---
 
 # A spec starts with a YAML front matter
 
-The file must start with a YAML front matter block between two `---` lines. The block must have
-these keys, in this order:
+The file must start with a YAML front matter block between two `---` lines. The block must be
+valid YAML. The block must have these keys, in this order:
 
 | Key | Type | Value |
 | --- | --- | --- |
@@ -42,4 +43,5 @@ Reason: Every Markdown tool reads standard front matter. One fixed set of keys l
 read every spec. The quotes keep the leading zeros, because YAML reads `000024` as a number.
 The short form stays correct when a rule moves to a different folder (000014).
 
-Test: `spezi check` checks the keys, their order and their values.
+Test: `spezi check` reads the block with a YAML parser, and checks that it is valid YAML, the
+keys, their order and their values.

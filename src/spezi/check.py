@@ -66,6 +66,7 @@ CODE_LONG_REF = re.compile(rf"§((?:{REPO}:)?{LONG_LOCAL})")
 SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{REPO}:)?(?:{PREFIXES})/[a-z0-9/-]+/)?{NUMBER}\b")
 FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({NUMBER})\b")
 FOREIGN_LONG_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LONG_LOCAL})\b")
+LOCAL_REF = re.compile(rf"(?<![\w/.:§-])({NUMBER})(?![\w-])")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 QUOTED = re.compile(r"'([^'\n]+)'")
 NAMED_REF = re.compile(rf"§[^\s]+|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+")
@@ -312,7 +313,32 @@ def _check_body(ctx: Context, spec: Spec) -> Errors:
             for repo, number in FOREIGN_REF.findall(text)
             for e in _foreign_error(rel, f"{repo}:{number}", ctx.foreign)
         ),
+        *(
+            e
+            for number in dict.fromkeys(LOCAL_REF.findall(text))
+            for e in _local_error(ctx, rel, number)
+        ),
     )
+
+
+def _local_error(ctx: Context, rel: str, number: str) -> Errors:
+    """Check one reference to a rule of the project (§000047).
+
+    Args:
+        ctx: The context of the check.
+        rel: Where the reference is.
+        number: The number of the rule.
+
+    Returns:
+        The errors.
+    """
+    match ctx.local.get(number):
+        case None:
+            return (f"{rel}: {number} names no rule of the project (000047)",)
+        case spec if spec.status in IN_FORCE:
+            return ()
+        case spec:
+            return (f"{rel}: {number} names a rule with the status {spec.status} (000047)",)
 
 
 def _foreign_error(rel: str, ref: str, foreign: Mapping[str, str]) -> Errors:
@@ -601,11 +627,15 @@ def _code_ref_error(ctx: Context, rel: str, ref: str) -> Errors:
     Returns:
         The errors.
     """
-    return (
-        _foreign_error(rel, ref, ctx.foreign)
-        if ":" in ref
-        else (() if ref in ctx.local else (f"{rel}: §{ref} names no spec (000017)",))
-    )
+    match ":" in ref, ctx.local.get(ref):
+        case True, _:
+            return _foreign_error(rel, ref, ctx.foreign)
+        case False, None:
+            return (f"{rel}: §{ref} names no spec (000017)",)
+        case False, spec if spec.status in IN_FORCE:
+            return ()
+        case False, spec:
+            return (f"{rel}: §{ref} names a rule with the status {spec.status} (000047)",)
 
 
 def _code_refs(ctx: Context) -> Errors:
@@ -781,16 +811,17 @@ def _line(text: str, message: str) -> int:
         message: The error without the path.
 
     Returns:
-        The first line with an entry or a reference of the message, else the line of the front
-        matter key at the start of the message, else 1.
+        The first line with an entry or a reference of the message, where the line of the front
+        matter key at the start of the message comes first, else the line of this key, else 1.
     """
     lines = tuple(enumerate(text.splitlines(), 1))
     key = message.split(" ", 1)[0]
+    own = tuple((n, line) for n, line in lines if key in KEYS and line.startswith(f"{key}:"))
     return next(
         (
             n
             for needle in (*QUOTED.findall(message), *NAMED_REF.findall(message))
-            for n, line in lines
+            for n, line in (*own, *lines)
             if needle in line
         ),
         next((n for n, line in lines if key in KEYS and line.startswith(f"{key}:")), 1),

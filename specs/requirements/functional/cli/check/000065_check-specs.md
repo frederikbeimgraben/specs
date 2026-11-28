@@ -4,7 +4,7 @@ title: spezi check checks the specs
 kind: functional
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_check.py:test_check_passes_after_init
   - tests/test_check.py:test_check_changes_no_file
@@ -14,6 +14,12 @@ tests:
   - tests/test_check.py:test_check_finds_a_missing_key
   - tests/test_check.py:test_check_finds_a_stale_index
   - tests/test_check.py:test_check_gives_the_line
+  - tests/test_check.py:test_check_finds_a_file_outside_the_kind_folders
+  - tests/test_check.py:test_check_gives_the_line_of_the_key
+  - tests/test_check.py:test_check_finds_an_old_diagram_type
+  - tests/test_check.py:test_check_finds_a_reference_to_no_rule
+  - tests/test_check.py:test_check_finds_a_reference_to_a_removed_rule
+  - tests/test_check.py:test_check_finds_front_matter_that_is_no_yaml
 implementation:
   - src/spezi/agents.py
   - src/spezi/check.py

@@ -97,3 +97,86 @@ def test_check_gives_the_line(kit: Kit, project: Path) -> None:
     assert f"{rel}:7: updated must be YYYY-MM-DD (000009)" in result.out
     assert f"{rel}:15: a spec refers to a rule without § (000017): §000999" in result.out
     assert "specs/README.md:1: the index is not current" in result.out
+
+
+def test_check_finds_a_file_outside_the_kind_folders(kit: Kit, project: Path) -> None:
+    """A file of each type that is not below a kind folder is an error of 000051."""
+    (project / "specs/notes").mkdir()
+    (project / "specs/notes/todo.txt").write_text("x\n", encoding="utf-8")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "specs/notes/todo.txt:1: not below a kind folder (000051)" in result.out
+
+
+def test_check_gives_the_line_of_the_key(kit: Kit, project: Path) -> None:
+    """An error of a key names the line of the key, also when an other line has the value."""
+    path = _rule(project)
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        .replace("title: Names are short", "title: Names are functional")
+        .replace("kind: style", "kind: functional"),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    rel = "specs/style/code/names/000100_short-names.md"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    assert f"{rel}:{lines.index('kind: functional') + 1}: kind 'functional'" in result.out
+
+
+def test_check_finds_an_old_diagram_type(kit: Kit, project: Path) -> None:
+    """A state diagram must start with `stateDiagram-v2`, not with `stateDiagram`."""
+    name = "specs/structures/specs/lifecycle/000041_status-life-cycle.md"
+    path = project / name
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        (kit.source / name).read_text(encoding="utf-8").replace("stateDiagram-v2", "stateDiagram"),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "a state diagram must start with stateDiagram-v2 (000034)" in result.out
+
+
+def test_check_finds_a_reference_to_no_rule(kit: Kit, project: Path) -> None:
+    """A number in the text of a spec must name a rule of the project."""
+    _rule(project, "A name must be short, as 000999 says.")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "000999 names no rule of the project (000047)" in result.out
+
+
+def test_check_finds_a_reference_to_a_removed_rule(kit: Kit, project: Path) -> None:
+    """A reference in a spec or in the code must not name a rule that is not in force."""
+    _rule(project, "A name must be short, as 000101 says.")
+    old = write_rule(
+        project, "style/code/names", "000101", "old-names", "Old names", "style", "Old: must go."
+    )
+    old.write_text(
+        old.read_text(encoding="utf-8").replace("status: approved", "status: removed"),
+        encoding="utf-8",
+    )
+    (project / "src/app.py").write_text('"""See §000101."""\n', encoding="utf-8")
+    path = project / "spezi.toml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("code_dirs = []", 'code_dirs = ["src"]'),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "000101 names a rule with the status removed (000047)" in result.out
+    assert "src/app.py:1: §000101 names a rule with the status removed (000047)" in result.out
+
+
+def test_check_finds_front_matter_that_is_no_yaml(kit: Kit, project: Path) -> None:
+    """A front matter that is no valid YAML is an error of 000009."""
+    path = _rule(project)
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "title: Names are short", "title: Names: are short"
+        ),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "front matter: no valid YAML" in result.out
+    assert "(000009)" in result.out

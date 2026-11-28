@@ -30,7 +30,7 @@ import sys
 from collections.abc import Callable, Mapping
 from enum import Enum, auto
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, NoReturn, override
 
 from rich.console import Console, Group, RenderableType
 from rich.style import StyleType
@@ -85,8 +85,32 @@ def _colored(stream: SupportsWrite[str]) -> bool:
             return False
 
 
+class UsageError(Exception):
+    """The command line has a wrong argument."""
+
+
 class _Parser(argparse.ArgumentParser):
-    """A parser that colors its help and its usage only on a terminal (§000076)."""
+    """The parser of the command line.
+
+    It colors its help and its usage only on a terminal (§000076). It stops with
+    `{"error": ...}` when the command line has `--json` (§000080).
+    """
+
+    @override
+    def error(self, message: str) -> NoReturn:
+        """Stop for a wrong argument.
+
+        Args:
+            message: The error of argparse.
+
+        Raises:
+            UsageError: The command line has `--json`.
+        """
+        match "--json" in sys.argv[1:]:
+            case True:
+                raise UsageError(message)
+            case False:
+                super().error(message)
 
     @override
     def _get_formatter(self) -> argparse.HelpFormatter:
@@ -433,7 +457,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             path = new(
                 project, args.kind, args.path, args.name, args.title, args.owner, tuple(args.scope)
             )
-            return _message(mode, str(path), log, project.root)
+            return _message(mode, path.relative_to(project.root).as_posix(), log, project.root)
         case "resolve":
             project = Project.open()
             spec = queries.find(project, args.id)
@@ -482,7 +506,11 @@ def main() -> None:
     A command that stops prints `specs: <error>` to stderr, or with `--json` the object
     `{"error": "<error>"}` to stdout (§000080). The exit code is then 1.
     """
-    args = parser().parse_args()
+    try:
+        args = parser().parse_args()
+    except UsageError as error:
+        sys.stdout.write(data.dumps({"error": str(error)}))
+        sys.exit(1)
     try:
         sys.exit(dispatch(args))
     except (

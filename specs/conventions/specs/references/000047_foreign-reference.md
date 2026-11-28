@@ -4,7 +4,7 @@ title: A reference to a rule of a different repository names the repository
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
 scope:
@@ -23,7 +23,9 @@ repository must be only the number. This is the short form:
 | Same repository | `000012` | `C/specs/format/000012` |
 | Different repository | `github.com/frederikbeimgraben/spezi:000012` | `github.com/frederikbeimgraben/spezi:C/specs/format/000012` |
 
-Code (000017), the front matter (000009) and the text of a spec must use the short form.
+Code (000017), the front matter (000009) and the text of a spec must use the short form. A
+reference in the text of a spec or in the code to a rule of the same repository must name a rule
+of the project with the status `draft` or `approved`.
 `spezi resolve <ID>` must print the long form of a short or a long form (000070).
 `spezi show <ID>` must print the full text of the rule (000071).
 
@@ -34,4 +36,6 @@ correct when a rule moves. The two commands give the kind, the path and the text
 search by hand.
 
 Test: `spezi check` finds each reference to a different repository, checks that it uses the
-short form and checks that the rule exists in the copy of 000048.
+short form and checks that the rule exists in the copy of 000048. It finds each number in the
+text of a spec and each `§` reference in the code, and checks that it names a rule of the
+project with the status `draft` or `approved`.

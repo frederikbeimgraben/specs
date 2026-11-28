@@ -19,6 +19,8 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import cast
 
+import yaml
+
 KIT_REPO = "github.com/frederikbeimgraben/spezi"
 OLD_KIT_REPO = "github.com/frederikbeimgraben/specs"
 CONFIG_NAME = "spezi.toml"
@@ -40,6 +42,11 @@ FOLDER_BY_KIND: Mapping[str, str] = {kind: folder for folder, (_, kind) in KINDS
 PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
 STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
 IN_FORCE = frozenset({"draft", "approved"})
+FORGES = ("github", "gitlab", "codeberg")
+TOP_KEYS = frozenset(
+    {"forge", "base_ref", "code_dirs", "code_suffixes", "max_elements", "features", "upstream"}
+)
+REPO_KEYS = frozenset({"ref", "include"})
 FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
@@ -213,26 +220,66 @@ class Spec:
         return value if isinstance(value, tuple) or value is None else ()
 
 
-def _front_matter_lines(lines: list[str]) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
-    """Return the keys and values of the lines of a front matter block.
+class FrontMatterError(Exception):
+    """The front matter is no valid YAML of the form of 000009."""
+
+
+def _value(node: yaml.Node) -> str | tuple[str, ...]:
+    """Return the value of one key of the front matter.
 
     Args:
-        lines: The lines between the two `---` lines.
+        node: The YAML node of the value.
 
     Returns:
-        One pair of key and value per key line. A key with list items gets a tuple.
+        The text, or the entries of a list. A key without a value gets an empty tuple.
+
+    Raises:
+        FrontMatterError: The value is no text and no list of texts.
     """
-    starts = tuple(i for i, line in enumerate(lines) if not line.startswith("  - "))
-    ends = (*starts[1:], len(lines))
-    return tuple(
-        (
-            lines[start].partition(":")[0].strip(),
-            tuple(item[4:].strip().strip('"') for item in lines[start + 1 : end])
-            if end > start + 1 or not lines[start].partition(":")[2].strip()
-            else lines[start].partition(":")[2].strip().strip('"'),
-        )
-        for start, end in zip(starts, ends, strict=True)
-    )
+    match node:
+        case yaml.ScalarNode(value="", style=None):
+            return ()
+        case yaml.ScalarNode(value=str(text)):
+            return text
+        case yaml.SequenceNode(value=list(items)) if all(
+            isinstance(i, yaml.ScalarNode) for i in items
+        ):
+            return tuple(str(cast("yaml.ScalarNode", i).value) for i in items)
+        case _:
+            raise FrontMatterError("a value must be a text or a list of texts")
+
+
+def _pairs(block: str) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
+    """Return the keys and values of a front matter block, read as YAML (§000009).
+
+    Args:
+        block: The text between the two `---` lines.
+
+    Returns:
+        One pair of key and value per key, in the order of the block.
+
+    Raises:
+        FrontMatterError: The block is no valid YAML, or no mapping of texts and lists.
+    """
+    try:
+        root = yaml.compose(block, Loader=yaml.BaseLoader)
+    except yaml.YAMLError as error:
+        raise FrontMatterError(f"no valid YAML: {' '.join(str(error).split())}") from error
+    match root:
+        case None:
+            return ()
+        case yaml.MappingNode(value=list(entries)):
+            pairs = tuple(
+                (str(cast("yaml.ScalarNode", k).value), _value(v))
+                for k, v in cast("list[tuple[yaml.Node, yaml.Node]]", entries)
+            )
+            match len({k for k, _ in pairs}) == len(pairs):
+                case True:
+                    return pairs
+                case False:
+                    raise FrontMatterError("a key is there more than one time")
+        case _:
+            raise FrontMatterError("the block must be a mapping")
 
 
 def parse_front_matter(text: str) -> tuple[Meta, tuple[str, ...], str] | None:
@@ -243,9 +290,12 @@ def parse_front_matter(text: str) -> tuple[Meta, tuple[str, ...], str] | None:
 
     Returns:
         The keys and values, the order of the keys and the body, or None without front matter.
+
+    Raises:
+        FrontMatterError: The front matter is no valid YAML of the form of 000009.
     """
     end = text.find("\n---\n", 4) if text.startswith("---\n") else -1
-    pairs = _front_matter_lines(text[4:end].splitlines()) if end >= 0 else ()
+    pairs = _pairs(text[4:end]) if end >= 0 else ()
     return (dict(pairs), tuple(k for k, _ in pairs), text[end + 5 :]) if end >= 0 else None
 
 
@@ -281,7 +331,7 @@ def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[st
     """
     kind = kind_of(path.relative_to(base))
     if kind is None:
-        return None, ("not below a kind folder (000004)",)
+        return None, ("not below a kind folder (000051)",)
     prefix, _, below = kind
     if len(below.parts) != 3:
         return None, ("must be <area>/<topic>/<file> below the kind folder (000004)",)
@@ -289,7 +339,10 @@ def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[st
         *(() if FILE_NAME.match(path.name) else ("file name breaks 000016",)),
         *(f"folder {f!r} breaks 000005" for f in below.parts[:2] if not FOLDER.match(f)),
     )
-    parsed = parse_front_matter(source(path))
+    try:
+        parsed = parse_front_matter(source(path))
+    except FrontMatterError as error:
+        return None, (*errors, f"front matter: {error} (000009)")
     if parsed is None:
         return None, (*errors, "no front matter (000009)")
     meta, keys, body = parsed
@@ -351,6 +404,26 @@ def _text(data: Mapping[str, object], key: str, default: str) -> str:
     return value
 
 
+def _forge(data: Mapping[str, object], default: str) -> str:
+    """Return the key `forge` of `spezi.toml` (§000078).
+
+    Args:
+        data: The table.
+        default: The value without the key.
+
+    Returns:
+        `github`, `gitlab` or `codeberg`.
+
+    Raises:
+        ConfigError: The value is not one of the forges.
+    """
+    match _text(data, "forge", default):
+        case str(forge) if forge in FORGES:
+            return forge
+        case _:
+            raise ConfigError(f"spezi.toml: forge must be {', '.join(FORGES)}")
+
+
 def _texts(data: Mapping[str, object], key: str, default: tuple[str, ...]) -> tuple[str, ...]:
     """Return a key of `spezi.toml` that holds a list of strings.
 
@@ -408,7 +481,34 @@ def _upstream(data: Mapping[str, object]) -> Mapping[str, Mapping[str, object]]:
     tables = cast("Mapping[str, object]", value) if isinstance(value, dict) else None
     if tables is None or not all(isinstance(t, dict) for t in tables.values()):
         raise ConfigError('spezi.toml: upstream must hold one table [upstream."<repo>"] each')
-    return cast("Mapping[str, Mapping[str, object]]", tables)
+    found = cast("Mapping[str, Mapping[str, object]]", tables)
+    match next(
+        ((repo, key) for repo, table in found.items() for key in table if key not in REPO_KEYS),
+        None,
+    ):
+        case (repo, key):
+            raise ConfigError(f'spezi.toml: unknown key {key} in [upstream."{repo}"]')
+        case None:
+            return found
+
+
+def _known(data: Mapping[str, object]) -> Mapping[str, object]:
+    """Return the table of `spezi.toml` when each key of its top level is known (§000078).
+
+    Args:
+        data: The whole file.
+
+    Returns:
+        The same table.
+
+    Raises:
+        ConfigError: A key is unknown.
+    """
+    match next((key for key in data if key not in TOP_KEYS), None):
+        case str(key):
+            raise ConfigError(f"spezi.toml: unknown key {key}")
+        case None:
+            return data
 
 
 def _features(data: Mapping[str, object]) -> Mapping[str, bool]:
@@ -469,12 +569,12 @@ def read_config(path: Path) -> Config:
     Returns:
         The settings.
     """
-    data = _load_toml(path)
+    data = _known(_load_toml(path))
     default = Config()
     upstream = _upstream(data)
     return Config(
         base_ref=_text(data, "base_ref", default.base_ref),
-        forge=_text(data, "forge", default.forge),
+        forge=_forge(data, default.forge),
         code_dirs=_texts(data, "code_dirs", default.code_dirs),
         code_suffixes=frozenset(
             _texts(data, "code_suffixes", tuple(sorted(default.code_suffixes)))
@@ -565,7 +665,7 @@ class Project:
             if p.is_file() and not hidden(p.relative_to(self.specs_dir))
         )
         top = tuple(
-            f"specs/{p.name}: specs/ holds only rules and README.md (000004)"
+            f"specs/{p.name}: specs/ holds only rules and README.md (000051)"
             for p in files
             if p.parent == self.specs_dir and p.name != "README.md"
         )
@@ -574,10 +674,18 @@ class Project:
             for p in files
             if p.parent != self.specs_dir and p.suffix == ".md"
         )
+        loose = tuple(
+            f"specs/{p.relative_to(self.specs_dir).as_posix()}: not below a kind folder (000051)"
+            for p in files
+            if p.parent != self.specs_dir
+            and p.suffix != ".md"
+            and kind_of(p.relative_to(self.specs_dir)) is None
+        )
         return (
             tuple(spec for _, (spec, _) in parsed if spec),
             (
                 *top,
+                *loose,
                 *(
                     f"specs/{p.relative_to(self.specs_dir)}: {e}"
                     for p, (_, errors) in parsed
