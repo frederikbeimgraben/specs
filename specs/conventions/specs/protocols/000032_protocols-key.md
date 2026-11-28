@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
+  - src/spezi/check.py
 scope:
   - specs/
 ---
@@ -20,4 +20,4 @@ not have the key `protocols`. Each entry must name a protocol spec that is in fo
 Reason: A reader of a rule finds the exact format. A tool finds every rule that a change of a
 format affects.
 
-Test: `specs check` checks every entry of `protocols`.
+Test: `spezi check` checks every entry of `protocols`.

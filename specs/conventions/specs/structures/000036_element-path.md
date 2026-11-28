@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
-  - src/specs_kit/sections.py
+  - src/spezi/check.py
+  - src/spezi/sections.py
 scope:
   - specs/
 ---
@@ -22,4 +22,4 @@ folders, in `implementation`.
 Reason: A reader goes from the diagram to the code in one step. A moved file breaks the check,
 so the diagram cannot point to old code.
 
-Test: `specs check` checks that each path exists. A review checks `implementation`.
+Test: `spezi check` checks that each path exists. A review checks `implementation`.

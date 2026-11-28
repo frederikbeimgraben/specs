@@ -1,7 +1,7 @@
 [project]
-name = "specs"
+name = "spezi-kit"
 version = "0.1.0"
-description = "Check and manage the specs of a project: the specs command and its MCP server."
+description = "Check and manage the specs of a project: the spezi command and its MCP server."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -14,7 +14,8 @@ dependencies = [
 ]
 
 [project.scripts]
-specs = "specs_kit.cli:main"
+spezi = "spezi.cli:main"
+specs = "spezi.cli:main"
 
 [build-system]
 requires = ["setuptools>=69"]
@@ -24,7 +25,7 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-specs_kit = ["data/*", "data/editors/zed/*", "data/editors/zed/src/*"]
+spezi = ["data/*", "data/editors/zed/*", "data/editors/zed/src/*"]
 
 [tool.ruff]
 target-version = "py313"

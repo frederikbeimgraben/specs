@@ -1,4 +1,4 @@
-"""Tests of `specs install` (§000083) and of `specs.lock` (§000082)."""
+"""Tests of `specs install` (§000083) and of `spezi.lock` (§000082)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 from conftest import Kit
 
-COPY = "specs/.upstream/github.com/frederikbeimgraben/specs"
+COPY = "specs/.upstream/github.com/frederikbeimgraben/spezi"
 RULE = f"{COPY}/workflow/specs/process/000001_precedence.md"
 
 
@@ -37,7 +37,7 @@ def test_install_restores_a_changed_copy(kit: Kit, project: Path) -> None:
     path.write_text(before + "More text.\n", encoding="utf-8")
     checked = kit.run(project, "check", "--raw")
     assert checked.code == 1
-    assert "does not agree with its hash in specs.lock" in checked.out
+    assert "does not agree with its hash in spezi.lock" in checked.out
     result = kit.run(project, "install", "--raw")
     assert result.code == 0, result.out + result.err
     assert f"M {RULE}" in result.out
@@ -45,7 +45,7 @@ def test_install_restores_a_changed_copy(kit: Kit, project: Path) -> None:
 
 
 def test_install_loads_a_missing_copy(kit: Kit, project: Path) -> None:
-    """`specs install` loads a copy that does not exist at the commit of `specs.lock`."""
+    """`specs install` loads a copy that does not exist at the commit of `spezi.lock`."""
     shutil.rmtree(project / "specs/.upstream")
     result = kit.run(project, "install", "--raw")
     assert result.code == 0, result.out + result.err
@@ -54,11 +54,11 @@ def test_install_loads_a_missing_copy(kit: Kit, project: Path) -> None:
 
 def test_install_writes_missing_kit_files(kit: Kit, project: Path) -> None:
     """`specs install` writes a missing template, CI file and `CLAUDE.md`."""
-    for name in ("specs/.templates/TEMPLATE.md", ".github/workflows/specs.yml", "CLAUDE.md"):
+    for name in ("specs/.templates/TEMPLATE.md", ".github/workflows/spezi.yml", "CLAUDE.md"):
         (project / name).unlink()
     result = kit.run(project, "install", "--raw")
     assert result.code == 0, result.out + result.err
-    for name in ("specs/.templates/TEMPLATE.md", ".github/workflows/specs.yml", "CLAUDE.md"):
+    for name in ("specs/.templates/TEMPLATE.md", ".github/workflows/spezi.yml", "CLAUDE.md"):
         assert f"A {name}" in result.out
 
 
@@ -77,7 +77,7 @@ def test_install_stops_for_a_broken_mcp_file(kit: Kit, project: Path) -> None:
     path.write_text("{broken\n", encoding="utf-8")
     result = kit.run(project, "install", "--raw")
     assert result.code == 1, result.out + result.err
-    assert "specs: .mcp.json: no valid JSON:" in result.err
+    assert "spezi: .mcp.json: no valid JSON:" in result.err
     assert "Traceback" not in result.err
     assert path.read_text(encoding="utf-8") == "{broken\n"
 
@@ -88,5 +88,5 @@ def test_install_stops_for_mcp_servers_that_are_no_object(kit: Kit, project: Pat
     path.write_text('{"mcpServers": []}\n', encoding="utf-8")
     result = kit.run(project, "install", "--raw")
     assert result.code == 1, result.out + result.err
-    assert "specs: .mcp.json: mcpServers is not an object" in result.err
+    assert "spezi: .mcp.json: mcpServers is not an object" in result.err
     assert path.read_text(encoding="utf-8") == '{"mcpServers": []}\n'

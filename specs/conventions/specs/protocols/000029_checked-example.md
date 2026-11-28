@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
-  - src/specs_kit/check.py
-  - src/specs_kit/sections.py
+  - src/spezi/check.py
+  - src/spezi/sections.py
 scope:
   - specs/
 ---
@@ -21,4 +21,4 @@ other code blocks, for example the headers of a request in an `http` block.
 Reason: A receiver copies the example first. An example that CI checks cannot drift from the
 schema.
 
-Test: `specs check` validates every `json` code block of `## Example`.
+Test: `spezi check` validates every `json` code block of `## Example`.

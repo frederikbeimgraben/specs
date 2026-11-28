@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import subprocess
 
-from specs_kit.migrations import MIGRATIONS
+from spezi.migrations import MIGRATIONS
 
 
 def parent(commit: str) -> str:

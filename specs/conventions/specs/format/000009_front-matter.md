@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
-  - src/specs_kit/check.py
+  - src/spezi/check.py
 scope:
   - specs/
 ---
@@ -22,7 +22,7 @@ these keys, in this order:
 | `title` | string | The title of the rule. It is the same text as the `#` title. |
 | `kind` | enum | `functional`, `non-functional`, `protocol`, `structure`, `style`, `convention`, `workflow`, `agent` or `decision` (000004). |
 | `status` | enum | `draft`, `approved`, `replaced` or `removed` (000010). |
-| `owner` | string | The login on the forge of `specs.toml` (GitHub, GitLab or Codeberg) of the person who approves the rule. |
+| `owner` | string | The login on the forge of `spezi.toml` (GitHub, GitLab or Codeberg) of the person who approves the rule. |
 | `updated` | date | The date of the last change, as `YYYY-MM-DD`. |
 | `replaced_by` | list of strings | Only with `status: replaced`: the numbers of the rules of the same repository that replace this rule (000010). |
 | `replaces` | list of strings | Optional, only with `status: draft` or `approved`: the rules that this rule replaces, in the short form of 000047. |
@@ -42,4 +42,4 @@ Reason: Every Markdown tool reads standard front matter. One fixed set of keys l
 read every spec. The quotes keep the leading zeros, because YAML reads `000024` as a number.
 The short form stays correct when a rule moves to a different folder (000014).
 
-Test: `specs check` checks the keys, their order and their values.
+Test: `spezi check` checks the keys, their order and their values.

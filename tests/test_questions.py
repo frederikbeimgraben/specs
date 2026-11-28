@@ -9,13 +9,13 @@ import pytest
 from conftest import RULES_REPO, Kit, git, write_rule
 from script import PROPOSAL, Script, inside
 
-from specs_kit.ask import Cancelled
-from specs_kit.kit import add, init, update
-from specs_kit.project import Project
+from spezi.ask import Cancelled
+from spezi.kit import add, init, update
+from spezi.project import Project
 
 
 def _config(root: Path) -> dict[str, object]:
-    """Return the parsed `specs.toml`.
+    """Return the parsed `spezi.toml`.
 
     Args:
         root: The root of the project.
@@ -23,7 +23,7 @@ def _config(root: Path) -> dict[str, object]:
     Returns:
         The settings.
     """
-    return tomllib.loads((root / "specs.toml").read_text(encoding="utf-8"))
+    return tomllib.loads((root / "spezi.toml").read_text(encoding="utf-8"))
 
 
 def _code(root: Path, kit: Kit) -> None:
@@ -54,7 +54,7 @@ def test_init_takes_the_proposals_without_a_terminal(kit: Kit, empty: Path) -> N
 
 
 def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
-    """Init writes the answers to specs.toml and the login to git config --local."""
+    """Init writes the answers to spezi.toml and the login to git config --local."""
     _code(empty, kit)
     script = Script(
         [
@@ -78,7 +78,7 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
     assert config["features"]["ci"] is True  # type: ignore[index]
     assert git(empty, "config", "--local", "gitlab.user", env=kit.env).strip() == "someone"
     assert not (empty / ".mcp.json").exists()
-    assert "# The base branch." in (empty / "specs.toml").read_text(encoding="utf-8")
+    assert "# The base branch." in (empty / "spezi.toml").read_text(encoding="utf-8")
 
 
 def test_init_cancel_changes_no_file(kit: Kit, empty: Path) -> None:
@@ -86,7 +86,7 @@ def test_init_cancel_changes_no_file(kit: Kit, empty: Path) -> None:
     script = Script(["github", PROPOSAL, "", PROPOSAL, False])
     with inside(kit.env, empty), pytest.raises(Cancelled):
         init(empty, None, script)
-    assert not (empty / "specs.toml").exists()
+    assert not (empty / "spezi.toml").exists()
 
 
 def test_add_asks_for_the_folders(kit: Kit, project: Path) -> None:

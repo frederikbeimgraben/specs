@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
-  - src/specs_kit/sections.py
+  - src/spezi/check.py
+  - src/spezi/sections.py
 scope:
   - specs/
 ---
@@ -21,5 +21,5 @@ diagram must have one row. `Meaning` must tell in one sentence what the element 
 Reason: The table is the text alternative of the diagram. A screen reader, a search and an
 agent read the table when they cannot read the drawing.
 
-Test: `specs check`: each name of the table occurs in the diagram. For `class`,
+Test: `spezi check`: each name of the table occurs in the diagram. For `class`,
 `state`, `sequence` and `entity` it also finds each element of the diagram in the table.

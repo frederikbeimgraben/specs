@@ -1,6 +1,6 @@
 ---
 id: "000069"
-title: specs new makes a new spec from its template
+title: spezi new makes a new spec from its template
 kind: functional
 status: approved
 owner: frederikbeimgraben
@@ -12,14 +12,14 @@ tests:
   - tests/test_new.py:test_new_needs_a_scope
   - tests/test_new.py:test_new_skips_the_numbers_of_the_copies
 implementation:
-  - src/specs_kit/new.py
+  - src/spezi/new.py
 scope:
-  - src/specs_kit/
+  - src/spezi/
 ---
 
-# specs new makes a new spec from its template
+# spezi new makes a new spec from its template
 
-`specs new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` must
+`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` must
 copy the template of `<kind>` from `specs/.templates/` to
 `specs/<kind folder>/<area>/<topic>/<number>_<name>.md` and print the path. `<kind>` is the kind
 or its letter (000004). The number must be the highest number of `specs/` and of `base_ref` plus

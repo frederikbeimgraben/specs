@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
-  - src/specs_kit/sections.py
+  - src/spezi/check.py
+  - src/spezi/sections.py
 scope:
   - specs/
 ---
@@ -32,4 +32,4 @@ Reason: GitHub and most Markdown tools draw a Mermaid block without a plug-in. T
 text, so a diff shows each change. Styles make the diagram unclear in dark and high contrast
 modes.
 
-Test: `specs check` checks the block, its first line and the styles.
+Test: `spezi check` checks the block, its first line and the styles.

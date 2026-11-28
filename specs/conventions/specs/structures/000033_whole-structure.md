@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
-  - src/specs_kit/sections.py
+  - src/spezi/check.py
+  - src/spezi/sections.py
   - specs/.templates/TEMPLATE-structure.md
 scope:
   - specs/
@@ -33,4 +33,4 @@ property of the code must agree with the diagram.
 Reason: The rule ID then points to one diagram. The reader sees the structure and the rule
 that binds it in one file.
 
-Test: `specs check` checks the headings and their order.
+Test: `spezi check` checks the headings and their order.

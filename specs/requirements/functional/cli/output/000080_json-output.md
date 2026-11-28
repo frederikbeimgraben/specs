@@ -1,6 +1,6 @@
 ---
 id: "000080"
-title: specs prints its data as JSON
+title: spezi prints its data as JSON
 kind: functional
 status: approved
 owner: frederikbeimgraben
@@ -13,15 +13,15 @@ tests:
   - tests/test_json.py:test_a_stop_gives_an_error_object
   - tests/test_json.py:test_raw_and_json_exclude_each_other
 implementation:
-  - src/specs_kit/data.py
-  - src/specs_kit/cli.py
+  - src/spezi/data.py
+  - src/spezi/cli.py
 scope:
-  - src/specs_kit/
+  - src/spezi/
 ---
 
-# specs prints its data as JSON
+# spezi prints its data as JSON
 
-With the option `--json` after the command, each command of `specs` except `mcp` and `lsp` must
+With the option `--json` after the command, each command of `spezi` except `mcp` and `lsp` must
 print its data as JSON, indented with two spaces, also on a terminal. `--json` and `--raw`
 (000076) must not go together.
 

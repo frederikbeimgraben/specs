@@ -6,13 +6,13 @@ from pathlib import Path
 
 from conftest import Kit
 
-LONG = "github.com/frederikbeimgraben/specs:W/specs/process/000001"
+LONG = "github.com/frederikbeimgraben/spezi:W/specs/process/000001"
 
 
 def test_resolve_prints_the_long_form(kit: Kit, project: Path) -> None:
     """`specs resolve` prints the long form for a short and a long form."""
     assert (
-        kit.run(project, "resolve", "github.com/frederikbeimgraben/specs:000001", "--raw").out
+        kit.run(project, "resolve", "github.com/frederikbeimgraben/spezi:000001", "--raw").out
         == f"{LONG}\n"
     )
     assert kit.run(project, "resolve", LONG, "--raw").out == f"{LONG}\n"
@@ -29,7 +29,7 @@ def test_show_prints_the_full_text(kit: Kit, project: Path) -> None:
     """`specs show` prints the full text of the spec file."""
     path = (
         project
-        / "specs/.upstream/github.com/frederikbeimgraben/specs/workflow/specs/process"
+        / "specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/specs/process"
         / "000001_precedence.md"
     )
     assert kit.run(project, "show", LONG, "--raw").out == path.read_text(encoding="utf-8")
@@ -44,7 +44,7 @@ def test_list_prints_one_line_for_each_rule(kit: Kit, project: Path) -> None:
     """`specs list` prints kind letter, short form, status and title, separated by tabs."""
     lines = kit.run(project, "list", "--raw").out.splitlines()
     assert (
-        "W\tgithub.com/frederikbeimgraben/specs:000001\tapproved\tA spec wins over other "
+        "W\tgithub.com/frederikbeimgraben/spezi:000001\tapproved\tA spec wins over other "
         "guidance" in lines
     )
     assert all(len(line.split("\t")) == 4 for line in lines)

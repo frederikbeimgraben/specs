@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
+  - src/spezi/check.py
 scope:
   - specs/
 ---
@@ -17,4 +17,4 @@ Folder names must use only `a` to `z`, `0` to `9` and `-`.
 
 Reason: The folder names become part of the rule IDs, where `/` is the separator.
 
-Test: `specs check`: every area and topic folder matches `^[a-z0-9]+(-[a-z0-9]+)*$`.
+Test: `spezi check`: every area and topic folder matches `^[a-z0-9]+(-[a-z0-9]+)*$`.

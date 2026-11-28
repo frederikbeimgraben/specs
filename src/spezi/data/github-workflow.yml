@@ -1,0 +1,19 @@
+name: spezi
+
+on:
+  pull_request:
+  push:
+    branches: [{branch}]
+
+permissions:
+  contents: read
+
+jobs:
+  spezi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - run: nix run github:frederikbeimgraben/spezi/{ref} -- check

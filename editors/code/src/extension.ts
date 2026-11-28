@@ -1,8 +1,8 @@
 /**
- * The VS Code extension of the specs kit: it starts `specs lsp` (§000088, §000089).
+ * The VS Code extension of the spezi kit: it starts `spezi lsp` (§000088, §000089).
  *
- * The extension starts `specs` from PATH. When PATH has no `specs`, it starts the command in
- * `.vscode/specs/server.json`, which `specs setup-ide code` writes.
+ * The extension starts `spezi` from PATH. When PATH has no `spezi`, it starts the command in
+ * `.vscode/spezi/server.json`, which `spezi setup-ide code` writes.
  */
 
 import { accessSync, constants, readFileSync } from "node:fs";
@@ -15,7 +15,7 @@ import {
   type ServerOptions,
 } from "vscode-languageclient/node";
 
-/** The content of `.vscode/specs/server.json`. */
+/** The content of `.vscode/spezi/server.json`. */
 interface Server {
   readonly command: string;
   readonly suffixes: readonly string[];
@@ -39,7 +39,7 @@ const runs = (path: string): boolean => {
 };
 
 /**
- * Return the path of `specs` on PATH.
+ * Return the path of `spezi` on PATH.
  *
  * @returns The path, or undefined.
  */
@@ -47,7 +47,7 @@ const onPath = (): string | undefined =>
   (process.env.PATH ?? "")
     .split(delimiter)
     .filter((folder) => folder !== "")
-    .map((folder) => join(folder, "specs"))
+    .map((folder) => join(folder, "spezi"))
     .find(runs);
 
 /**
@@ -58,9 +58,9 @@ const onPath = (): string | undefined =>
  */
 const server = (root: string): Server => {
   try {
-    return JSON.parse(readFileSync(join(root, ".vscode", "specs", "server.json"), "utf8")) as Server;
+    return JSON.parse(readFileSync(join(root, ".vscode", "spezi", "server.json"), "utf8")) as Server;
   } catch {
-    return { command: "specs", suffixes: [] };
+    return { command: "spezi", suffixes: [] };
   }
 };
 
@@ -92,7 +92,7 @@ export const activate = async (context: ExtensionContext): Promise<void> => {
     options: { cwd: root },
   };
   const clientOptions: LanguageClientOptions = { documentSelector: selector(config.suffixes) };
-  client = new LanguageClient("specs", "specs", serverOptions, clientOptions);
+  client = new LanguageClient("spezi", "spezi", serverOptions, clientOptions);
   context.subscriptions.push(client);
   await client.start();
 };

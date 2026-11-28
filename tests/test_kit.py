@@ -7,14 +7,14 @@ from pathlib import Path
 
 from conftest import RULES_REPO, Kit, git, write_rule
 
-from specs_kit.kit import copy_rules, write_repo
-from specs_kit.project import Project
+from spezi.kit import copy_rules, write_repo
+from spezi.project import Project
 
-KIT = "specs/.upstream/github.com/frederikbeimgraben/specs"
+KIT = "specs/.upstream/github.com/frederikbeimgraben/spezi"
 
 
 def _config(project: Path) -> dict[str, object]:
-    """Return the parsed `specs.toml` of a project.
+    """Return the parsed `spezi.toml` of a project.
 
     Args:
         project: The root of the project.
@@ -22,11 +22,11 @@ def _config(project: Path) -> dict[str, object]:
     Returns:
         The settings.
     """
-    return tomllib.loads((project / "specs.toml").read_text(encoding="utf-8"))
+    return tomllib.loads((project / "spezi.toml").read_text(encoding="utf-8"))
 
 
 def _lock(project: Path) -> dict[str, dict[str, object]]:
-    """Return the upstream tables of `specs.lock`.
+    """Return the upstream tables of `spezi.lock`.
 
     Args:
         project: The root of the project.
@@ -34,13 +34,13 @@ def _lock(project: Path) -> dict[str, dict[str, object]]:
     Returns:
         The tables by repository.
     """
-    value = tomllib.loads((project / "specs.lock").read_text(encoding="utf-8"))["upstream"]
+    value = tomllib.loads((project / "spezi.lock").read_text(encoding="utf-8"))["upstream"]
     assert isinstance(value, dict)
     return value
 
 
 def _upstream(project: Path) -> dict[str, dict[str, object]]:
-    """Return the upstream tables of `specs.toml`.
+    """Return the upstream tables of `spezi.toml`.
 
     Args:
         project: The root of the project.
@@ -56,24 +56,24 @@ def _upstream(project: Path) -> dict[str, dict[str, object]]:
 def test_init_writes_the_kit_files(kit: Kit, project: Path) -> None:
     """`specs init` writes the settings, the kit copy, templates, skills, CI and MCP files."""
     assert _config(project)["forge"] == "github"
-    assert _upstream(project)["github.com/frederikbeimgraben/specs"]["ref"] == "main"
-    assert _lock(project)["github.com/frederikbeimgraben/specs"]["commit"] == kit.rev
+    assert _upstream(project)["github.com/frederikbeimgraben/spezi"]["ref"] == "main"
+    assert _lock(project)["github.com/frederikbeimgraben/spezi"]["commit"] == kit.rev
     for name in (
         f"{KIT}/workflow/specs/process/000001_precedence.md",
         "specs/.templates/TEMPLATE.md",
-        ".claude/skills/spec-write/SKILL.md",
-        ".github/workflows/specs.yml",
+        ".claude/skills/spezi-write/SKILL.md",
+        ".github/workflows/spezi.yml",
         ".mcp.json",
         ".envrc",
         "specs/README.md",
-        "specs.lock",
+        "spezi.lock",
     ):
         assert (project / name).is_file(), name
 
 
 def test_init_ci_runs_on_the_base_branch(kit: Kit, project: Path) -> None:
     """The CI job runs for a push to the branch of `base_ref`."""
-    assert "branches: [main]" in (project / ".github/workflows/specs.yml").read_text(
+    assert "branches: [main]" in (project / ".github/workflows/spezi.yml").read_text(
         encoding="utf-8"
     )
 
@@ -84,7 +84,7 @@ def test_init_keeps_an_existing_flake(kit: Kit, empty: Path) -> None:
     result = kit.run(empty, "init", "--forge", "github", "--raw")
     assert result.code == 0, result.out + result.err
     assert (empty / "flake.nix").read_text(encoding="utf-8") == before
-    assert f'inputs.specs.url = "github:frederikbeimgraben/specs/{kit.rev}";' in result.out
+    assert f'inputs.spezi.url = "github:frederikbeimgraben/spezi/{kit.rev}";' in result.out
 
 
 def test_init_takes_the_forge_from_the_remote(kit: Kit, empty: Path) -> None:
@@ -93,14 +93,14 @@ def test_init_takes_the_forge_from_the_remote(kit: Kit, empty: Path) -> None:
     result = kit.run(empty, "init", "--raw")
     assert result.code == 0, result.out + result.err
     assert _config(empty)["forge"] == "codeberg"
-    assert (empty / ".forgejo/workflows/specs.yml").is_file()
+    assert (empty / ".forgejo/workflows/spezi.yml").is_file()
 
 
 def test_init_stops_when_the_kit_is_there(kit: Kit, project: Path) -> None:
-    """`specs init` stops with an error when `specs.toml` exists."""
+    """`specs init` stops with an error when `spezi.toml` exists."""
     result = kit.run(project, "init", "--forge", "github", "--raw")
     assert result.code == 1
-    assert "specs.toml exists" in result.err
+    assert "spezi.toml exists" in result.err
 
 
 def test_add_copies_the_rules(kit: Kit, project: Path) -> None:
@@ -126,11 +126,11 @@ def test_add_with_include_copies_only_the_folders(kit: Kit, project: Path) -> No
 
 
 def test_add_stops_for_a_repository_in_the_settings(kit: Kit, project: Path) -> None:
-    """`specs add` stops with an error when the repository is in `specs.toml` already."""
+    """`specs add` stops with an error when the repository is in `spezi.toml` already."""
     assert kit.run(project, "add", RULES_REPO, kit.rules_rev, "--raw").code == 0
     result = kit.run(project, "add", RULES_REPO, kit.rules_rev, "--raw")
     assert result.code == 1
-    assert "is in specs.toml" in result.err
+    assert "is in spezi.toml" in result.err
 
 
 def test_update_replaces_the_copy_and_keeps_include(kit: Kit, project: Path) -> None:
@@ -159,17 +159,17 @@ def test_update_replaces_the_copy_and_keeps_include(kit: Kit, project: Path) -> 
 
 
 def test_update_stops_for_an_unknown_repository(kit: Kit, project: Path) -> None:
-    """`specs update` stops with an error when the repository is not in `specs.toml`."""
+    """`specs update` stops with an error when the repository is not in `spezi.toml`."""
     result = kit.run(project, "update", RULES_REPO, kit.rules_rev, "--raw")
     assert result.code == 1
-    assert "is not in specs.toml" in result.err
+    assert "is not in spezi.toml" in result.err
 
 
 def test_update_of_the_kit_runs_the_check(kit: Kit, project: Path) -> None:
     """`specs update` of the kit replaces the kit files and prints the report of the check."""
     result = kit.run(project, "update", "kit", kit.rev, "--raw")
     assert result.code == 0, result.out + result.err
-    assert f"updated github.com/frederikbeimgraben/specs to {kit.rev}" in result.out
+    assert f"updated github.com/frederikbeimgraben/spezi to {kit.rev}" in result.out
     assert "0 specs, 0 errors" in result.out
 
 
@@ -200,7 +200,7 @@ def test_update_without_arguments_updates_each_repository(kit: Kit, project: Pat
         assert _upstream(project)[RULES_REPO]["ref"] == "main"
         assert _lock(project)[RULES_REPO]["commit"] == rev
         assert f"updated {RULES_REPO} to {rev}" in result.out
-        assert f"updated github.com/frederikbeimgraben/specs to {kit.rev}" in result.out
+        assert f"updated github.com/frederikbeimgraben/spezi to {kit.rev}" in result.out
     finally:
         git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
 
@@ -208,7 +208,7 @@ def test_update_without_arguments_updates_each_repository(kit: Kit, project: Pat
 def test_update_reads_a_ref_without_spaces(kit: Kit, project: Path) -> None:
     """`specs update` sets the ref of a table that writes `ref="..."` without spaces."""
     assert kit.run(project, "add", RULES_REPO, kit.rules_rev).code == 0
-    path = project / "specs.toml"
+    path = project / "spezi.toml"
     text = path.read_text(encoding="utf-8")
     path.write_text(text.replace(f'ref = "{kit.rules_rev}"', f'ref="{kit.rules_rev}"'))
     result = kit.run(project, "update", RULES_REPO, "main", "--raw")
@@ -218,7 +218,7 @@ def test_update_reads_a_ref_without_spaces(kit: Kit, project: Path) -> None:
 
 def test_update_writes_include_once(tmp_path: Path) -> None:
     """A new `include` replaces the `include` of the table and does not add a second key."""
-    (tmp_path / "specs.toml").write_text(
+    (tmp_path / "spezi.toml").write_text(
         f'[upstream."{RULES_REPO}"]\nref = "v1"\ninclude = ["style/"]\n', encoding="utf-8"
     )
     write_repo(Project.open(tmp_path), RULES_REPO, "v2", ("agents", "style"))

@@ -9,13 +9,13 @@ import pytest
 from conftest import RULES_REPO, Kit
 from script import Script, inside
 
-from specs_kit.ask import Cancelled
-from specs_kit.configure import configure
-from specs_kit.project import Project
+from spezi.ask import Cancelled
+from spezi.configure import configure
+from spezi.project import Project
 
 
 def _config(root: Path) -> dict[str, object]:
-    """Return the parsed `specs.toml`.
+    """Return the parsed `spezi.toml`.
 
     Args:
         root: The root of the project.
@@ -23,7 +23,7 @@ def _config(root: Path) -> dict[str, object]:
     Returns:
         The settings.
     """
-    return tomllib.loads((root / "specs.toml").read_text(encoding="utf-8"))
+    return tomllib.loads((root / "spezi.toml").read_text(encoding="utf-8"))
 
 
 def test_configure_sets_a_switch(kit: Kit, project: Path) -> None:
@@ -36,20 +36,20 @@ def test_configure_sets_a_switch(kit: Kit, project: Path) -> None:
 
 
 def test_configure_keeps_the_comments(kit: Kit, project: Path) -> None:
-    """Configure changes only the value and keeps the comments of specs.toml."""
-    before = (project / "specs.toml").read_text(encoding="utf-8")
+    """Configure changes only the value and keeps the comments of spezi.toml."""
+    before = (project / "spezi.toml").read_text(encoding="utf-8")
     assert kit.run(project, "configure", "code_dirs", "src,lib").code == 0
-    after = (project / "specs.toml").read_text(encoding="utf-8")
+    after = (project / "spezi.toml").read_text(encoding="utf-8")
     assert after == before.replace("code_dirs = []", 'code_dirs = ["src", "lib"]')
 
 
 def test_configure_stops_for_a_bad_value(kit: Kit, project: Path) -> None:
     """Configure stops with an error for a value of a different form."""
-    before = (project / "specs.toml").read_text(encoding="utf-8")
+    before = (project / "spezi.toml").read_text(encoding="utf-8")
     result = kit.run(project, "configure", "max_elements", "zero", "--raw")
     assert result.code == 1
     assert "whole number" in result.err
-    assert (project / "specs.toml").read_text(encoding="utf-8") == before
+    assert (project / "spezi.toml").read_text(encoding="utf-8") == before
 
 
 def test_configure_stops_for_claude_without_agents(kit: Kit, project: Path) -> None:
@@ -78,21 +78,21 @@ def test_the_menu_saves_the_changes(kit: Kit, project: Path) -> None:
 
 def test_the_menu_discards_the_changes(kit: Kit, project: Path) -> None:
     """Discard asks once and changes no file."""
-    before = (project / "specs.toml").read_text(encoding="utf-8")
+    before = (project / "spezi.toml").read_text(encoding="utf-8")
     script = Script(["features.ci = true", "discard", True])
     with inside(kit.env, project), pytest.raises(Cancelled):
         configure(Project.open(project), script)
-    assert (project / "specs.toml").read_text(encoding="utf-8") == before
+    assert (project / "spezi.toml").read_text(encoding="utf-8") == before
 
 
 def test_remove_deletes_the_copy(kit: Kit, project: Path) -> None:
-    """Remove deletes the table, the copy and the entry in specs.lock."""
+    """Remove deletes the table, the copy and the entry in spezi.lock."""
     assert kit.run(project, "add", RULES_REPO, "main").code == 0
     result = kit.run(project, "remove", RULES_REPO, "--raw")
     assert result.code == 0, result.out + result.err
     assert RULES_REPO not in _config(project)["upstream"]  # type: ignore[operator]
     assert not (project / "specs/.upstream/example.com").exists()
-    assert RULES_REPO not in (project / "specs.lock").read_text(encoding="utf-8")
+    assert RULES_REPO not in (project / "spezi.lock").read_text(encoding="utf-8")
 
 
 def test_remove_stops_for_the_kit(kit: Kit, project: Path) -> None:

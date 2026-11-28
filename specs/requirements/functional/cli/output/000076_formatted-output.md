@@ -1,6 +1,6 @@
 ---
 id: "000076"
-title: specs formats its output for a terminal
+title: spezi formats its output for a terminal
 kind: functional
 status: approved
 owner: frederikbeimgraben
@@ -9,15 +9,15 @@ tests:
   - tests/test_output.py:test_terminal_output_has_color
   - tests/test_output.py:test_raw_output_has_no_color
 implementation:
-  - src/specs_kit/cli.py
-  - src/specs_kit/view.py
+  - src/spezi/cli.py
+  - src/spezi/view.py
 scope:
-  - src/specs_kit/
+  - src/spezi/
 ---
 
-# specs formats its output for a terminal
+# spezi formats its output for a terminal
 
-When stdout is a terminal, each command of `specs` except `mcp` and `lsp` must print a formatted
+When stdout is a terminal, each command of `spezi` except `mcp` and `lsp` must print a formatted
 output:
 
 | Command | Formatted output |

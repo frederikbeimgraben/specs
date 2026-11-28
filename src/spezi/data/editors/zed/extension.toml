@@ -1,0 +1,11 @@
+id = "spezi"
+name = "spezi"
+version = "0.1.0"
+schema_version = 1
+authors = ["frederikbeimgraben"]
+description = "The language server of the spezi kit: spezi lsp."
+repository = "https://github.com/frederikbeimgraben/spezi"
+
+[language_servers.spezi]
+name = "spezi"
+languages = [{languages}]

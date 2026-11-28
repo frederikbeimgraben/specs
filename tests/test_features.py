@@ -1,4 +1,4 @@
-"""Tests of the switches in `[features]` of `specs.toml` (§000084)."""
+"""Tests of the switches in `[features]` of `spezi.toml` (§000084)."""
 
 from __future__ import annotations
 
@@ -8,13 +8,13 @@ from conftest import Kit
 
 
 def _switch(project: Path, **switches: bool) -> None:
-    """Set switches of `[features]` in `specs.toml`.
+    """Set switches of `[features]` in `spezi.toml`.
 
     Args:
         project: The root of the project.
         **switches: The new value of each switch.
     """
-    path = project / "specs.toml"
+    path = project / "spezi.toml"
     text = path.read_text(encoding="utf-8")
     for name, value in switches.items():
         text = text.replace(f"\n{name} = true\n", f"\n{name} = {str(value).lower()}\n").replace(
@@ -25,8 +25,8 @@ def _switch(project: Path, **switches: bool) -> None:
 
 PARTS = (
     ".mcp.json",
-    ".claude/skills/spec-write/SKILL.md",
-    ".github/workflows/specs.yml",
+    ".claude/skills/spezi-write/SKILL.md",
+    ".github/workflows/spezi.yml",
     "AGENTS.md",
     "CLAUDE.md",
 )

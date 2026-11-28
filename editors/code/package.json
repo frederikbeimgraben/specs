@@ -1,13 +1,13 @@
 {
-  "name": "specs",
-  "displayName": "specs",
-  "description": "The language server of the specs kit: specs lsp.",
+  "name": "spezi",
+  "displayName": "spezi",
+  "description": "The language server of the spezi kit: spezi lsp.",
   "version": "0.1.0",
   "publisher": "frederikbeimgraben",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/frederikbeimgraben/specs"
+    "url": "https://github.com/frederikbeimgraben/spezi"
   },
   "engines": {
     "vscode": "^1.91.0"
@@ -16,6 +16,7 @@
     "Linters"
   ],
   "activationEvents": [
+    "workspaceContains:spezi.toml",
     "workspaceContains:specs.toml"
   ],
   "main": "./out/extension.js",
