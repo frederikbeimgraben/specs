@@ -1,8 +1,8 @@
-"""Tests of the references to rules and of migration 6 (spec 000017, 000081)."""
+"""Tests of the references to rules and of migration 7 (spec 000017, 000081)."""
 
 from __future__ import annotations
 
-from spezi.migrations.m0006_spec_references import _code, _markdown
+from spezi.migrations.m0007_spec_references import _code, _markdown
 from spezi.refs import (
     bad_references,
     bare_numbers,

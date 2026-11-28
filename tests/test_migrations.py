@@ -12,7 +12,7 @@ from conftest import RULES_REPO, Kit, git, write_rule
 
 from spezi.agents import BEGIN, END
 from spezi.changes import move_tree
-from spezi.migrations import m0005_spezi_name
+from spezi.migrations import m0005_spezi_name, m0006_clean_settings
 
 NEW_KIT = "github.com/frederikbeimgraben/spezi"
 OLD_KIT = "github.com/frederikbeimgraben/specs"
@@ -234,3 +234,30 @@ def test_migration_5_renames_the_flake_input(tmp_path: Path) -> None:
     nodes = json.loads((tmp_path / "flake.lock").read_text())["nodes"]
     assert nodes["root"]["inputs"] == {"nixpkgs": "nixpkgs", "spezi": "spezi"}
     assert nodes["spezi"]["locked"]["repo"] == "spezi" and "specs" not in nodes
+
+
+def test_migration_6_removes_the_comments_of_the_template(tmp_path: Path) -> None:
+    """Migration 6 removes each comment of an earlier template and keeps a comment of a person."""
+    (tmp_path / "spezi.toml").write_text(
+        "# Settings of the spezi command (000078). Each key is optional.\n"
+        "\n"
+        "# github, gitlab or codeberg.\n"
+        'forge = "github"\n'
+        "\n"
+        "# The highest count of elements in one structure diagram (spec 000037).\n"
+        "# Our diagrams are small.\n"
+        "max_elements = 25\n"
+        "\n"
+        "[features]\n"
+        "# The MCP server spezi in .mcp.json.\n"
+        "mcp = true\n",
+        encoding="utf-8",
+    )
+    m0006_clean_settings.project(tmp_path)
+    once = (tmp_path / "spezi.toml").read_text(encoding="utf-8")
+    assert once == (
+        'forge = "github"\n\n# Our diagrams are small.\nmax_elements = 25\n\n'
+        "[features]\nmcp = true\n"
+    )
+    m0006_clean_settings.project(tmp_path)
+    assert (tmp_path / "spezi.toml").read_text(encoding="utf-8") == once

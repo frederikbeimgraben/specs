@@ -1,45 +1,23 @@
-# Settings of the specs command (spec 000078). Each key is optional.
-
-# github, gitlab or codeberg.
 forge = "github"
 
-# The base branch. A spec number that this branch took after your branch left it is an error.
 base_ref = "origin/main"
 
-# The folders that hold code. The check finds a reference to a rule that does not exist.
 code_dirs = ["src"]
 
-# The file types of the code in code_dirs.
 code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"]
 
-# The highest count of elements in one structure diagram (spec 000037).
 max_elements = 25
 
-# The optional parts of the kit (spec 000084). true: specs install writes the part and keeps it.
-# false: specs install removes it. specs init and specs update also follow these switches.
 repo = "github.com/frederikbeimgraben/spezi"
 
 [features]
-# The MCP server specs in .mcp.json.
 mcp = true
-# The block with the rules for agents in AGENTS.md (spec 000079).
 agents = true
-# CLAUDE.md with the line @AGENTS.md. It needs agents = true.
 claude = true
-# The CI job, for example .github/workflows/specs.yml.
 ci = true
-# The skills .claude/skills/spezi-*.
 skills = true
-# flake.nix with a devShell with the command specs.
 flake = true
-# .envrc with use flake.
 envrc = true
-
-# The rules of a different repository, copied to specs/.upstream/<host>/<group>/.../<repo>/ (spec 000048).
-# ref is a tag, a branch or a commit. specs.lock holds the commit of the copy (spec 000082).
-# specs update resolves ref again, specs add adds a repository, specs install changes no ref.
-# include is optional: the folders below specs/ that the copy holds, for example ["style/python/"].
-# Without include, the copy holds all rules. specs add --include sets it.
 
 [upstream."github.com/frederikbeimgraben/spezi-python"]
 ref = "main"

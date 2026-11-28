@@ -18,7 +18,8 @@ from spezi.migrations import (
     m0003_agents_marker,
     m0004_specs_paths,
     m0005_spezi_name,
-    m0006_spec_references,
+    m0006_clean_settings,
+    m0007_spec_references,
 )
 from spezi.project import kit_rev
 
@@ -74,10 +75,16 @@ MIGRATIONS: tuple[Migration, ...] = (
         m0005_spezi_name.copy,
     ),
     Migration(
-        m0006_spec_references.COMMIT,
-        m0006_spec_references.DESCRIPTION,
-        m0006_spec_references.project,
-        m0006_spec_references.copy,
+        m0006_clean_settings.COMMIT,
+        m0006_clean_settings.DESCRIPTION,
+        m0006_clean_settings.project,
+        m0006_clean_settings.copy,
+    ),
+    Migration(
+        m0007_spec_references.COMMIT,
+        m0007_spec_references.DESCRIPTION,
+        m0007_spec_references.project,
+        m0007_spec_references.copy,
     ),
 )
 

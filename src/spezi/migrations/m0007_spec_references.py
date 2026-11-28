@@ -1,4 +1,4 @@
-"""Migration 6: write each reference to a rule as `(spec <ref>)` (spec 000017).
+"""Migration 7: write each reference to a rule as `(spec <ref>)` (spec 000017).
 
 The old kit wrote a reference in the code with a section sign before the short form, and a
 reference in a Markdown file as the bare rule number. The migration writes each of them as
