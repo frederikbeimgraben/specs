@@ -43,8 +43,9 @@ The index `specs/README.md`, the copies below `specs/.upstream/` and the templat
 `specs/.templates/` have no switch. `spezi init`, `spezi update` and `spezi install` must write
 or replace only the parts that are on. `spezi install` must remove each part that is off, as
 the table tells, and list each changed or deleted file (000077). `spezi update` must not change
-`flake.nix` when `flake` is off. When `ci` is off, no command must read or change
-`.gitlab-ci.yml`. `spezi check` must not check the block in `AGENTS.md` when `agents` is off.
+`flake.nix` when `flake` is off. When `ci` is off, a command must not stop because
+`.gitlab-ci.yml` has an `include` that is not a list. `spezi check` must not check the block in
+`AGENTS.md` when `agents` is off.
 
 `claude = true` with `agents = false` is an error of `spezi.toml` (000078), because `CLAUDE.md`
 only imports `AGENTS.md`. A key of `[features]` that is not in the table, or a value that is not
