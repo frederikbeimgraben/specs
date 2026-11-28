@@ -61,5 +61,6 @@ reportMatchNotExhaustive = "error"
 include = ["src", "tests"]
 
 [tool.pytest.ini_options]
+addopts = "-n auto"
 pythonpath = ["src", "tests"]
 testpaths = ["tests"]
