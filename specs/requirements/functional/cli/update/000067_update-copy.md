@@ -12,6 +12,7 @@ tests:
   - tests/test_kit.py:test_update_without_arguments_updates_each_repository
   - tests/test_kit.py:test_update_reads_a_ref_without_spaces
   - tests/test_kit.py:test_update_writes_include_once
+  - tests/test_transitive.py:test_update_with_recursive_adds_a_new_transitive_upstream
 implementation:
   - src/spezi/kit.py
   - src/spezi/cli.py

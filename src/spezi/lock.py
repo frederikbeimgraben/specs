@@ -28,16 +28,19 @@ class Locked:
     """The entry of one repository in `spezi.lock`.
 
     Attributes:
-        ref: The `ref` of `spezi.toml` that gave the commit.
+        ref: The `ref` of `spezi.toml` that gave the commit; empty for a transitive upstream.
         commit: The commit of the copy.
         include: The folders of the copy below `specs/`, without slashes; empty for all.
         hash: The hash of the copy (`tree_hash`).
+        via: The direct upstreams that bring a transitive upstream, sorted; empty for a direct
+            upstream (§000092).
     """
 
     ref: str
     commit: str
     include: tuple[str, ...]
     hash: str
+    via: tuple[str, ...] = ()
 
 
 def tree_hash(folder: Path) -> str:
@@ -74,12 +77,23 @@ def _entry(table: Mapping[str, object]) -> Locked | None:
     Returns:
         The entry or None.
     """
-    match table.get("ref"), table.get("commit"), table.get("include", []), table.get("hash"):
-        case str() as ref, str() as commit, list() as include, str() as digest if all(
-            isinstance(f, str) for f in cast("list[object]", include)
+    match (
+        table.get("ref", ""),
+        table.get("commit"),
+        table.get("include", []),
+        table.get("hash"),
+        table.get("via", []),
+    ):
+        case str() as ref, str() as commit, list() as include, str() as digest, list() as via if (
+            all(isinstance(f, str) for f in (*cast("list[object]", include), *via))
+            and bool(ref) != bool(via)
         ):
             return Locked(
-                ref, commit, tuple(f.strip("/") for f in cast("list[str]", include)), digest
+                ref,
+                commit,
+                tuple(f.strip("/") for f in cast("list[str]", include)),
+                digest,
+                tuple(sorted(cast("list[str]", via))),
             )
         case _:
             return None
@@ -127,8 +141,8 @@ def lock_text(entries: Mapping[str, Locked]) -> str:
     """
     return HEAD + "".join(
         f'\n[upstream."{repo}"]\n'
-        f'ref = "{e.ref}"\n'
-        f'commit = "{e.commit}"\n'
+        + (f"via = [{', '.join(f'"{v}"' for v in e.via)}]\n" if e.via else f'ref = "{e.ref}"\n')
+        + f'commit = "{e.commit}"\n'
         f"include = [{', '.join(f'"{f}/"' for f in e.include)}]\n"
         f'hash = "{e.hash}"\n'
         for repo, e in sorted(entries.items())
@@ -161,7 +175,7 @@ def drop_locked(root: Path, repos: frozenset[str]) -> None:
 
     Args:
         root: The root of the project.
-        repos: The repositories of `spezi.toml`.
+        repos: The repositories of `spezi.toml` and the transitive upstreams that stay.
     """
     current = read_lock(root)
     if set(current) - repos:

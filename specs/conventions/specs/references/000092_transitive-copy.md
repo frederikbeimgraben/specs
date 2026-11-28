@@ -5,7 +5,15 @@ kind: convention
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
-implementation: null
+tests:
+  - tests/test_transitive.py:test_add_with_recursive_copies_the_transitive_upstream
+  - tests/test_transitive.py:test_the_project_itself_gets_no_copy
+  - tests/test_transitive.py:test_two_commits_of_one_upstream_are_an_error
+  - tests/test_transitive.py:test_union_of_folders
+implementation:
+  - src/spezi/transitive.py
+  - src/spezi/kit.py
+  - src/spezi/check.py
 scope:
   - specs/
   - spezi.toml

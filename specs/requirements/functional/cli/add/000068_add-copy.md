@@ -10,6 +10,8 @@ tests:
   - tests/test_kit.py:test_add_with_include_copies_only_the_folders
   - tests/test_kit.py:test_add_stops_for_a_repository_in_the_settings
   - tests/test_kit.py:test_add_without_ref_takes_the_default_branch
+  - tests/test_transitive.py:test_add_with_recursive_copies_the_transitive_upstream
+  - tests/test_transitive.py:test_add_without_recursive_copies_no_transitive_upstream
 implementation:
   - src/spezi/kit.py
   - src/spezi/cli.py

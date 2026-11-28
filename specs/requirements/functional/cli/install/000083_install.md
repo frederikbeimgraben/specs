@@ -13,6 +13,7 @@ tests:
   - tests/test_install.py:test_install_loads_a_missing_copy
   - tests/test_install.py:test_install_stops_for_a_broken_mcp_file
   - tests/test_install.py:test_install_stops_for_mcp_servers_that_are_no_object
+  - tests/test_transitive.py:test_install_restores_a_transitive_copy
 implementation:
   - src/spezi/install.py
   - src/spezi/kit.py

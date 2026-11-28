@@ -5,6 +5,8 @@ kind: convention
 status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
+tests:
+  - tests/test_transitive.py:test_the_lock_keeps_via_and_no_ref
 implementation:
   - src/spezi/lock.py
   - src/spezi/check.py

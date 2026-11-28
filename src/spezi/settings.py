@@ -20,6 +20,7 @@ from spezi.project import FEATURES, Config, ConfigError, config_file, read_confi
 type Value = str | int | bool | tuple[str, ...]
 
 SIMPLE: Mapping[str, str] = {
+    "repo": "text",
     "forge": "text",
     "base_ref": "text",
     "code_dirs": "list",
@@ -109,6 +110,8 @@ def current(config: Config, key: str) -> Value:
             return config.max_elements
         case "forge", _, _:
             return config.forge
+        case "repo", _, _:
+            return config.repo
         case _:
             return config.base_ref
 
@@ -196,15 +199,20 @@ def drop_repo(document: tomlkit.TOMLDocument, repo: str) -> None:
 
 
 def set_repo(
-    document: tomlkit.TOMLDocument, repo: str, ref: str, include: tuple[str, ...] | None
+    document: tomlkit.TOMLDocument,
+    repo: str,
+    ref: str,
+    include: tuple[str, ...] | None,
+    transitive: tuple[str, ...] | None = None,
 ) -> None:
-    """Set `ref` and `include` of one repository. Add its table when it is missing.
+    """Set `ref`, `include` and `transitive` of one repository. Add its table when it is missing.
 
     Args:
         document: The document of `spezi.toml`.
         repo: The repository.
         ref: The ref.
         include: The folders of the copy, empty for all, or None to keep `include` as it is.
+        transitive: The transitive upstreams to copy, or None to keep `transitive` as it is.
     """
     if not isinstance(document.get("upstream"), Table):
         document["upstream"] = tomlkit.table(is_super_table=True)
@@ -218,6 +226,13 @@ def set_repo(
             table.pop("include", None)
         case _:
             table["include"] = [f"{f}/" for f in include]
+    match transitive:
+        case None:
+            pass
+        case ():
+            table.pop("transitive", None)
+        case _:
+            table["transitive"] = list(transitive)
     if repo not in upstream:
         upstream[repo] = table
 
