@@ -2,7 +2,7 @@
 id: "000017"
 title: Code refers to a rule with (spec <number>)
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 implementation:

@@ -56,7 +56,7 @@ specs/
 | [C/specs/format/000014](/specs/conventions/specs/format/000014_moved-rule.md) | A moved rule keeps its number | approved |
 | [C/specs/format/000015](/specs/conventions/specs/format/000015_labels.md) | Labels in a rule are fixed | approved |
 | [C/specs/format/000016](/specs/conventions/specs/format/000016_file-name.md) | The file name is number and name | approved |
-| [C/specs/format/000017](/specs/conventions/specs/format/000017_spec-reference.md) | Code refers to a rule with (spec <number>) | draft |
+| [C/specs/format/000017](/specs/conventions/specs/format/000017_spec-reference.md) | Code refers to a rule with (spec <number>) | approved |
 | [C/specs/layout/000004](/specs/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | approved |
 | [C/specs/layout/000005](/specs/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [C/specs/layout/000006](/specs/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
