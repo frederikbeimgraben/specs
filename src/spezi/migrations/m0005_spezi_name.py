@@ -27,7 +27,7 @@ from spezi.project import (
     read_config,
 )
 
-COMMIT = "0000000000000000000000000000000000000000"
+COMMIT = "a2580250777d900688fd985fa515bfc3effeb5de"
 DESCRIPTION = "give the files of the kit the new name spezi"
 OLD_NAME = "specs"
 NEW_NAME = "spezi"
