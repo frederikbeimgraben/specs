@@ -135,3 +135,48 @@ def test_check_finds_an_old_diagram_type(kit: Kit, project: Path) -> None:
     result = kit.run(project, "check", "--raw")
     assert result.code == 1
     assert "a state diagram must start with stateDiagram-v2 (000034)" in result.out
+
+
+def test_check_finds_a_reference_to_no_rule(kit: Kit, project: Path) -> None:
+    """A number in the text of a spec must name a rule of the project."""
+    _rule(project, "A name must be short, as 000999 says.")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "000999 names no rule of the project (000047)" in result.out
+
+
+def test_check_finds_a_reference_to_a_removed_rule(kit: Kit, project: Path) -> None:
+    """A reference in a spec or in the code must not name a rule that is not in force."""
+    _rule(project, "A name must be short, as 000101 says.")
+    old = write_rule(
+        project, "style/code/names", "000101", "old-names", "Old names", "style", "Old: must go."
+    )
+    old.write_text(
+        old.read_text(encoding="utf-8").replace("status: approved", "status: removed"),
+        encoding="utf-8",
+    )
+    (project / "src/app.py").write_text('"""See §000101."""\n', encoding="utf-8")
+    path = project / "spezi.toml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("code_dirs = []", 'code_dirs = ["src"]'),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "000101 names a rule with the status removed (000047)" in result.out
+    assert "src/app.py:1: §000101 names a rule with the status removed (000047)" in result.out
+
+
+def test_check_finds_front_matter_that_is_no_yaml(kit: Kit, project: Path) -> None:
+    """A front matter that is no valid YAML is an error of 000009."""
+    path = _rule(project)
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "title: Names are short", "title: Names: are short"
+        ),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "front matter: no valid YAML" in result.out
+    assert "(000009)" in result.out

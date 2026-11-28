@@ -48,7 +48,7 @@ specs/
 | [C/specs/content/000026](/specs/conventions/specs/content/000026_product-terms.md) | Product terms stay as the product shows them | approved |
 | [C/specs/decisions/000042](/specs/conventions/specs/decisions/000042_whole-decision.md) | A decision spec records one decision with its alternatives | approved |
 | [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | approved |
-| [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | approved |
+| [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | draft |
 | [C/specs/format/000010](/specs/conventions/specs/format/000010_status.md) | The status shows the approval | approved |
 | [C/specs/format/000011](/specs/conventions/specs/format/000011_one-rule-per-file.md) | One file holds one rule | approved |
 | [C/specs/format/000012](/specs/conventions/specs/format/000012_rule-id.md) | The rule ID has kind, path and number | approved |
@@ -68,7 +68,7 @@ specs/
 | [C/specs/protocols/000030](/specs/conventions/specs/protocols/000030_breaking-change.md) | A breaking change of a format is a new protocol spec | approved |
 | [C/specs/protocols/000031](/specs/conventions/specs/protocols/000031_code-against-schema.md) | A test checks the output of the code against the schema | approved |
 | [C/specs/protocols/000032](/specs/conventions/specs/protocols/000032_protocols-key.md) | A rule names the formats that it uses | approved |
-| [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | approved |
+| [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | draft |
 | [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | approved |
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |

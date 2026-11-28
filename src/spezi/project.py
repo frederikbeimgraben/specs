@@ -19,6 +19,8 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import cast
 
+import yaml
+
 KIT_REPO = "github.com/frederikbeimgraben/spezi"
 OLD_KIT_REPO = "github.com/frederikbeimgraben/specs"
 CONFIG_NAME = "spezi.toml"
@@ -214,26 +216,66 @@ class Spec:
         return value if isinstance(value, tuple) or value is None else ()
 
 
-def _front_matter_lines(lines: list[str]) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
-    """Return the keys and values of the lines of a front matter block.
+class FrontMatterError(Exception):
+    """The front matter is no valid YAML of the form of 000009."""
+
+
+def _value(node: yaml.Node) -> str | tuple[str, ...]:
+    """Return the value of one key of the front matter.
 
     Args:
-        lines: The lines between the two `---` lines.
+        node: The YAML node of the value.
 
     Returns:
-        One pair of key and value per key line. A key with list items gets a tuple.
+        The text, or the entries of a list. A key without a value gets an empty tuple.
+
+    Raises:
+        FrontMatterError: The value is no text and no list of texts.
     """
-    starts = tuple(i for i, line in enumerate(lines) if not line.startswith("  - "))
-    ends = (*starts[1:], len(lines))
-    return tuple(
-        (
-            lines[start].partition(":")[0].strip(),
-            tuple(item[4:].strip().strip('"') for item in lines[start + 1 : end])
-            if end > start + 1 or not lines[start].partition(":")[2].strip()
-            else lines[start].partition(":")[2].strip().strip('"'),
-        )
-        for start, end in zip(starts, ends, strict=True)
-    )
+    match node:
+        case yaml.ScalarNode(value="", style=None):
+            return ()
+        case yaml.ScalarNode(value=str(text)):
+            return text
+        case yaml.SequenceNode(value=list(items)) if all(
+            isinstance(i, yaml.ScalarNode) for i in items
+        ):
+            return tuple(str(cast("yaml.ScalarNode", i).value) for i in items)
+        case _:
+            raise FrontMatterError("a value must be a text or a list of texts")
+
+
+def _pairs(block: str) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
+    """Return the keys and values of a front matter block, read as YAML (§000009).
+
+    Args:
+        block: The text between the two `---` lines.
+
+    Returns:
+        One pair of key and value per key, in the order of the block.
+
+    Raises:
+        FrontMatterError: The block is no valid YAML, or no mapping of texts and lists.
+    """
+    try:
+        root = yaml.compose(block, Loader=yaml.BaseLoader)
+    except yaml.YAMLError as error:
+        raise FrontMatterError(f"no valid YAML: {' '.join(str(error).split())}") from error
+    match root:
+        case None:
+            return ()
+        case yaml.MappingNode(value=list(entries)):
+            pairs = tuple(
+                (str(cast("yaml.ScalarNode", k).value), _value(v))
+                for k, v in cast("list[tuple[yaml.Node, yaml.Node]]", entries)
+            )
+            match len({k for k, _ in pairs}) == len(pairs):
+                case True:
+                    return pairs
+                case False:
+                    raise FrontMatterError("a key is there more than one time")
+        case _:
+            raise FrontMatterError("the block must be a mapping")
 
 
 def parse_front_matter(text: str) -> tuple[Meta, tuple[str, ...], str] | None:
@@ -244,9 +286,12 @@ def parse_front_matter(text: str) -> tuple[Meta, tuple[str, ...], str] | None:
 
     Returns:
         The keys and values, the order of the keys and the body, or None without front matter.
+
+    Raises:
+        FrontMatterError: The front matter is no valid YAML of the form of 000009.
     """
     end = text.find("\n---\n", 4) if text.startswith("---\n") else -1
-    pairs = _front_matter_lines(text[4:end].splitlines()) if end >= 0 else ()
+    pairs = _pairs(text[4:end]) if end >= 0 else ()
     return (dict(pairs), tuple(k for k, _ in pairs), text[end + 5 :]) if end >= 0 else None
 
 
@@ -290,7 +335,10 @@ def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[st
         *(() if FILE_NAME.match(path.name) else ("file name breaks 000016",)),
         *(f"folder {f!r} breaks 000005" for f in below.parts[:2] if not FOLDER.match(f)),
     )
-    parsed = parse_front_matter(source(path))
+    try:
+        parsed = parse_front_matter(source(path))
+    except FrontMatterError as error:
+        return None, (*errors, f"front matter: {error} (000009)")
     if parsed is None:
         return None, (*errors, "no front matter (000009)")
     meta, keys, body = parsed

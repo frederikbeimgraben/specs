@@ -17,6 +17,9 @@ tests:
   - tests/test_check.py:test_check_finds_a_file_outside_the_kind_folders
   - tests/test_check.py:test_check_gives_the_line_of_the_key
   - tests/test_check.py:test_check_finds_an_old_diagram_type
+  - tests/test_check.py:test_check_finds_a_reference_to_no_rule
+  - tests/test_check.py:test_check_finds_a_reference_to_a_removed_rule
+  - tests/test_check.py:test_check_finds_front_matter_that_is_no_yaml
 implementation:
   - src/spezi/agents.py
   - src/spezi/check.py
