@@ -35,8 +35,8 @@ copy:
 | Target | Ref |
 | --- | --- |
 | The project and each copy, on an update of the kit | The kit commit in `spezi.lock` of the project before the update, else the kit ref in its `spezi.toml`. |
-| The new copy of the kit | The commit of the copy. |
 | The project, on `spezi install` | The same ref. Without a kit entry, no migration runs. |
+| The new copy of the kit | The commit of the copy. |
 | The copy of a different repository | The kit commit in `spezi.lock` of that repository at its commit, else the kit ref in its `spezi.toml`. Without one, each migration runs. |
 
 The kit had the name `specs` before. A project or a repository from that time has `specs.toml`
