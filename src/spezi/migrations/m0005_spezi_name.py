@@ -47,6 +47,15 @@ GITLAB_INCLUDE: Mapping[str, str] = {
     "  - local: .gitlab/ci/specs.yml": "  - local: .gitlab/ci/spezi.yml"
 }
 OLD_LONG_ID = re.compile(rf"(?<![\w./-]){re.escape(OLD_KIT_REPO)}(?=:)")
+OLD_PATHS: Mapping[str, str] = {
+    **FILES,
+    **FOLDERS,
+    **{old: new for old, (_, new) in CI_FILES.items()},
+}
+OLD_PATH = re.compile(
+    rf"(?<![\w./-])({'|'.join(re.escape(p) for p in sorted(OLD_PATHS, key=len, reverse=True))})"
+    r"(?![\w.-])"
+)
 OLD_BEGIN = re.compile(r"^<!-- specs:begin \(written by [^)]*\) -->$", re.MULTILINE)
 OLD_END = "<!-- specs:end -->"
 BEGIN = "<!-- spezi:begin (written by spezi install, do not edit) -->"
@@ -266,8 +275,22 @@ def _agents(root: Path) -> None:
         write_text(path, new)
 
 
+def _paths(path: Path) -> None:
+    """Give each old path of a file of the kit in a spec the new path.
+
+    Args:
+        path: The spec.
+    """
+    text = path.read_text(encoding="utf-8")
+    new = OLD_PATH.sub(lambda found: OLD_PATHS[found[1]], text)
+    if new != text:
+        write_text(path, new)
+
+
 def _specs_and_code(root: Path) -> None:
     """Give the long IDs of the kit in the specs and in the code of the project the new name.
+
+    The specs also get the new path of each file of the kit, for example in `implementation`.
 
     Args:
         root: The root of the project.
@@ -280,9 +303,11 @@ def _specs_and_code(root: Path) -> None:
         for p in sorted((root / folder).rglob("*"))
         if p.is_file() and p.suffix in config.code_suffixes
     )
-    rules = (
+    rules = tuple(
         p for p in sorted(specs.rglob("*.md")) if p.is_file() and not hidden(p.relative_to(specs))
     )
+    for path in rules:
+        _paths(path)
     for path in (*rules, *code):
         _long_ids(path)
 

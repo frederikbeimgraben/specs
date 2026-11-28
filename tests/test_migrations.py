@@ -149,7 +149,10 @@ def _old_names(root: Path) -> None:
     )
     rule = root / "specs" / "workflow" / "a" / "b" / "000100_x.md"
     rule.parent.mkdir(parents=True)
-    rule.write_text("see github.com/frederikbeimgraben/specs:W/specs/process/000001\n")
+    rule.write_text(
+        "implementation:\n  - specs.toml\n  - .claude/skills/spec-write/SKILL.md\n"
+        "see github.com/frederikbeimgraben/specs:W/specs/process/000001, specs.toml.bak\n"
+    )
 
 
 def test_migration_5_gives_the_files_the_new_name(tmp_path: Path) -> None:
@@ -179,7 +182,10 @@ def test_migration_5_gives_the_files_the_new_name(tmp_path: Path) -> None:
     ]
     assert (tmp_path / "AGENTS.md").read_text() == f"# Mine\n\n{BEGIN}\nrules\n{END}\n"
     rule = tmp_path / "specs" / "workflow" / "a" / "b" / "000100_x.md"
-    assert rule.read_text() == f"see {NEW_KIT}:W/specs/process/000001\n"
+    assert rule.read_text() == (
+        "implementation:\n  - spezi.toml\n  - .claude/skills/spezi-write/SKILL.md\n"
+        f"see {NEW_KIT}:W/specs/process/000001, specs.toml.bak\n"
+    )
 
 
 def test_migration_5_keeps_a_changed_ci_file(tmp_path: Path) -> None:
