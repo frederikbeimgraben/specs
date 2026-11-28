@@ -83,7 +83,7 @@ specs/
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | spezi add adds the copy of a different repository | approved |
 | [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | spezi writes the rules for agents to AGENTS.md | approved |
-| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | draft |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | approved |
 | [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | spezi configure changes the settings in spezi.toml | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | approved |
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | spezi install brings a project to the state of its settings | approved |
@@ -92,9 +92,9 @@ specs/
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | spezi mcp runs the MCP server | approved |
 | [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | spezi migrates a project and its copies to a new kit | approved |
 | [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | spezi new makes a new spec from its template | approved |
-| [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | spezi formats its output for a terminal | draft |
+| [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | spezi formats its output for a terminal | approved |
 | [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | spezi lists the files that a command changes | approved |
-| [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | spezi prints its data as JSON | draft |
+| [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | spezi prints its data as JSON | approved |
 | [F/cli/questions/000085](/specs/requirements/functional/cli/questions/000085_questions.md) | init, add and update ask questions on a terminal | approved |
 | [F/cli/remove/000087](/specs/requirements/functional/cli/remove/000087_remove.md) | spezi remove removes the copy of a different repository | approved |
 | [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | spezi resolve prints the long form of an ID | approved |
