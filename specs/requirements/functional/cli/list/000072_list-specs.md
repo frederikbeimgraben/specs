@@ -7,7 +7,6 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_queries.py:test_list_prints_one_line_for_each_rule
-  - tests/test_queries.py:test_list_filters_by_kind
 implementation:
   - src/spezi/queries.py
   - src/spezi/cli.py
@@ -18,17 +17,9 @@ scope:
 
 # spezi list prints every rule
 
-`spezi list [<kind>]` must print one line for each rule of the project, then one line for each
-rule of the copies. `<kind>` is a kind or its letter (spec 000004). With `<kind>`, it must print
-only the rules of this kind, and stop with an error for an unknown kind. The MCP tool `list`
-must take `kind` as an optional argument. A line must hold the kind letter, the short form
-(spec 000047), the status and the title, in this order and separated by tabs. For example:
+`spezi list` must print one line for each rule of the project, then one line for each rule of
+the copies.
 
-```text
-S	github.com/frederikbeimgraben/spezi-python:000001	approved	Python code needs Python 3.13 or later
-```
-
-Reason: An agent sees all rules in one call. The short form is the form that code and specs
-use, and the kind letter tells the kind without the long path.
+Reason: An agent sees all rules in one call.
 
 Test: `tests/test_queries.py`.

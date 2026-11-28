@@ -4,7 +4,7 @@ title: A spec states the current rule
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - specs/
 scope:
@@ -13,7 +13,6 @@ scope:
 
 # A spec states the current rule
 
-A spec must state the rule that is in force now, without history or stories. A date must show
-only if the rule depends on it. A spec must not refer to tickets, pull requests or threads.
+A spec must state the rule that is in force now, without history or stories.
 
 Reason: A history explains the past. The reader needs the rule that is in force now.

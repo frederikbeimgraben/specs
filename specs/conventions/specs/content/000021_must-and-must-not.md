@@ -4,7 +4,7 @@ title: The rule text uses must and must not
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
 scope:
@@ -13,9 +13,8 @@ scope:
 
 # The rule text uses must and must not
 
-Use `must` for an obligation and `must not` for a prohibition. Use the present tense for a fact
-that the rule depends on.
+A rule must use `must` for an obligation and `must not` for a prohibition.
 
-Reason: One fixed word shows what is binding and what is a fact.
+Reason: One fixed word shows what is binding.
 
 Test: `spezi check` finds a draft or approved rule without `must`.

@@ -8,10 +8,6 @@ updated: 2026-11-28
 tests:
   - tests/test_json.py:test_list_and_resolve_give_rules
   - tests/test_json.py:test_show_gives_meta_and_body
-  - tests/test_json.py:test_check_gives_errors_as_objects
-  - tests/test_json.py:test_a_command_that_changes_files_gives_all_parts
-  - tests/test_json.py:test_a_stop_gives_an_error_object
-  - tests/test_json.py:test_raw_and_json_exclude_each_other
 implementation:
   - src/spezi/data.py
   - src/spezi/cli.py
@@ -22,24 +18,15 @@ scope:
 # spezi prints its data as JSON
 
 With the option `--json` after the command, each command of `spezi` except `mcp` and `lsp` must
-print its data as JSON, indented with two spaces, also on a terminal. `--json` and `--raw`
-(spec 000076) must not go together.
+print its data as JSON, indented with two spaces, also on a terminal.
 
 | Command | JSON |
 | --- | --- |
-| `list`, `search` | A list with one rule object for each line (spec 000072). |
+| `list`, `search` | A list with one rule object for each line (spec 000229). |
 | `resolve` | The rule object. |
 | `show` | `long`, `path`, `meta` with the front matter as an object, and `body` with the text after the front matter. |
-| `check` | `specs` with the count of the rules of the project, `upstream` with the count of the rules of the copies (spec 000065), `errors`, `warnings` (spec 000093), and `changed` (spec 000077). |
-| `init`, `update`, `add`, `new`, `setup-ide` | `message`, `hints`, `check` with `specs`, `upstream`, `errors` and `warnings` or `null`, and `changed`. |
-
-A rule object must hold `kind` (the kind letter), `id` (the short form (spec 000047)), `long`
-(the long form), `status`, `title` and `path`. An error object must hold `file`, `line` (a whole
-number from 1), `message` and `rule` (the number of the rule that the error names). It must hold
-`null` for a part that the error line does not have. A warning object must have the same keys.
-Each object of `changed` must hold `mark` and `path`. A command can stop with an error, also for
-a wrong argument. Then it must print `{"error": "<error>"}` to stdout, nothing to stderr, and
-end with the exit code 1. A path must be relative to the root of the project.
+| `check` | `specs` with the count of the rules of the project, `upstream` with the count of the rules of the copies (spec 000214), `errors`, `warnings` (spec 000093), and `changed` (spec 000077). |
+| `init`, `install`, `update`, `add`, `configure`, `remove`, `new`, `setup-ide` | `message`, `hints`, `check` with `specs`, `upstream`, `errors` and `warnings` or `null`, and `changed`. |
 
 Reason: A script reads every command in the same way, without parsing text.
 

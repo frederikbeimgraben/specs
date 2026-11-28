@@ -4,7 +4,7 @@ title: A spec wins over other guidance
 kind: workflow
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - specs/
 scope:
@@ -13,8 +13,6 @@ scope:
 
 # A spec wins over other guidance
 
-A rule in `specs/` must win over a skill, a memory file, a README and a code comment. If the code
-and a spec do not agree, an agent must tell the owner. It must not change the code or the spec
-silently.
+A rule in `specs/` must win over a skill, a memory file, a README and a code comment.
 
 Reason: Only one source can be binding. Otherwise two agents follow two different rules.

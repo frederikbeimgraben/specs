@@ -7,13 +7,8 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_output.py:test_terminal_output_has_color
-  - tests/test_output.py:test_raw_output_has_no_color
   - tests/test_output.py:test_a_migration_has_a_blue_mark
   - tests/test_output.py:test_each_repository_has_a_green_mark
-  - tests/test_output.py:test_help_on_terminal_has_color
-  - tests/test_output.py:test_usage_on_terminal_has_color
-  - tests/test_output.py:test_help_with_no_color_has_no_color
-  - tests/test_output.py:test_help_in_a_pipe_has_no_color
 implementation:
   - src/spezi/cli.py
   - src/spezi/view.py
@@ -28,27 +23,12 @@ output:
 
 | Command | Formatted output |
 | --- | --- |
-| `check` | Each error in red, then each warning in yellow with `! ` (spec 000093), then the line with the counts (spec 000065). The line is green without errors and warnings, yellow with only warnings, else red. |
-| `list`, `search` | A table with the columns (spec 000072), with a color for each status. |
+| `check` | Each error in red, then each warning in yellow with `! ` (spec 000093), then the line with the counts (spec 000214). |
+| `list`, `search` | A table with the columns (spec 000229), with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
-| `init`, `update`, `add`, `new`, `setup-ide` | Each line of the message with a green mark. Below it, each line of a repository (spec 000067, 000083) with a green mark. Then each migration that ran (spec 000081) on its own line with a blue mark `↻` and without `migrated:`. |
+| `init`, `install`, `update`, `add`, `configure`, `remove`, `new`, `setup-ide` | Each line of the message with a green mark. Below it, each line of a repository (spec 000067, 000289) with a green mark. Then each migration that ran (spec 000282) on its own line with a blue mark `↻` and without `migrated:`. |
 
-With the option `--raw` after the command, or when stdout is not a terminal, the command must
-print the plain text of its own spec. The plain text has no color and no table. With `--json`,
-the command must print JSON (spec 000080). The MCP server must always return the plain text.
-
-The help of `spezi` and of each command must have color, with `rich-argparse`:
-
-| Output | Stream | Color |
-| --- | --- | --- |
-| `--help` | stdout | The program name, commands and options bold cyan, headings bold, metavars cyan. |
-| The usage after a wrong argument | stderr | The same colors. |
-
-The help must have color only when its stream is a terminal and `NO_COLOR` is not set. Else
-the help must be plain text.
-
-Reason: A person reads the formatted output and the help faster. A script, the CI and an agent
-read the plain text, and it stays the same.
+Reason: A person reads the formatted output faster.
 
 Test: `tests/test_output.py`.

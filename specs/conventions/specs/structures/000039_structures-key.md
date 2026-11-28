@@ -4,7 +4,7 @@ title: A rule names the structures that it uses
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
 scope:
@@ -14,10 +14,9 @@ scope:
 # A rule names the structures that it uses
 
 A functional or non-functional spec that depends on a structure of a structure spec must list
-the full ID of that structure spec in `structures`. A spec that uses no structure must not have
-the key `structures`. Each entry must name a structure spec that is in force.
+the full ID of that structure spec in `structures`.
 
 Reason: A reader of a rule finds the structure that the rule talks about. A tool finds every
 rule that a change of the structure affects.
 
-Test: `spezi check` checks every entry of `structures`.
+Test: Review.

@@ -4,9 +4,10 @@ title: The status of a spec moves from draft to approved, replaced or removed
 kind: structure
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 diagram: state
 implementation:
+  - specs/.templates/TEMPLATE.md
   - specs/conventions/specs/format/000010_status.md
 scope:
   - specs/
@@ -14,9 +15,7 @@ scope:
 
 # The status of a spec moves from draft to approved, replaced or removed
 
-A spec must change its status only along an arrow of this diagram. A spec with `replaced` or
-`removed` must not go back to `draft` or `approved`. A change of that rule must get a new spec
-with a new number (spec 000013).
+The status of a spec must change only along an arrow of this diagram.
 
 ## Diagram
 
@@ -41,7 +40,6 @@ stateDiagram-v2
 | `replaced` | specs/conventions/specs/format/000010_status.md | A different spec replaces the spec and names it in `replaces`. `replaced_by` names that spec. |
 | `removed` | specs/conventions/specs/format/000010_status.md | The spec is not in force. The number stays taken. |
 
-Reason: A number is never used again (spec 000013). The diagram shows that a spec that left force
-stays out of force.
+Reason: Each arrow is one step that the owner can examine.
 
 Test: Review.

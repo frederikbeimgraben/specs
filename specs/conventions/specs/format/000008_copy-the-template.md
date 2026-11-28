@@ -4,7 +4,7 @@ title: A new spec starts as a copy of the template
 kind: convention
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 implementation:
   - specs/.templates/TEMPLATE.md
   - specs/.templates/TEMPLATE-protocol.md
@@ -25,11 +25,6 @@ A new spec must start as a copy of its template in `specs/.templates/`:
 | `structure` | `specs/.templates/TEMPLATE-structure.md` |
 | `decision` | `specs/.templates/TEMPLATE-decision.md` |
 
-`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` must make the copy (spec 000069). It
-sets the number, the title, the kind, the owner, the date and `scope`. The copy must pass
-`spezi check`.
-
-Reason: The template holds the keys in the correct order and the fixed sections. The command
-gives the next free number (spec 000013), so that nobody must count by hand.
+Reason: The template holds the keys in the right order and the sections of the kind.
 
 Test: `spezi check` checks the result.
