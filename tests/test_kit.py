@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tomllib
 from pathlib import Path
 
@@ -178,7 +179,7 @@ def test_update_of_the_kit_runs_the_check(kit: Kit, project: Path) -> None:
     result = kit.run(project, "update", "kit", kit.rev, "--raw")
     assert result.code == 0, result.out + result.err
     assert f"updated github.com/frederikbeimgraben/spezi to {kit.rev}" in result.out
-    assert "0 specs, 0 errors" in result.out
+    assert re.search(r"0 specs, [1-9][0-9]* upstream, 0 errors", result.out)
 
 
 def test_add_without_ref_takes_the_default_branch(kit: Kit, project: Path) -> None:

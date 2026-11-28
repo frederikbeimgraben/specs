@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from spezi.check import run
+from spezi.check import run, summary
 from spezi.new import kind_name
 from spezi.project import KINDS_BY_PREFIX, Project, Spec
 
@@ -139,4 +139,4 @@ def check(project: Project, *, write: bool = False) -> tuple[bool, str]:
         True without errors, and the report.
     """
     count, errors = run(project, write=write)
-    return not errors, "".join(f"{e}\n" for e in errors) + f"{count} specs, {len(errors)} errors\n"
+    return not errors, "".join(f"{e}\n" for e in errors) + f"{summary(count, errors)}\n"

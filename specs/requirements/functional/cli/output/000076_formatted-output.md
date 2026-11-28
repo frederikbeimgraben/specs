@@ -26,7 +26,7 @@ output:
 
 | Command | Formatted output |
 | --- | --- |
-| `check` | Each error in red, then the count of specs and errors, green without errors. |
+| `check` | Each error in red, then the line with the counts of 000065, green without errors. |
 | `list`, `search` | A table with the columns of 000072, with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
