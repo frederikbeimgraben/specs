@@ -2,10 +2,13 @@
 id: "000048"
 title: The rules of a different repository are an unchanged copy
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
+tests:
+  - tests/test_kit.py:test_a_copy_keeps_a_folder_named_upstream
 implementation:
+  - src/specs_kit/changes.py
   - src/specs_kit/check.py
   - src/specs_kit/kit.py
 scope:

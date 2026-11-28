@@ -40,6 +40,7 @@ from specs_kit.settings import (
     parse_value,
     plain,
     set_key,
+    set_repo,
 )
 
 SAVE = "save"
@@ -105,30 +106,6 @@ def _repos(document: tomlkit.TOMLDocument) -> dict[str, Table]:
         if isinstance(upstream, Table)
         else {}
     )
-
-
-def _set_repo(
-    document: tomlkit.TOMLDocument, repo: str, ref: str, include: tuple[str, ...]
-) -> None:
-    """Set `ref` and `include` of one repository. Add its table when it is missing.
-
-    Args:
-        document: The document of `specs.toml`.
-        repo: The repository.
-        ref: The ref.
-        include: The folders of the copy, or empty for all.
-    """
-    if not isinstance(document.get("upstream"), Table):
-        document["upstream"] = tomlkit.table(is_super_table=True)
-    upstream = cast("Table", document["upstream"])
-    table = cast("Table", upstream[repo]) if repo in upstream else tomlkit.table()
-    table["ref"] = ref
-    if include:
-        table["include"] = [f"{f}/" for f in include]
-    elif "include" in table:
-        del table["include"]
-    if repo not in upstream:
-        upstream[repo] = table
 
 
 def _repo_line(repo: str, table: Table) -> str:
@@ -233,9 +210,9 @@ def _edit_repo(document: tomlkit.TOMLDocument, repo: str, ask: Ask) -> None:
     actions = ("ref", "include", *(("remove",) if repo != KIT_REPO else ()), "back")
     match ask.select(f"{repo}: what to change?", actions, "back"):
         case "ref":
-            _set_repo(document, repo, choose_ref(ask, repo, ref), include)
+            set_repo(document, repo, choose_ref(ask, repo, ref), include)
         case "include":
-            _set_repo(document, repo, ref, _ask_include(repo, ref, include, ask))
+            set_repo(document, repo, ref, _ask_include(repo, ref, include, ask))
         case "remove":
             drop_repo(document, repo)
         case _:
@@ -254,7 +231,7 @@ def _add_repo(document: tomlkit.TOMLDocument, ask: Ask) -> None:
         ask.show(f"{repo} is in specs.toml already")
         return
     ref = choose_ref(ask, repo, default_ref(repo))
-    _set_repo(document, repo, ref, _ask_include(repo, ref, (), ask))
+    set_repo(document, repo, ref, _ask_include(repo, ref, (), ask))
 
 
 def configure(project: Project, ask: Ask) -> bool:

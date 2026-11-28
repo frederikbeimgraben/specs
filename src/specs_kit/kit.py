@@ -43,6 +43,7 @@ from specs_kit.settings import (
     Value,
     drop_repo,
     set_keys,
+    set_repo,
     write_settings,
 )
 
@@ -334,46 +335,26 @@ def copy_rules(source: Path, project: Project, repo: str, include: tuple[str, ..
     replace_tree(source / "specs", project.upstream_dir / repo, include)
 
 
-def set_ref(project: Project, repo: str, ref: str) -> None:
-    """Set `ref` of one repository in `specs.toml`. Add the table when it is missing.
+def write_repo(
+    project: Project, repo: str, ref: str, include: tuple[str, ...] | None = None
+) -> None:
+    """Set `ref`, and `include` when given, of one repository in `specs.toml`.
+
+    The table is added when it is missing. The other lines of `specs.toml` stay.
 
     Args:
         project: The project.
         repo: The repository as `<host>/<group>/.../<repo>`.
-        ref: The commit.
+        ref: The tag, the branch or the commit.
+        include: The folders of the copy, empty for all, or None to keep `include` as it is.
+
+    Raises:
+        KitError: The new `specs.toml` breaks a rule of 000078.
     """
-    text = project.config_path.read_text(encoding="utf-8") if project.config_path.is_file() else ""
-    header = f'[upstream."{repo}"]'
-    pattern = re.compile(rf"^{re.escape(header)}\n(?:(?!\[).*\n)*?ref = .*$", re.MULTILINE)
-    updated = (
-        pattern.sub(lambda m: re.sub(r"ref = .*$", f'ref = "{ref}"', m.group(0)), text)
-        if pattern.search(text)
-        else f'{text.rstrip()}\n\n{header}\nref = "{ref}"\n'.lstrip()
-    )
-    write_text(project.config_path, updated if updated.endswith("\n") else f"{updated}\n")
-
-
-def set_include(project: Project, repo: str, include: tuple[str, ...]) -> None:
-    """Add `include` below the table of one repository in `specs.toml`.
-
-    Args:
-        project: The project.
-        repo: The repository as `<host>/<group>/.../<repo>`.
-        include: The folders of the copy.
-    """
-    text = project.config_path.read_text(encoding="utf-8")
-    header = f'[upstream."{repo}"]'
-    entry = "include = [" + ", ".join(f'"{f}/"' for f in include) + "]"
-    write_text(
-        project.config_path,
-        re.sub(
-            rf"^({re.escape(header)}\n(?:(?!\[).*\n)*?ref = .*)$",
-            lambda m: f"{m.group(1)}\n{entry}",
-            text,
-            count=1,
-            flags=re.MULTILINE,
-        ),
-    )
+    try:
+        write_settings(project.root, lambda doc: set_repo(doc, repo, ref, include))
+    except SettingError as error:
+        raise KitError(str(error)) from error
 
 
 def skills(source: Path) -> tuple[Path, ...]:
@@ -955,7 +936,7 @@ def init(root: Path, forge: str | None, ask: Ask | None = None) -> tuple[Project
         (root / "specs").mkdir(exist_ok=True)
         project = Project.open(root)
         copy_rules(source, project, KIT_REPO)
-        set_ref(project, KIT_REPO, ref)
+        write_repo(project, KIT_REPO, ref)
         install_kit_files(source, project, commit)
         _lock(project, KIT_REPO, ref, commit, ())
     return Project.open(root), commit
@@ -1278,9 +1259,7 @@ def update(
                 kit_files=target == KIT_REPO,
                 review=_update_review(fresh, target, wanted, include, questions),
             )
-            set_ref(fresh, target, wanted)
-            if chosen != include:
-                set_include(fresh, target, chosen)
+            write_repo(fresh, target, wanted, chosen if chosen != include else None)
             _lock(fresh, target, wanted, commit, chosen)
             own = commit if target == KIT_REPO else own
             done.append((target, commit))
@@ -1383,9 +1362,7 @@ def add(
             kit_files=False,
             review=_add_review(name, wanted, folders, questions),
         )
-    set_ref(project, name, wanted)
-    if chosen:
-        set_include(project, name, chosen)
+    write_repo(project, name, wanted, chosen)
     _lock(project, name, wanted, commit, chosen)
     return commit, ran
 
