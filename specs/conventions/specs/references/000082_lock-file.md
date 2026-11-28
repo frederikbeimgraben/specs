@@ -39,9 +39,9 @@ hash = "sha256-<base64>"
 Only `spezi install`, `spezi update`, `spezi add` and `spezi init` must write `spezi.lock`
 (000083). A person or an agent must not change it. `spezi check` must show an error when
 `spezi.lock` does not name each repository of `spezi.toml` and each copy of 000092, and no
-other, when `ref` or `include` of an
-entry is not the same as in `spezi.toml`, or when the hash of a copy is not the hash of its
-entry.
+other, when `ref` or `include` of the entry of a direct upstream is not the same as in
+`spezi.toml`, when `commit`, `include` or `via` of the entry of a transitive upstream does not
+agree with 000092, or when the hash of a copy is not the hash of its entry.
 
 Reason: `spezi.toml` tells which version a project wants, and `spezi.lock` tells which commit it
 has. `spezi install` can then load a copy without a network when the copy agrees with
