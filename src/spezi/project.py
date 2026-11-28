@@ -40,6 +40,7 @@ FOLDER_BY_KIND: Mapping[str, str] = {kind: folder for folder, (_, kind) in KINDS
 PREFIXES = "|".join(prefix for prefix, _ in KINDS.values())
 STATUSES = frozenset({"draft", "approved", "replaced", "removed"})
 IN_FORCE = frozenset({"draft", "approved"})
+FORGES = ("github", "gitlab", "codeberg")
 FEATURES = ("mcp", "agents", "claude", "ci", "skills", "flake", "envrc")
 UPSTREAM = ".upstream"
 TEMPLATES = ".templates"
@@ -281,7 +282,7 @@ def parse_spec(path: Path, base: Path, repo: str) -> tuple[Spec | None, tuple[st
     """
     kind = kind_of(path.relative_to(base))
     if kind is None:
-        return None, ("not below a kind folder (000004)",)
+        return None, ("not below a kind folder (000051)",)
     prefix, _, below = kind
     if len(below.parts) != 3:
         return None, ("must be <area>/<topic>/<file> below the kind folder (000004)",)
@@ -349,6 +350,26 @@ def _text(data: Mapping[str, object], key: str, default: str) -> str:
     if not isinstance(value, str):
         raise ConfigError(f"spezi.toml: {key} must be a string")
     return value
+
+
+def _forge(data: Mapping[str, object], default: str) -> str:
+    """Return the key `forge` of `spezi.toml` (§000078).
+
+    Args:
+        data: The table.
+        default: The value without the key.
+
+    Returns:
+        `github`, `gitlab` or `codeberg`.
+
+    Raises:
+        ConfigError: The value is not one of the forges.
+    """
+    match _text(data, "forge", default):
+        case str(forge) if forge in FORGES:
+            return forge
+        case _:
+            raise ConfigError(f"spezi.toml: forge must be {', '.join(FORGES)}")
 
 
 def _texts(data: Mapping[str, object], key: str, default: tuple[str, ...]) -> tuple[str, ...]:
@@ -474,7 +495,7 @@ def read_config(path: Path) -> Config:
     upstream = _upstream(data)
     return Config(
         base_ref=_text(data, "base_ref", default.base_ref),
-        forge=_text(data, "forge", default.forge),
+        forge=_forge(data, default.forge),
         code_dirs=_texts(data, "code_dirs", default.code_dirs),
         code_suffixes=frozenset(
             _texts(data, "code_suffixes", tuple(sorted(default.code_suffixes)))
@@ -565,7 +586,7 @@ class Project:
             if p.is_file() and not hidden(p.relative_to(self.specs_dir))
         )
         top = tuple(
-            f"specs/{p.name}: specs/ holds only rules and README.md (000004)"
+            f"specs/{p.name}: specs/ holds only rules and README.md (000051)"
             for p in files
             if p.parent == self.specs_dir and p.name != "README.md"
         )
@@ -574,10 +595,18 @@ class Project:
             for p in files
             if p.parent != self.specs_dir and p.suffix == ".md"
         )
+        loose = tuple(
+            f"specs/{p.relative_to(self.specs_dir).as_posix()}: not below a kind folder (000051)"
+            for p in files
+            if p.parent != self.specs_dir
+            and p.suffix != ".md"
+            and kind_of(p.relative_to(self.specs_dir)) is None
+        )
         return (
             tuple(spec for _, (spec, _) in parsed if spec),
             (
                 *top,
+                *loose,
                 *(
                     f"specs/{p.relative_to(self.specs_dir)}: {e}"
                     for p, (_, errors) in parsed

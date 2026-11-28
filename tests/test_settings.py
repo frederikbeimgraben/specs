@@ -16,12 +16,13 @@ BEGIN = "<!-- spezi:begin (written by spezi install, do not edit) -->"
         ("code_dirs = []", 'code_dirs = "src"', "code_dirs"),
         ("max_elements = 25", "max_elements = 0", "max_elements"),
         ('forge = "github"', "forge = [", "spezi.toml"),
+        ('forge = "github"', 'forge = "gitea"', "forge must be github, gitlab, codeberg"),
     ],
 )
 def test_a_bad_setting_stops_each_command(
     kit: Kit, project: Path, old: str, new: str, message: str
 ) -> None:
-    """A wrong type or no valid TOML stops the command with one line and exit code 1."""
+    """A wrong type, a wrong forge or no valid TOML stops the command with one line and code 1."""
     path = project / "spezi.toml"
     text = path.read_text(encoding="utf-8")
     assert old in text

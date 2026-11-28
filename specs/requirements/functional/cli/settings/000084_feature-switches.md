@@ -2,15 +2,16 @@
 id: "000084"
 title: spezi.toml switches the optional parts of the kit on and off
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_features.py:test_a_switch_off_removes_the_part
   - tests/test_features.py:test_a_switch_on_writes_the_part_again
   - tests/test_features.py:test_a_changed_claude_file_stays
   - tests/test_features.py:test_claude_needs_agents
   - tests/test_features.py:test_update_follows_the_switches
+  - tests/test_features.py:test_ci_off_does_not_read_the_gitlab_file
 implementation:
   - src/spezi/project.py
   - src/spezi/install.py
@@ -42,8 +43,8 @@ The index `specs/README.md`, the copies below `specs/.upstream/` and the templat
 `specs/.templates/` have no switch. `spezi init`, `spezi update` and `spezi install` must write
 or replace only the parts that are on. `spezi install` must remove each part that is off, as
 the table tells, and list each changed or deleted file (000077). `spezi update` must not change
-`flake.nix` when `flake` is off. `spezi check` must not check the block in `AGENTS.md` when
-`agents` is off.
+`flake.nix` when `flake` is off. When `ci` is off, no command must read or change
+`.gitlab-ci.yml`. `spezi check` must not check the block in `AGENTS.md` when `agents` is off.
 
 `claude = true` with `agents = false` is an error of `spezi.toml` (000078), because `CLAUDE.md`
 only imports `AGENTS.md`. A key of `[features]` that is not in the table, or a value that is not

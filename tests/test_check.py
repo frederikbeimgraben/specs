@@ -97,3 +97,41 @@ def test_check_gives_the_line(kit: Kit, project: Path) -> None:
     assert f"{rel}:7: updated must be YYYY-MM-DD (000009)" in result.out
     assert f"{rel}:15: a spec refers to a rule without § (000017): §000999" in result.out
     assert "specs/README.md:1: the index is not current" in result.out
+
+
+def test_check_finds_a_file_outside_the_kind_folders(kit: Kit, project: Path) -> None:
+    """A file of each type that is not below a kind folder is an error of 000051."""
+    (project / "specs/notes").mkdir()
+    (project / "specs/notes/todo.txt").write_text("x\n", encoding="utf-8")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "specs/notes/todo.txt:1: not below a kind folder (000051)" in result.out
+
+
+def test_check_gives_the_line_of_the_key(kit: Kit, project: Path) -> None:
+    """An error of a key names the line of the key, also when an other line has the value."""
+    path = _rule(project)
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        .replace("title: Names are short", "title: Names are functional")
+        .replace("kind: style", "kind: functional"),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    rel = "specs/style/code/names/000100_short-names.md"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    assert f"{rel}:{lines.index('kind: functional') + 1}: kind 'functional'" in result.out
+
+
+def test_check_finds_an_old_diagram_type(kit: Kit, project: Path) -> None:
+    """A state diagram must start with `stateDiagram-v2`, not with `stateDiagram`."""
+    name = "specs/structures/specs/lifecycle/000041_status-life-cycle.md"
+    path = project / name
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        (kit.source / name).read_text(encoding="utf-8").replace("stateDiagram-v2", "stateDiagram"),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "a state diagram must start with stateDiagram-v2 (000034)" in result.out

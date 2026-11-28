@@ -17,7 +17,7 @@ import jsonschema
 from jsonschema.protocols import Validator
 
 from spezi.context import Context, Errors, where
-from spezi.project import Spec
+from spezi.project import Spec, source
 
 PROTOCOL_SECTIONS = ("## Transport", "## Schema", "## Example", "## Compatibility")
 SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
@@ -28,10 +28,10 @@ STRUCTURE_SECTIONS = ("## Diagram", "## Elements")
 DECISION_SECTIONS = ("## Context", "## Decision", "## Alternatives", "## Consequences")
 DIAGRAMS: Mapping[str, tuple[str, ...]] = {
     "class": ("classDiagram",),
-    "state": ("stateDiagram-v2", "stateDiagram"),
+    "state": ("stateDiagram-v2",),
     "sequence": ("sequenceDiagram",),
     "entity": ("erDiagram",),
-    "component": ("flowchart", "graph"),
+    "component": ("flowchart",),
 }
 MERMAID_STYLE = re.compile(
     r"^[ \t]*(?:(?:style|linkStyle)[ \t]+\S+[ \t]+\S|(?:classDef|click|cssClass)[ \t])|:::",
@@ -160,7 +160,7 @@ def _read_schema(rel: str, schema: Path) -> dict[str, object] | str:
     if not schema.is_file():
         return f"{rel}: the schema file {schema.name} is missing (000028)"
     try:
-        data: object = json.loads(schema.read_text(encoding="utf-8"))
+        data: object = json.loads(source(schema))
     except json.JSONDecodeError as error:
         return f"{rel}: {schema.name} is no JSON: {error} (000028)"
     return (

@@ -781,16 +781,17 @@ def _line(text: str, message: str) -> int:
         message: The error without the path.
 
     Returns:
-        The first line with an entry or a reference of the message, else the line of the front
-        matter key at the start of the message, else 1.
+        The first line with an entry or a reference of the message, where the line of the front
+        matter key at the start of the message comes first, else the line of this key, else 1.
     """
     lines = tuple(enumerate(text.splitlines(), 1))
     key = message.split(" ", 1)[0]
+    own = tuple((n, line) for n, line in lines if key in KEYS and line.startswith(f"{key}:"))
     return next(
         (
             n
             for needle in (*QUOTED.findall(message), *NAMED_REF.findall(message))
-            for n, line in lines
+            for n, line in (*own, *lines)
             if needle in line
         ),
         next((n for n, line in lines if key in KEYS and line.startswith(f"{key}:")), 1),

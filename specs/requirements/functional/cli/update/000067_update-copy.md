@@ -2,7 +2,7 @@
 id: "000067"
 title: spezi update resolves the refs again and replaces the copies
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -49,9 +49,9 @@ the shell and run `nix develop`, because a program cannot load its shell again.
 
 The command must stop with an error when `<repo>` is not in `spezi.toml`, when this program is
 an older commit of the kit than the kit commit in `spezi.lock`, when `<repo>` at `<ref>` has no
-folder of `include`, when the kit at `<ref>` has no `specs/.templates/`, or when
-`.gitlab-ci.yml` has an `include` that is not a list. It must then change no file of the
-repository with the error.
+folder of `include`, when the kit at `<ref>` has no `specs/.templates/`, or when the switch
+`ci` is on and `.gitlab-ci.yml` has an `include` that is not a list. It must then change no file
+of the repository with the error.
 
 The command must replace only the parts whose switch in `[features]` is on, and must not change
 `flake.nix` when `flake` is off (000084). Before it copies, the command must run the migrations
