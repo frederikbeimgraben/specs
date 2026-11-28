@@ -88,7 +88,7 @@ specs/
 | [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | spezi configure changes the settings in spezi.toml | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | approved |
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | spezi install brings a project to the state of its settings | approved |
-| [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | spezi list prints every rule | draft |
+| [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | spezi list prints every rule | approved |
 | [F/cli/lsp/000088](/specs/requirements/functional/cli/lsp/000088_language-server.md) | spezi lsp runs the language server | approved |
 | [F/cli/mcp/000074](/specs/requirements/functional/cli/mcp/000074_mcp-server.md) | spezi mcp runs the MCP server | approved |
 | [F/cli/migrate/000081](/specs/requirements/functional/cli/migrate/000081_migrations.md) | spezi migrates a project and its copies to a new kit | approved |
