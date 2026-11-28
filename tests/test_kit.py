@@ -134,6 +134,31 @@ def test_add_with_include_copies_only_the_folders(kit: Kit, project: Path) -> No
     assert _upstream(project)[RULES_REPO]["include"] == ["agents/"]
 
 
+def test_init_leaves_out_the_own_folders_of_the_kit(kit: Kit, project: Path) -> None:
+    """The copy of the kit holds no folder of `own` in the `spezi.toml` of the kit."""
+    assert (project / KIT / "conventions").is_dir()
+    assert not (project / KIT / "requirements").exists()
+    assert not (project / KIT / "workflow/kit").exists()
+    assert (project / KIT / "workflow/specs").is_dir()
+
+
+def test_add_copies_an_own_folder_that_include_names(kit: Kit, project: Path) -> None:
+    """A copy leaves out each folder of `own`, except a folder that `include` names."""
+    (kit.rules / "spezi.toml").write_text('own = ["style/"]\n', encoding="utf-8")
+    rev = kit.commit_rules()
+    copy = project / "specs/.upstream" / RULES_REPO
+    try:
+        assert kit.run(project, "add", RULES_REPO, rev, "--raw").code == 0
+        assert (copy / "agents/work/tests/000002_run-tests.md").is_file()
+        assert not (copy / "style").exists()
+        assert kit.run(project, "remove", RULES_REPO, "--raw").code == 0
+        result = kit.run(project, "add", RULES_REPO, rev, "--include", "style/python/", "--raw")
+        assert result.code == 0, result.out + result.err
+        assert (copy / "style/python/naming/000001_snake-case.md").is_file()
+    finally:
+        git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
+
+
 def test_add_stops_for_a_repository_in_the_settings(kit: Kit, project: Path) -> None:
     """`specs add` stops with an error when the repository is in `spezi.toml` already."""
     assert kit.run(project, "add", RULES_REPO, kit.rules_rev, "--raw").code == 0

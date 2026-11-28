@@ -10,6 +10,8 @@ max_elements = 25
 
 repo = "github.com/frederikbeimgraben/spezi"
 
+own = ["requirements/", "workflow/kit/"]
+
 [features]
 mcp = true
 agents = true

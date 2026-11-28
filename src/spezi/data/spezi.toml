@@ -3,6 +3,7 @@ base_ref = "origin/main"
 code_dirs = []
 code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"]
 max_elements = 25
+own = []
 
 [features]
 mcp = true

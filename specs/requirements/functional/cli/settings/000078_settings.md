@@ -2,7 +2,7 @@
 id: "000078"
 title: spezi.toml holds the settings of the spezi command
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -31,6 +31,7 @@ optional and must have this type and default:
 | `code_dirs` | list of strings | `[]` | The folders with `§` references (000017). |
 | `code_suffixes` | list of strings | `.py`, `.ts`, `.js`, `.go`, `.rs`, `.java`, `.kt`, `.nix`, `.sh` | The file types in `code_dirs`. |
 | `max_elements` | whole number from 1 | `25` | The highest count of elements in one diagram (000037). |
+| `own` | list of strings | `[]` | The folders below `specs/` with the rules of this repository only. A copy of the repository leaves them out (000048). |
 | `[features]` | table | each switch `true` | The switches of the optional parts of the kit (000084). |
 | `[upstream."<repo>"]` | table | none | One table for each direct upstream, with `ref` (string: a tag, a branch or a commit), the optional `include` (list of strings) and the optional `transitive` (list of strings) (000048, 000082, 000092). |
 

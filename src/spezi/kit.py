@@ -37,6 +37,7 @@ from spezi.project import (
     config_file,
     kit_rev,
     kit_source,
+    read_config,
 )
 from spezi.review import broken_references, change_lines, rule_changes, rules_in
 from spezi.settings import (
@@ -326,6 +327,26 @@ def normal_include(include: tuple[str, ...]) -> tuple[str, ...]:
     return folders
 
 
+def own_folders(source: Path, include: tuple[str, ...]) -> tuple[str, ...]:
+    """Return the folders of `own` of a repository that its copy leaves out (§000048).
+
+    A folder of `own` that `include` names, or that holds a folder of `include`, is copied.
+
+    Args:
+        source: The root of a checkout of the repository.
+        include: The folders below `specs/` to copy, or empty for all.
+
+    Returns:
+        The folders below `specs/`, without slashes at the ends.
+    """
+    named = tuple(i.strip("/") for i in include)
+    return tuple(
+        folder
+        for folder in (o.strip("/") for o in read_config(source / CONFIG_NAME).own)
+        if not any(n == folder or n.startswith(f"{folder}/") for n in named)
+    )
+
+
 def copy_rules(
     source: Path,
     project: Project,
@@ -354,7 +375,9 @@ def copy_rules(
         raise KitError(f"{repo} has no specs/ folder")
     if missing:
         raise KitError(f"{repo} has no folder specs/{', specs/'.join(missing)}")
-    replace_tree(source / "specs", project.upstream_dir / repo, include)
+    replace_tree(
+        source / "specs", project.upstream_dir / repo, include, own_folders(source, include)
+    )
     if direct and (source / LOCK_NAME).is_file():
         write_text(
             project.upstream_dir / repo / LOCK_NAME,
