@@ -1,6 +1,6 @@
 ---
 id: "000003"
-title: Python code is documented in Google-style docstrings
+title: Each module, class and function has a docstring
 kind: style
 status: approved
 owner: frederikbeimgraben
@@ -10,11 +10,11 @@ scope:
   - specs/
 ---
 
-# Python code is documented in Google-style docstrings
+# Each module, class and function has a docstring
 
-Every module, class and function must have a docstring in the Google format. A function body
-must not hold a `#` comment. A reason or a note must go into the docstring.
+Each module, class and function must have a docstring.
 
-Reason: One place for the documentation. Tools show a docstring, but not a comment in the body.
+Reason: Tools show the docstring to the reader of the code.
 
-Test: ruff rule set `D` with the Google convention. A review finds a comment in a body.
+Test: The ruff rules `D100` to `D107` find a public name without a docstring (spec 000028). A
+review finds a private name without a docstring.

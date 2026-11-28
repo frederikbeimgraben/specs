@@ -12,10 +12,13 @@ scope:
 
 # The exceptions of the functional style are named
 
-The rules 000001 to 000007 must not apply to these parts:
+The rules of the functional style must not apply to the parts of the list below. These rules are
+(spec 000001, 000002, 000003, 000004, 000005, 000006, 000007, 000009, 000011, 000012, 000013, 000014).
 
-- tests
-- `try`, `with` and `raise`
-- code that a library or the language needs in a different form
+- Tests.
+- `try`, `with` and `raise`.
+- A `for` statement that only causes effects (spec 000010).
+- Code that a library or the language needs in a different form.
 
-Reason: The library or the language needs them in this form.
+Reason: The library or the language needs these parts in this form. An effect needs a
+statement.

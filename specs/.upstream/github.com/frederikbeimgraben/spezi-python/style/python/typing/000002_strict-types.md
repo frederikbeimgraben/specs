@@ -1,6 +1,6 @@
 ---
 id: "000002"
-title: Python code is strictly typed
+title: basedpyright reports no error
 kind: style
 status: approved
 owner: frederikbeimgraben
@@ -10,11 +10,9 @@ scope:
   - specs/
 ---
 
-# Python code is strictly typed
+# basedpyright reports no error
 
-Every function must have a type for each parameter and for its return value. Code must not use
-a bare `Any`. A closed set of values must be an `Enum` or a `Literal`. basedpyright must report
-0 errors with the settings in `pyproject.toml`.
+basedpyright must report 0 errors with the settings in `pyproject.toml`.
 
 Reason: The type checker finds an error before a test or a user does.
 
