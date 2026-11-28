@@ -81,7 +81,6 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
     assert config["features"]["ci"] is True  # type: ignore[index]
     assert git(empty, "config", "--local", "gitlab.user", env=kit.env).strip() == "someone"
     assert not (empty / ".mcp.json").exists()
-    assert "# The base branch." in (empty / "spezi.toml").read_text(encoding="utf-8")
 
 
 def test_init_cancel_changes_no_file(kit: Kit, empty: Path) -> None:

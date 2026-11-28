@@ -2,12 +2,13 @@
 id: "000078"
 title: spezi.toml holds the settings of the spezi command
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_settings.py:test_a_bad_setting_stops_each_command
   - tests/test_settings.py:test_an_unknown_key_of_a_copy_stops_each_command
+  - tests/test_settings.py:test_init_writes_the_settings_without_comments
 implementation:
   - src/spezi/project.py
   - src/spezi/data/spezi.toml
@@ -32,7 +33,7 @@ optional and must have this type and default:
 | `[features]` | table | each switch `true` | The switches of the optional parts of the kit (000084). |
 | `[upstream."<repo>"]` | table | none | One table for each direct upstream, with `ref` (string: a tag, a branch or a commit), the optional `include` (list of strings) and the optional `transitive` (list of strings) (000048, 000082, 000092). |
 
-The template `src/spezi/data/spezi.toml` must hold each key with its default and a comment.
+The template `src/spezi/data/spezi.toml` must hold each key with its default and no comment.
 When `spezi.toml` is no valid TOML, when a key has a different type, when `forge` is not
 `github`, `gitlab` or `codeberg`, or when a key on the top level or in a table
 `[upstream."<repo>"]` is not in the table above, each command must stop with one line
