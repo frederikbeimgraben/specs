@@ -377,13 +377,12 @@ def copy_rules(
     if missing:
         raise KitError(f"{repo} has no folder specs/{', specs/'.join(missing)}")
     replace_tree(
-        source / "specs", project.upstream_dir / repo, include, own_folders(source, include)
+        source / "specs",
+        project.upstream_dir / repo,
+        include,
+        own_folders(source, include),
+        ((LOCK_NAME, source / LOCK_NAME),) if direct and (source / LOCK_NAME).is_file() else (),
     )
-    if direct and (source / LOCK_NAME).is_file():
-        write_text(
-            project.upstream_dir / repo / LOCK_NAME,
-            (source / LOCK_NAME).read_text(encoding="utf-8"),
-        )
 
 
 def write_repo(
@@ -1487,7 +1486,7 @@ def update(
     ref: str | None,
     ask: Ask | None = None,
     recursive: bool = False,
-) -> tuple[tuple[tuple[str, str], ...], tuple[str, ...]]:
+) -> tuple[tuple[tuple[str, str, bool], ...], tuple[str, ...]]:
     """Resolve the ref of one or of each repository again, and replace its copy (spec 000067).
 
     With `ref`, the command first sets `ref` in `spezi.toml`. The kit comes first, so that a
@@ -1501,7 +1500,8 @@ def update(
         recursive: True for `-r`: copy each new transitive upstream without a question.
 
     Returns:
-        The repository and its new commit for each update, and the migrations that ran.
+        The repository, its new commit and whether the commit is not the one of `spezi.lock`
+        before, for each update, and the migrations that ran.
 
     Raises:
         KitError: The repository is not in `spezi.toml`, or git fails.
@@ -1512,7 +1512,7 @@ def update(
         _check_repo(name)
     if name is None and ref is not None:
         raise KitError("usage: spezi update [<repo> [<ref>]]")
-    done: list[tuple[str, str]] = []
+    done: list[tuple[str, str, bool]] = []
     ran: list[str] = []
     with lazy_history() as history:
         own = own_ref(project)
@@ -1546,6 +1546,7 @@ def update(
             )
             include = normal_include(current.config.include.get(target, ()))
             fresh = Project.open(project.root)
+            before = read_lock(fresh.root).get(target)
             commit, copied, plan = fetch_copy(
                 fresh,
                 target,
@@ -1562,7 +1563,7 @@ def update(
             )
             _lock(fresh, target, wanted, commit, chosen)
             own = commit if target == KIT_REPO else own
-            done.append((target, commit))
+            done.append((target, commit, before is None or before.commit != commit))
             ran.extend(copied)
     return tuple(done), tuple(dict.fromkeys(ran))
 

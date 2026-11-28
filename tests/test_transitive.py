@@ -112,6 +112,7 @@ def test_add_with_recursive_copies_the_transitive_upstream(
     more, _, second = _repos(kit, tmp_path)
     result = more.run(project, "add", MID, "main", "-r", "--raw")
     assert result.code == 0, result.out + result.err
+    assert f"installed {BASE} at {second} via {MID}" in result.out
     table = _settings(project)["upstream"][MID]  # type: ignore[index]
     assert table["transitive"] == [BASE]
     entry = read_lock(project)[BASE]
@@ -194,3 +195,31 @@ def test_update_with_recursive_adds_a_new_transitive_upstream(
     assert result.code == 0, result.out + result.err
     assert _settings(project)["upstream"][MID]["transitive"] == [BASE]  # type: ignore[index]
     assert (project / "specs/.upstream" / BASE).is_dir()
+
+
+def test_update_without_a_new_commit_changes_no_file(
+    kit: Kit, project: Path, tmp_path: Path
+) -> None:
+    """A second `spezi update -r` with the same commits lists no changed file and says so."""
+    more, _, second = _repos(kit, tmp_path)
+    assert more.run(project, "add", MID, "main", "-r", "--raw").code == 0
+    assert more.run(project, "update", MID, "-r", "-y", "--raw").code == 0
+    result = more.run(project, "update", MID, "-r", "-y", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert "spezi.lock" not in result.out
+    assert f"{MID} is up to date at " in result.out
+    assert f"{BASE} is up to date at {second} via {MID}" in result.out
+    assert "updated" not in result.out
+
+
+def test_update_lists_a_transitive_upstream_with_a_new_commit(
+    kit: Kit, project: Path, tmp_path: Path
+) -> None:
+    """`spezi update` gives a line for a transitive upstream that gets a new commit."""
+    more, first, second = _repos(kit, tmp_path)
+    _repo(kit, tmp_path / "mid", "000021", _pin(BASE, first))
+    assert more.run(project, "add", MID, "main", "-r", "--raw").code == 0
+    _repo(kit, tmp_path / "mid", "000022", _pin(BASE, second))
+    result = more.run(project, "update", MID, "-y", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert f"updated {BASE} to {second} via {MID}" in result.out

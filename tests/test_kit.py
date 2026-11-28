@@ -203,7 +203,7 @@ def test_update_of_the_kit_runs_the_check(kit: Kit, project: Path) -> None:
     """`specs update` of the kit replaces the kit files and prints the report of the check."""
     result = kit.run(project, "update", "kit", kit.rev, "--raw")
     assert result.code == 0, result.out + result.err
-    assert f"updated github.com/frederikbeimgraben/spezi to {kit.rev}" in result.out
+    assert f"github.com/frederikbeimgraben/spezi is up to date at {kit.rev}" in result.out
     assert re.search(r"0 specs, [1-9][0-9]* upstream, 0 errors", result.out)
 
 
@@ -234,7 +234,7 @@ def test_update_without_arguments_updates_each_repository(kit: Kit, project: Pat
         assert _upstream(project)[RULES_REPO]["ref"] == "main"
         assert _lock(project)[RULES_REPO]["commit"] == rev
         assert f"updated {RULES_REPO} to {rev}" in result.out
-        assert f"updated github.com/frederikbeimgraben/spezi to {kit.rev}" in result.out
+        assert f"github.com/frederikbeimgraben/spezi is up to date at {kit.rev}" in result.out
     finally:
         git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
 

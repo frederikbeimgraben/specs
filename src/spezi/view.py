@@ -11,7 +11,7 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 
-from spezi.changes import MIGRATED, Mark
+from spezi.changes import MIGRATED, REPO_LINE, Mark
 from spezi.check import Count, summary
 from spezi.project import Spec
 
@@ -106,8 +106,9 @@ def done(text: str) -> Text:
 def outcome(text: str, hints: tuple[str, ...]) -> Group:
     """Return the message of a command with a green mark and its hints below it.
 
-    A hint of a migration that ran gets a blue mark, as the lines of the changed files
-    (spec 000081).
+    Each line of the message and each line of a repository gets a green mark (spec 000067,
+    000083). A hint of a migration that ran gets a blue mark, as the lines of the changed
+    files (spec 000081).
 
     Args:
         text: The message.
@@ -117,14 +118,27 @@ def outcome(text: str, hints: tuple[str, ...]) -> Group:
         The message, the migrations, and the other hints.
     """
     return Group(
-        done(text),
-        *(
-            Text.assemble(("↻ ", "bold blue"), (h.removeprefix(MIGRATED), "blue"))
-            if h.startswith(MIGRATED)
-            else Text(h)
-            for h in hints
-        ),
+        *(done(line) for line in text.splitlines()),
+        *(_hint(h) for h in hints),
     )
+
+
+def _hint(hint: str) -> Text:
+    """Return one hint: a migration with a blue mark, a repository with a green mark.
+
+    Args:
+        hint: The hint.
+
+    Returns:
+        The formatted hint.
+    """
+    match hint:
+        case _ if hint.startswith(MIGRATED):
+            return Text.assemble(("↻ ", "bold blue"), (hint.removeprefix(MIGRATED), "blue"))
+        case _ if REPO_LINE.fullmatch(hint):
+            return done(hint)
+        case _:
+            return Text(hint)
 
 
 def file_list(changed: tuple[tuple[Mark, str], ...]) -> Group:

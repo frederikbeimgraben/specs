@@ -39,7 +39,7 @@ from rich_argparse import RichHelpFormatter
 
 from spezi import data, ide, lsp, queries
 from spezi.ask import Ask, Cancelled, Stop, asker
-from spezi.changes import MIGRATED, Mark, lines, recording
+from spezi.changes import MIGRATED, Mark, lines, recording, repos_first
 from spezi.check import run, summary
 from spezi.configure import configure, set_value
 from spezi.devshell import init_flake, update_flake
@@ -293,7 +293,8 @@ def _check(
     project = Project.open(root)
     count, errors = run(project, write=write)
     changed = lines(log, project.root)
-    head = () if message is None else (_lines(*message),)
+    arranged = None if message is None else (message[0], repos_first(message[1]))
+    head = () if arranged is None else (_lines(*arranged),)
     checked = data.report(count, tuple(errors))
     _emit(
         mode,
@@ -304,14 +305,14 @@ def _check(
             + f"{summary(count, errors)}\n"
         ),
         lambda: Group(
-            *(() if message is None else (outcome(*message),)),
+            *(() if arranged is None else (outcome(*arranged),)),
             file_list(changed),
             report(count, tuple(errors)),
         ),
         lambda: (
             {**checked, "changed": data.changed(changed)}
-            if message is None
-            else dict(data.result(message[0], message[1], checked, changed))
+            if arranged is None
+            else dict(data.result(arranged[0], arranged[1], checked, changed))
         ),
     )
     return 1 if errors else 0
@@ -435,14 +436,17 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
         case "update":
             project = Project.open()
             done, ran = update(project, args.repo, args.ref, _ask(args, mode), args.recursive)
-            kit = dict(done).get(KIT_REPO)
+            kit = {repo: commit for repo, commit, _ in done}.get(KIT_REPO)
             hints = (
                 *(f"{MIGRATED}{d}" for d in ran),
                 *(update_flake(project.root, kit) if kit and project.config.on("flake") else ()),
                 *(ide.refresh(Project.open(project.root)) if kit else ()),
-                *install(Project.open(project.root)),
+                *install(Project.open(project.root), same=True),
             )
-            text = "; ".join(f"updated {repo} to {commit}" for repo, commit in done)
+            text = "\n".join(
+                f"updated {repo} to {commit}" if new else f"{repo} is up to date at {commit}"
+                for repo, commit, new in done
+            )
             return _check(True, mode, log, (text, hints), project.root)
         case "add":
             project = Project.open()

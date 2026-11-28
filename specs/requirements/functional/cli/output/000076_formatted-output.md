@@ -9,6 +9,7 @@ tests:
   - tests/test_output.py:test_terminal_output_has_color
   - tests/test_output.py:test_raw_output_has_no_color
   - tests/test_output.py:test_a_migration_has_a_blue_mark
+  - tests/test_output.py:test_each_repository_has_a_green_mark
   - tests/test_output.py:test_help_on_terminal_has_color
   - tests/test_output.py:test_usage_on_terminal_has_color
   - tests/test_output.py:test_help_with_no_color_has_no_color
@@ -31,7 +32,7 @@ output:
 | `list`, `search` | A table with the columns (spec 000072), with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
-| `init`, `update`, `add`, `new`, `setup-ide` | The message with a green mark. Below it, each migration that ran (spec 000081) on its own line with a blue mark `↻` and without `migrated:`. |
+| `init`, `update`, `add`, `new`, `setup-ide` | Each line of the message with a green mark. Below it, each line of a repository (spec 000067, 000083) with a green mark, and each migration that ran (spec 000081) on its own line with a blue mark `↻` and without `migrated:`. |
 
 With the option `--raw` after the command, or when stdout is not a terminal, the command must
 print the plain text of its own spec, with no color and no table. With `--json`, the command
