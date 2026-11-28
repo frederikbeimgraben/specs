@@ -30,16 +30,16 @@ print its data as JSON, indented with two spaces, also on a terminal. `--json` a
 | `list`, `search` | A list with one rule object for each line (spec 000072). |
 | `resolve` | The rule object. |
 | `show` | `long`, `path`, `meta` with the front matter as an object, and `body` with the text after the front matter. |
-| `check` | `specs` with the count of the rules of the project, `upstream` with the count of the rules of the copies (spec 000065), `errors`, and `changed` (spec 000077). |
-| `init`, `update`, `add`, `new`, `setup-ide` | `message`, `hints`, `check` with `specs`, `upstream` and `errors` or `null`, and `changed`. |
+| `check` | `specs` with the count of the rules of the project, `upstream` with the count of the rules of the copies (spec 000065), `errors`, `warnings` (spec 000093), and `changed` (spec 000077). |
+| `init`, `update`, `add`, `new`, `setup-ide` | `message`, `hints`, `check` with `specs`, `upstream`, `errors` and `warnings` or `null`, and `changed`. |
 
 A rule object must hold `kind` (the kind letter), `id` (the short form (spec 000047)), `long`
 (the long form), `status`, `title` and `path`. An error object must hold `file`, `line` (a whole
 number from 1), `message` and `rule` (the number of the rule that the error names). It must hold
-`null` for a part that the error line does not have. Each object of `changed` must hold `mark`
-and `path`. A command can stop with an error, also for a wrong argument. Then it must print
-`{"error": "<error>"}` to stdout, nothing to stderr, and end with the exit code 1. A path must
-be relative to the root of the project.
+`null` for a part that the error line does not have. A warning object must have the same keys.
+Each object of `changed` must hold `mark` and `path`. A command can stop with an error, also for
+a wrong argument. Then it must print `{"error": "<error>"}` to stdout, nothing to stderr, and
+end with the exit code 1. A path must be relative to the root of the project.
 
 Reason: A script reads every command in the same way, without parsing text.
 

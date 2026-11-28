@@ -41,11 +41,11 @@ that `ref` names. It must write the `ref`, the commit, `include` and the hash to
 of `include` and must keep `include`. Only a folder that the user adds (spec 000085) changes it.
 The kit comes first.
 
-The message must have one line for each repository, in the order of the update:
+The message must have one line for each repository, in the order of the update. The line is
 `updated <repo> to <commit>`, or `<repo> is up to date at <commit>` when the new commit is the
 commit of `<repo>` in `spezi.lock` before the command. Below the message, the command must give
-one line for each transitive upstream (spec 000092), sorted by repository: the lines of
-`spezi install` (spec 000083), and `<repo> is up to date at <commit> via <direct>` for each
+one line for each transitive upstream (spec 000092), sorted by repository. These are the lines
+of `spezi install` (spec 000083), and `<repo> is up to date at <commit> via <direct>` for each
 transitive upstream whose commit did not change. `<direct>` is the list `via` of `spezi.lock`
 (spec 000082), separated by `, `.
 

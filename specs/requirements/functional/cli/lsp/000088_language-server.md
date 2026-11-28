@@ -28,14 +28,15 @@ Markdown file that git tracks, and the files of `code_dirs` with the suffixes of
 `code_suffixes` (spec 000078).
 
 The server must show each error of `spezi check` (spec 000065) as a diagnostic with the severity
-error, at the line of the error. An error without a line must go to line 1 of its file. An
-error of a folder or of a missing file must go to line 1 of `spezi.toml`, with its path in the
-text. The server must check the project:
+error, at the line of the error. It must show each warning (spec 000093) in the same way, with
+the severity warning. An error without a line must go to line 1 of its file. An error of a
+folder or of a missing file must go to line 1 of `spezi.toml`, with its path in the text. The
+server must check the project:
 
 1. When the client starts it: the whole project, from the files on the disk.
 2. 300 ms after the last change of an open file: only this file, with the text in the editor.
 3. When the client saves a file: the whole project, from the files on the disk. The server
-   must remove each diagnostic of a file that has no error now.
+   must remove each diagnostic of a file that has no error and no warning now.
 
 On a reference to a rule, the server must give a hover and a definition. In the front matter
 of a spec, a reference is a rule ID in the short or the long form (spec 000047). In each other
