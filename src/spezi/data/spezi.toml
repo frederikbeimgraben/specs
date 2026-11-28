@@ -1,47 +1,14 @@
-# Settings of the spezi command (000078). Each key is optional.
-
-# The full name of this project, <host>/<group>/.../<repo>. A transitive upstream of this name
-# gets no copy (000092). spezi init asks for it.
-# repo = "github.com/<owner>/<repo>"
-
-# github, gitlab or codeberg.
 forge = "{forge}"
-
-# The base branch. A spec number that this branch took after your branch left it is an error.
 base_ref = "origin/main"
-
-# The folders that hold code. The check finds a § reference to a rule that does not exist.
 code_dirs = []
-
-# The file types of the code in code_dirs.
 code_suffixes = [".py", ".ts", ".js", ".go", ".rs", ".java", ".kt", ".nix", ".sh"]
-
-# The highest count of elements in one structure diagram (000037).
 max_elements = 25
 
-# The optional parts of the kit (000084). true: spezi install writes the part and keeps it.
-# false: spezi install removes it. spezi init and spezi update also follow these switches.
 [features]
-# The MCP server spezi in .mcp.json.
 mcp = true
-# The block with the rules for agents in AGENTS.md (000079).
 agents = true
-# CLAUDE.md with the line @AGENTS.md. It needs agents = true.
 claude = true
-# The CI job, for example .github/workflows/spezi.yml.
 ci = true
-# The skills .claude/skills/spezi-*.
 skills = true
-# flake.nix with a devShell with the command spezi.
 flake = true
-# .envrc with use flake.
 envrc = true
-
-# The rules of a different repository, copied to specs/.upstream/<host>/<group>/.../<repo>/ (000048).
-# ref is a tag, a branch or a commit. spezi.lock holds the commit of the copy (000082).
-# spezi update resolves ref again, spezi add adds a repository, spezi install changes no ref.
-# include is optional: the folders below specs/ that the copy holds, for example ["style/python/"].
-# Without include, the copy holds all rules. spezi add --include sets it.
-# transitive is optional: the upstreams of this repository that the project also copies, at the
-# commit of its spezi.lock (000092). spezi init, spezi add and spezi update ask for it, and -r
-# takes each one.

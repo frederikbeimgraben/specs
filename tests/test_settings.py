@@ -36,6 +36,15 @@ def test_a_bad_setting_stops_each_command(
         assert result.err.count("\n") == 1
 
 
+def test_init_writes_the_settings_without_comments(kit: Kit, project: Path) -> None:
+    """`spezi init` writes `spezi.toml` with each key and its default, and with no comment."""
+    text = (project / "spezi.toml").read_text(encoding="utf-8")
+    assert "#" not in text
+    assert 'base_ref = "origin/main"' in text
+    assert "max_elements = 25" in text
+    assert "envrc = true" in text
+
+
 def test_init_writes_agents_and_claude(kit: Kit, project: Path) -> None:
     """`specs init` creates `CLAUDE.md` with the import and lists the approved A and W rules."""
     agents = (project / "AGENTS.md").read_text(encoding="utf-8")
