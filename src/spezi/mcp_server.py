@@ -31,7 +31,7 @@ def _installed(project: Project, head: Callable[[], tuple[str, ...]]) -> str:
         head: Makes the change before `install` and returns its messages.
 
     Returns:
-        The text, with the report of the check at the end (§000077).
+        The text, with the report of the check at the end (spec 000077).
     """
     with recording() as log:
         messages = head()

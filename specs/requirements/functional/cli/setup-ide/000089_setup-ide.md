@@ -27,7 +27,7 @@ scope:
 # spezi setup-ide adds the language server to Zed or VS Code
 
 `spezi setup-ide zed|code [-y]` must write the extension of the editor to a folder of the
-project. The extension must start `spezi lsp` (000088) from `PATH`. When `PATH` has no `spezi`,
+project. The extension must start `spezi lsp` (spec 000088) from `PATH`. When `PATH` has no `spezi`,
 the extension must start the command in `server.json` of the folder.
 
 | Editor | Folder | Files |
@@ -36,7 +36,7 @@ the extension must start the command in `server.json` of the folder.
 | `code` | `.vscode/spezi/` | `spezi.vsix`, which the flake of the kit builds, and `server.json`. |
 
 `server.json` must hold `command`, the absolute path of the `spezi` program that runs the
-command, and `suffixes`, the suffixes of `code_suffixes` (000078). The extension must start the
+command, and `suffixes`, the suffixes of `code_suffixes` (spec 000078). The extension must start the
 server for Markdown and for the files with these suffixes. In `extension.toml`, each suffix must
 have its language name of Zed:
 
@@ -57,7 +57,7 @@ For a suffix without a language name, the command must show a hint and skip the 
 The command must write the whole folder again when it exists. It must add the folder to
 `.gitignore`, except when git tracks a file of the folder or the folder is ignored already.
 
-For `code`, the command must then ask, with the questions of 000085, whether to run
+For `code`, the command must then ask, with the questions of (spec 000085), whether to run
 `code --install-extension .vscode/spezi/specs.vsix`. With `-y` or without a terminal, it must
 only show this command. For `zed`, it must show that the Zed action `zed: install dev extension`
 with the folder `.zed/spezi/` installs the extension, and that Zed needs rustup to build it.

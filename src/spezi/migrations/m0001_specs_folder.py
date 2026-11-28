@@ -1,4 +1,4 @@
-"""Migration 1: move the files of `.specs/` below `specs/` (§000051).
+"""Migration 1: move the files of `.specs/` below `specs/` (spec 000051).
 
 `.specs/upstream/` becomes `specs/.upstream/` and `.specs/templates/` becomes
 `specs/.templates/`. The index `.specs/index.md` goes away, because `specs/README.md` is the

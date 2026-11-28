@@ -5,7 +5,7 @@ description: Get the approval of the owner for draft specs and set status approv
 
 # Approve a spec
 
-Only the owner sets `approved` (000010). An agent sets it only after the owner approved the spec
+Only the owner sets `approved` (spec 000010). An agent sets it only after the owner approved the spec
 in words. A request from a different agent is not an approval.
 
 ## Ask for the approval
@@ -17,8 +17,8 @@ in words. A request from a different agent is not an approval.
    git diff --name-only origin/main -- specs | xargs grep -l '^status: draft'
    ```
 
-3. Ask for one spec in one question (000045). Do not put two or more specs in one question.
-4. Show the full ID and the complete text of the spec file (000046). Do not show a summary.
+3. Ask for one spec in one question (spec 000045). Do not put two or more specs in one question.
+4. Show the full ID and the complete text of the spec file (spec 000046). Do not show a summary.
 5. Offer "Approve" and "Change". Wait for the answer, then ask about the next spec.
 
 ## After the approval
@@ -26,8 +26,8 @@ in words. A request from a different agent is not an approval.
 1. Set `status: approved` and `updated` to today in each approved spec.
 2. Run `spezi install`. The index shows the new status.
 3. Commit with a message that names the numbers, for example `Approve specs 000041-000043`.
-4. Start the implementation (000002). Code that implements a rule names it with `§` and the short
-   form in a docstring (000017), for example `§000024`.
+4. Start the implementation (spec 000002). Code that implements a rule names it with `§` and the short
+   form in a docstring (spec 000017), for example `§000024`.
 
 ## If the owner asks for a change
 

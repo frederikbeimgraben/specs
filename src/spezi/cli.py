@@ -18,7 +18,7 @@ Usage:
     spezi lsp
 
 Each command except `mcp` and `lsp` takes `--raw` or `--json`. On a terminal, `init`, `add`,
-`update` and `configure` ask questions; `--yes` takes the proposals instead (§000085).
+`update` and `configure` ask questions; `--yes` takes the proposals instead (spec 000085).
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 
 
 class _Help(RichHelpFormatter):
-    """The help in the colors of the other output, with the words of argparse (§000076)."""
+    """The help in the colors of the other output, with the words of argparse (spec 000076)."""
 
     styles: ClassVar[dict[str, StyleType]] = {
         **RichHelpFormatter.styles,
@@ -70,7 +70,7 @@ class _Help(RichHelpFormatter):
 
 
 def _colored(stream: SupportsWrite[str]) -> bool:
-    """Tell if the help on a stream has color (§000076).
+    """Tell if the help on a stream has color (spec 000076).
 
     Args:
         stream: The stream of the help.
@@ -92,8 +92,8 @@ class UsageError(Exception):
 class _Parser(argparse.ArgumentParser):
     """The parser of the command line.
 
-    It colors its help and its usage only on a terminal (§000076). It stops with
-    `{"error": ...}` when the command line has `--json` (§000080).
+    It colors its help and its usage only on a terminal (spec 000076). It stops with
+    `{"error": ...}` when the command line has `--json` (spec 000080).
     """
 
     @override
@@ -202,7 +202,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 class Mode(Enum):
-    """The form of the output (§000076, §000080)."""
+    """The form of the output (spec 000076, 000080)."""
 
     PRETTY = auto()
     RAW = auto()
@@ -256,7 +256,7 @@ def _emit(
 
 
 def _raw_changes(changed: tuple[tuple[Mark, str], ...]) -> str:
-    """Return the changed files as plain text, one `<mark> <path>` on each line (§000077).
+    """Return the changed files as plain text, one `<mark> <path>` on each line (spec 000077).
 
     Args:
         changed: The mark and the path of each change.
@@ -277,8 +277,8 @@ def _check(
     """Run the check and print the message, the report and the changed files.
 
     `install` writes the index and `AGENTS.md` first. `init`, `update` and `add` end with
-    `install` and give their message and hints (§000066, §000067, §000068, §000083). The changed
-    files come before the report, so that the report is at the end (§000077).
+    `install` and give their message and hints (spec 000066, 000067, 000068, 000083). The changed
+    files come before the report, so that the report is at the end (spec 000077).
 
     Args:
         write: True to write the index and `AGENTS.md` first.
@@ -351,7 +351,7 @@ def _lines(text: str, hints: tuple[str, ...]) -> str:
 
 
 def _ask(args: argparse.Namespace, mode: Mode) -> Ask:
-    """Return the questions on a terminal, else the proposals (§000085).
+    """Return the questions on a terminal, else the proposals (spec 000085).
 
     Args:
         args: The parsed command line.
@@ -364,7 +364,7 @@ def _ask(args: argparse.Namespace, mode: Mode) -> Ask:
 
 
 def _configure(project: Project, args: argparse.Namespace, mode: Mode) -> str:
-    """Change `spezi.toml` with the menu or with one key and its value (§000086).
+    """Change `spezi.toml` with the menu or with one key and its value (spec 000086).
 
     Args:
         project: The project.
@@ -518,7 +518,7 @@ def main() -> None:
     """Run the command line and exit with its code.
 
     A command that stops prints `specs: <error>` to stderr, or with `--json` the object
-    `{"error": "<error>"}` to stdout (§000080). The exit code is then 1.
+    `{"error": "<error>"}` to stdout (spec 000080). The exit code is then 1.
     """
     try:
         args = parser().parse_args()

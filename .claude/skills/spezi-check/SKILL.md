@@ -18,18 +18,18 @@ Each error names the file and the rule number. Read that rule with `spezi show <
 the spec. Do not change a rule of the kit to make the check pass.
 
 `spezi.toml` sets `forge`, `base_ref`, `code_dirs`, `code_suffixes`, `max_elements` and
-`upstream` with `ref` and `include` (000078).
+`upstream` with `ref` and `include` (spec 000078).
 
 ## Review what the checker cannot see
 
 For each changed spec:
 
-- One rule, one thing (000019). A test can decide (000020).
-- ASD-STE100: active voice, short sentences, one word for one thing (000025).
-- No history, no ticket, no pull request number (000024).
-- `Reason:` keeps the cause (000022).
-- `implementation` and `tests` name the real code (000009, 000023).
-- A structure spec shows the code as it is (000038).
+- One rule, one thing (spec 000019). A test can decide (spec 000020).
+- ASD-STE100: active voice, short sentences, one word for one thing (spec 000025).
+- No history, no ticket, no pull request number (spec 000024).
+- `Reason:` keeps the cause (spec 000022).
+- `implementation` and `tests` name the real code (spec 000009, 000023).
+- A structure spec shows the code as it is (spec 000038).
 
 ## Check the code against the specs
 
@@ -40,6 +40,6 @@ For each changed spec:
    grep -rn "§" <path>
    ```
 
-2. Read each rule. If the code and a rule do not agree, tell the owner (000001). Do not change
+2. Read each rule. If the code and a rule do not agree, tell the owner (spec 000001). Do not change
    the code or the spec silently.
-3. A pull request with code names the approved spec that it implements (000002).
+3. A pull request with code names the approved spec that it implements (spec 000002).

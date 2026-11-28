@@ -13,7 +13,7 @@ scope:
 
 # The exceptions of the functional style are named
 
-The rules 000052 to 000058 must not apply to these parts:
+The rules (spec 000052) to (spec 000058) must not apply to these parts:
 
 - tests
 - `try`, `with` and `raise`

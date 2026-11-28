@@ -1,7 +1,7 @@
 """Install the kit in a project, and update the copies of different repositories.
 
 `init` replaces the old install script. `update` and `add` replace a copy below
-`specs/.upstream/` with the `specs/` folder of its repository at one commit (§000048).
+`specs/.upstream/` with the `specs/` folder of its repository at one commit (spec 000048).
 """
 
 from __future__ import annotations
@@ -336,8 +336,8 @@ def copy_rules(
 ) -> None:
     """Replace the copy of one repository with its `specs/` folder or the folders of `include`.
 
-    The copy holds `specs/README.md` only without `include` (§000048). The copy of a direct
-    upstream also holds the `spezi.lock` of the repository (§000092).
+    The copy holds `specs/README.md` only without `include` (spec 000048). The copy of a direct
+    upstream also holds the `spezi.lock` of the repository (spec 000092).
 
     Args:
         source: The root of a checkout of the repository.
@@ -378,7 +378,7 @@ def write_repo(
         repo: The repository as `<host>/<group>/.../<repo>`.
         ref: The tag, the branch or the commit.
         include: The folders of the copy, empty for all, or None to keep `include` as it is.
-        transitive: The transitive upstreams to copy (§000092), or None to keep them.
+        transitive: The transitive upstreams to copy (spec 000092), or None to keep them.
 
     Raises:
         KitError: The new `spezi.toml` breaks a rule of 000078.
@@ -480,7 +480,7 @@ def gitlab_root_text(root: Path) -> str | None:
 def check_forge(root: Path, forge: str, ci: bool) -> None:
     """Fail before a change when the kit cannot write its CI file for a forge.
 
-    With the switch `ci` off, the kit does not read `.gitlab-ci.yml` (§000084).
+    With the switch `ci` off, the kit does not read `.gitlab-ci.yml` (spec 000084).
 
     Args:
         root: The root of the project.
@@ -512,7 +512,7 @@ def templates(source: Path) -> Path:
 def install_kit_files(source: Path, project: Project, ref: str) -> None:
     """Replace the templates, and the skills, the CI file and the MCP server that are on.
 
-    The switches `skills`, `ci` and `mcp` of `[features]` choose the parts (§000084).
+    The switches `skills`, `ci` and `mcp` of `[features]` choose the parts (spec 000084).
 
     Args:
         source: The root of the kit at `ref`.
@@ -637,12 +637,12 @@ def check_program(history: History, own: str | None) -> None:
 
 @dataclass(frozen=True, slots=True)
 class Plan:
-    """What the questions before a copy chose (§000085).
+    """What the questions before a copy chose (spec 000085).
 
     Attributes:
         include: The folders below `specs/` to copy, or empty for all.
         keep: The text of each changed template or skill that stays as it is.
-        transitive: The transitive upstreams to copy (§000092), or None to keep the list.
+        transitive: The transitive upstreams to copy (spec 000092), or None to keep the list.
     """
 
     include: tuple[str, ...]
@@ -677,7 +677,7 @@ def fetch_copy(
         kit_files: True to also replace the templates, the skills, the CI file and the MCP
             server entry from the kit.
         review: Asks the questions before the copy, with the checkout and its commit, or None.
-        direct: True for a direct upstream, False for a transitive upstream (§000092).
+        direct: True for a direct upstream, False for a transitive upstream (spec 000092).
 
     Returns:
         The commit of the copy, the descriptions of the migrations of the copy that ran, and
@@ -746,7 +746,7 @@ def stale_copies(project: Project) -> tuple[str, ...]:
 
 
 def sync_copies(project: Project, history: History) -> tuple[str, ...]:
-    """Load each copy again that does not agree with `spezi.lock` and `spezi.toml` (§000083).
+    """Load each copy again that does not agree with `spezi.lock` and `spezi.toml` (spec 000083).
 
     A copy whose `ref` in `spezi.toml` did not change comes from its commit in `spezi.lock`.
     Else the command resolves `ref` again.
@@ -791,7 +791,7 @@ def sync_transitive(project: Project, history: History) -> tuple[str, ...]:
 
     The commit and the folders come from the `spezi.lock` in the copy of each direct upstream.
     A copy and an entry of `spezi.lock` that no table and no list `transitive` names go
-    (§000083, §000092). A repository with a conflict keeps its copy; the check shows the error.
+    (spec 000083, 000092). A repository with a conflict keeps its copy; the check shows the error.
 
     Args:
         project: The project.
@@ -860,7 +860,7 @@ def _fetch_transitive(
 def ask_transitive(
     ask: Ask, direct: str, offered: tuple[str, ...], recursive: bool
 ) -> tuple[str, ...]:
-    """Ask which transitive upstreams of a direct upstream to copy (§000085).
+    """Ask which transitive upstreams of a direct upstream to copy (spec 000085).
 
     Args:
         ask: The questions.
@@ -963,7 +963,7 @@ def suffix_choices(
 
 
 def _features_answer(ask: Ask) -> tuple[str, ...]:
-    """Ask for the parts of the kit until `claude` comes only with `agents` (§000084).
+    """Ask for the parts of the kit until `claude` comes only with `agents` (spec 000084).
 
     Args:
         ask: The questions.
@@ -980,7 +980,7 @@ def _features_answer(ask: Ask) -> tuple[str, ...]:
 
 @dataclass(frozen=True, slots=True)
 class Start:
-    """The answers of the questions of `init` (§000085).
+    """The answers of the questions of `init` (spec 000085).
 
     Attributes:
         forge: The forge.
@@ -989,8 +989,8 @@ class Start:
         code_suffixes: The file types of the code.
         features: The parts of the kit that are on.
         owner: The login to write to `git config --local <forge>.user`, or empty.
-        repo: The full name of the project, or empty (§000092).
-        transitive: The transitive upstreams of the kit to copy (§000092).
+        repo: The full name of the project, or empty (spec 000092).
+        transitive: The transitive upstreams of the kit to copy (spec 000092).
     """
 
     forge: str
@@ -1056,7 +1056,7 @@ def ask_start(
     kit_lock: Mapping[str, Locked] | None = None,
     recursive: bool = False,
 ) -> Start:
-    """Ask the questions of `init`, or take their proposals (§000085).
+    """Ask the questions of `init`, or take their proposals (spec 000085).
 
     Args:
         root: The root of the project.
@@ -1149,9 +1149,9 @@ def _write_start(root: Path, start: Start) -> None:
 def init(
     root: Path, forge: str | None, ask: Ask | None = None, recursive: bool = False
 ) -> tuple[Project, str]:
-    """Ask the questions, write `spezi.toml` and copy the kit at its highest tag (§000066).
+    """Ask the questions, write `spezi.toml` and copy the kit at its highest tag (spec 000066).
 
-    The transitive upstreams of the kit come with the steps of `spezi install` (§000092).
+    The transitive upstreams of the kit come with the steps of `spezi install` (spec 000092).
 
     Args:
         root: The root of the project.
@@ -1189,7 +1189,7 @@ def init(
 
 
 def offer_lines(root: Path, features: Mapping[str, bool], ask: Ask) -> None:
-    """Offer to add the missing line to an `.envrc` and a `CLAUDE.md` that exist (§000085).
+    """Offer to add the missing line to an `.envrc` and a `CLAUDE.md` that exist (spec 000085).
 
     Args:
         root: The root of the project.
@@ -1335,7 +1335,7 @@ def _rel_files(folder: Path) -> tuple[Path, ...]:
 def _keep_answers(
     project: Project, changed: Mapping[Path, tuple[str, str]], ask: Ask
 ) -> Mapping[Path, str]:
-    """Ask for each changed template and skill: overwrite, keep or cancel (§000085).
+    """Ask for each changed template and skill: overwrite, keep or cancel (spec 000085).
 
     Args:
         project: The project.
@@ -1383,7 +1383,7 @@ def _update_review(
     ask: Ask,
     recursive: bool = False,
 ) -> Review:
-    """Return the questions of `update` for one repository (§000085).
+    """Return the questions of `update` for one repository (spec 000085).
 
     Args:
         project: The project.
@@ -1454,7 +1454,7 @@ def update(
     ask: Ask | None = None,
     recursive: bool = False,
 ) -> tuple[tuple[tuple[str, str], ...], tuple[str, ...]]:
-    """Resolve the ref of one or of each repository again, and replace its copy (§000067).
+    """Resolve the ref of one or of each repository again, and replace its copy (spec 000067).
 
     With `ref`, the command first sets `ref` in `spezi.toml`. The kit comes first, so that a
     different repository is measured against the new kit.
@@ -1559,7 +1559,7 @@ def _add_review(
     ask: Ask,
     recursive: bool = False,
 ) -> Review:
-    """Return the questions of `add` (§000085).
+    """Return the questions of `add` (spec 000085).
 
     Args:
         project: The project.
@@ -1599,7 +1599,7 @@ def add(
     ask: Ask | None = None,
     recursive: bool = False,
 ) -> tuple[str, tuple[str, ...]]:
-    """Add the copy of a new repository (§000068).
+    """Add the copy of a new repository (spec 000068).
 
     Args:
         project: The project.

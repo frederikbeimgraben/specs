@@ -1,4 +1,4 @@
-"""Change the values of `spezi.toml` and keep its comments and its order (§000086).
+"""Change the values of `spezi.toml` and keep its comments and its order (spec 000086).
 
 `spezi configure` and the questions of `init` and `add` change `spezi.toml` with tomlkit, so
 that only the values change.

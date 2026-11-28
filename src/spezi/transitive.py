@@ -1,4 +1,4 @@
-"""The transitive upstreams: the upstreams that the copy of a direct upstream brings (§000092).
+"""The transitive upstreams: the upstreams that the copy of a direct upstream brings (spec 000092).
 
 The copy of each direct upstream holds the `spezi.lock` of its repository. The list
 `transitive` in the table of the direct upstream names the repositories of that file that the

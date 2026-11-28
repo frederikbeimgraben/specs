@@ -16,4 +16,4 @@ scope:
 A data type must be immutable unless a write needs it. Its collection fields must be
 immutable collections too.
 
-Reason: 000055 needs data that cannot change.
+Reason: (spec 000055) needs data that cannot change.

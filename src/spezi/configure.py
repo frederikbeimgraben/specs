@@ -1,4 +1,4 @@
-"""`spezi configure`: change the settings of `spezi.toml` in a menu, or one key at a time (§000086).
+"""`spezi configure`: change the settings of `spezi.toml` in a menu, or one key at a time (spec 000086).
 
 The menu shows each key with its value, and each repository of `[upstream]`. A change stays in
 memory until `save`. `save` writes `spezi.toml` with its comments, and the command then runs
@@ -235,7 +235,7 @@ def _add_repo(document: tomlkit.TOMLDocument, ask: Ask) -> None:
 
 
 def configure(project: Project, ask: Ask) -> bool:
-    """Show the menu of `spezi configure` until `save` or `discard` (§000086).
+    """Show the menu of `spezi configure` until `save` or `discard` (spec 000086).
 
     Args:
         project: The project.

@@ -16,4 +16,4 @@ scope:
 Code must split an expression that is deeper than three levels or longer than 8 lines. The
 parts must become named locals or a named helper function.
 
-Reason: The goal of 000052 is code that is easier to read, not one long expression.
+Reason: The goal of (spec 000052) is code that is easier to read, not one long expression.

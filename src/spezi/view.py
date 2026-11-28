@@ -1,4 +1,4 @@
-"""The formatted output of the command `spezi` for a terminal (§000076)."""
+"""The formatted output of the command `spezi` for a terminal (spec 000076)."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ def console() -> Console:
 
 
 def table(specs: Iterable[Spec]) -> Table:
-    """Return a table of rules: kind letter, short form, status and title (§000072).
+    """Return a table of rules: kind letter, short form, status and title (spec 000072).
 
     Args:
         specs: The rules.
@@ -104,7 +104,7 @@ def done(text: str) -> Text:
 
 
 def file_list(changed: tuple[tuple[Mark, str], ...]) -> Group:
-    """Return the changed files as in `git status --short`, with a color for each mark (§000077).
+    """Return the changed files as in `git status --short`, with a color for each mark (spec 000077).
 
     Args:
         changed: The mark and the path of each change.

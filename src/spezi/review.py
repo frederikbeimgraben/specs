@@ -1,4 +1,4 @@
-"""Compare two versions of a copy before `update` or `add` replaces it (§000085).
+"""Compare two versions of a copy before `update` or `add` replaces it (spec 000085).
 
 The summary lists each new, changed and removed rule. `update` also finds the project rules
 that refer to a rule that the new version replaces or removes, and the templates and skills that
@@ -10,9 +10,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
-from spezi.check import FOREIGN_REF, INLINE_CODE
+from spezi.check import FOREIGN_REF
 from spezi.context import where
 from spezi.project import IN_FORCE, Project, Spec, hidden, parse_spec
+from spezi.refs import INLINE_CODE
 
 type Change = tuple[str, str, str]
 

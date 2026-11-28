@@ -3,10 +3,10 @@
 The binding rules of this project. The kind folders of `specs/` hold the rules
 of the project, `specs/.upstream/` the rules of different repositories and
 `specs/.templates/` the templates. The command `spezi install` writes this
-file. Do not change it by hand (000007).
+file. Do not change it by hand (spec 000007).
 
 A new spec starts with
-`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).
+`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` (spec 000008).
 
 ## Tree
 
@@ -128,6 +128,6 @@ specs/
 
 ## Upstream
 
-The rules of different repositories that apply to this project (000049).
+The rules of different repositories that apply to this project (spec 000049).
 
 No rules.

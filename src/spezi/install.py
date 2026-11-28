@@ -1,4 +1,4 @@
-"""`spezi install`: bring a project to the state of its `spezi.toml` and `spezi.lock` (§000083).
+"""`spezi install`: bring a project to the state of its `spezi.toml` and `spezi.lock` (spec 000083).
 
 The command changes no pin. It runs the migrations, loads each copy that does not agree with
 `spezi.lock`, writes each missing file of the kit and keeps each file that exists.
@@ -229,7 +229,7 @@ def _remove_gitlab_include(root: Path) -> None:
 
 
 def remove_off(project: Project, commit: str) -> tuple[str, ...]:
-    """Remove each part of the kit whose switch in `[features]` is off (§000084).
+    """Remove each part of the kit whose switch in `[features]` is off (spec 000084).
 
     `flake.nix`, `.envrc` and `CLAUDE.md` go away only when they hold only the text of the kit.
     Else the command gives a hint with what to remove by hand.

@@ -16,7 +16,7 @@ scope:
 
 A spec must change its status only along an arrow of this diagram. A spec with `replaced` or
 `removed` must not go back to `draft` or `approved`. A change of that rule must get a new spec
-with a new number (000013).
+with a new number (spec 000013).
 
 ## Diagram
 
@@ -41,7 +41,7 @@ stateDiagram-v2
 | `replaced` | specs/conventions/specs/format/000010_status.md | A different spec replaces the spec and names it in `replaces`. `replaced_by` names that spec. |
 | `removed` | specs/conventions/specs/format/000010_status.md | The spec is not in force. The number stays taken. |
 
-Reason: A number is never used again (000013). The diagram shows that a spec that left force
+Reason: A number is never used again (spec 000013). The diagram shows that a spec that left force
 stays out of force.
 
 Test: Review.

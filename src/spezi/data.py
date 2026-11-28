@@ -1,4 +1,4 @@
-"""The JSON forms of the output of the command `spezi` (§000080)."""
+"""The JSON forms of the output of the command `spezi` (spec 000080)."""
 
 from __future__ import annotations
 

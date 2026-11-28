@@ -1,4 +1,4 @@
-"""Keep the input `spezi` of the flake of a project at the ref of the kit (§000066, §000067).
+"""Keep the input `spezi` of the flake of a project at the ref of the kit (spec 000066, 000067).
 
 The kit never changes a `flake.nix` or an `.envrc` that exists. For a missing part it returns a
 hint with the lines to add.
@@ -66,7 +66,7 @@ def init_flake(root: Path, ref: str, features: Mapping[str, bool]) -> tuple[str,
 
     Without `flake.nix`, write a new flake with the input `spezi` and a devShell, lock it, and
     add it to git. With `flake.nix`, change nothing and return a hint for each missing part.
-    The switches `flake` and `envrc` of `[features]` choose the parts (§000084).
+    The switches `flake` and `envrc` of `[features]` choose the parts (spec 000084).
 
     Args:
         root: The root of the project.

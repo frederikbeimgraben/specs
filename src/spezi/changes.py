@@ -1,4 +1,4 @@
-"""Record the files that a command creates, changes or deletes (§000077).
+"""Record the files that a command creates, changes or deletes (spec 000077).
 
 Each place that writes a file reports it here. A command that runs in `recording()` gets the
 list at its end. A write with the same content is no change.
@@ -172,7 +172,7 @@ def _rmtree(folder: Path) -> None:
 
 
 def _ignore(source: Path) -> Callable[[str, list[str]], set[str]]:
-    """Return the names that a copy of a `specs/` folder leaves out (§000048).
+    """Return the names that a copy of a `specs/` folder leaves out (spec 000048).
 
     Args:
         source: The folder to copy.
@@ -191,7 +191,7 @@ def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> Non
 
     Without `folders`, the copy holds all of `source` except each hidden file or folder, for
     example `.upstream/` and `.templates/`, and the folder `upstream/` at the top of `source`,
-    where the copies of a kit before `.upstream/` were (§000048).
+    where the copies of a kit before `.upstream/` were (spec 000048).
 
     Args:
         source: The folder to copy.

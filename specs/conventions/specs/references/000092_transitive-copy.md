@@ -40,7 +40,7 @@ For each repository of `transitive`, these rules apply:
 | --- | --- |
 | The repository is `repo` of `spezi.toml`, the project itself. | No copy. |
 | The repository has its own table in `spezi.toml`. | No copy from `transitive`. The direct table wins. |
-| Else | A copy below `specs/.upstream/<repo>/` (000048), at the `commit` that the `spezi.lock` of the direct upstream names for it, with its `include` from that entry. |
+| Else | A copy below `specs/.upstream/<repo>/` (spec 000048), at the `commit` that the `spezi.lock` of the direct upstream names for it, with its `include` from that entry. |
 
 The copy of each direct upstream must hold its `spezi.lock` as `specs/.upstream/<repo>/spezi.lock`,
 unchanged. The copy of a transitive upstream must not hold a `spezi.lock`.
@@ -50,8 +50,8 @@ hold the union of the two `include` lists. An empty `include` is all rules. When
 different commits, `spezi check` must show an error that names the repository and both direct
 upstreams. A table for the repository in `spezi.toml` of the project removes the error.
 
-A copy of a transitive upstream follows 000048 and 000049 like a copy of a direct upstream.
-Only `spezi init`, `spezi add` and `spezi update` must change `transitive` (000085).
+A copy of a transitive upstream follows (spec 000048) and (spec 000049) like a copy of a direct upstream.
+Only `spezi init`, `spezi add` and `spezi update` must change `transitive` (spec 000085).
 
 Reason: A rule of an upstream can refer to a rule of its own upstream. The copy of that
 upstream makes the reference readable without a network. The commit of the upstream's

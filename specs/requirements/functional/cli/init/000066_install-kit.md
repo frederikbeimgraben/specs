@@ -25,16 +25,16 @@ scope:
 # spezi init adds the kit to a project
 
 `spezi init [<dir>] [--forge github|gitlab|codeberg] [-y] [-r]` must add the kit to the project
-in `<dir>`, or in the current folder. First it must ask the questions of 000085, and it must write
+in `<dir>`, or in the current folder. First it must ask the questions of (spec 000085), and it must write
 the answers to `spezi.toml`. It must write these files:
 
 | File | Content |
 | --- | --- |
-| `spezi.toml` | The settings, with the answers of 000085 and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in 000068. |
-| `spezi.lock` | The commit that this `ref` names, the hash of the copy of the kit, and the entry of each copy of a transitive upstream (000082). |
+| `spezi.toml` | The settings, with the answers of (spec 000085) and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in (spec 000068). |
+| `spezi.lock` | The commit that this `ref` names, the hash of the copy of the kit, and the entry of each copy of a transitive upstream (spec 000082). |
 | `specs/` | An empty folder for the rules of the project. |
-| `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit, with its `spezi.lock` (000048). |
-| `specs/.upstream/<repo>/` | The transitive upstreams of the kit that the user chooses, or each with `-r` (000092, 000085). The command must write them as `transitive` to the table of the kit. |
+| `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit, with its `spezi.lock` (spec 000048). |
+| `specs/.upstream/<repo>/` | The transitive upstreams of the kit that the user chooses, or each with `-r` (spec 000092, 000085). The command must write them as `transitive` to the table of the kit. |
 | `specs/.templates/` | The templates of the kit at this commit. |
 | `.claude/skills/spezi-*` | The skills of the kit. |
 | `.github/workflows/spezi.yml`, `.gitlab/ci/spezi.yml` or `.forgejo/workflows/spezi.yml` | The CI job for the forge, which runs `spezi check` at the commit of the kit. On GitHub and Codeberg, it runs for each pull request and for each push to the branch of `base_ref`, for example `develop` for `origin/develop`. For Codeberg, the job runs on the hosted Forgejo Actions runner `codeberg-small`. |
@@ -49,17 +49,17 @@ The command must also give the project a devShell with the program `spezi`:
 | `flake.nix` without the input `spezi` | Change no file. Show the lines of the input to add. |
 | `flake.nix` without `spezi.packages` | Change no file. Show the package to add to the devShell. |
 | No `.envrc` | Write `.envrc` with `use flake`, and tell to run `direnv allow`. |
-| `.envrc` without `use flake` | Show the line to add. Add it only when the user answers yes (000085). |
+| `.envrc` without `use flake` | Show the line to add. Add it only when the user answers yes (spec 000085). |
 
 The line of the input must be `inputs.spezi.url = "github:frederikbeimgraben/spezi/<commit>";`,
 with the commit of `spezi.lock`, below the comment
 `# The spezi command of the kit. The ref must be the commit in spezi.lock.`.
 The input `spezi` must not follow the input `nixpkgs` of the project.
 
-The command must write only the parts whose switch in `[features]` is on (000084). At its end,
-it must do the steps of `spezi install` (000083).
+The command must write only the parts whose switch in `[features]` is on (spec 000084). At its end,
+it must do the steps of `spezi install` (spec 000083).
 
-Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must
+Without `--forge`, the command must propose the forge of `git remote origin` (spec 000085). It must
 stop with an error and change no file when `spezi.toml` exists, when the forge is unknown, when
 the switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is
 the kit, or when this program is an older commit of the kit than the commit of the `ref`.

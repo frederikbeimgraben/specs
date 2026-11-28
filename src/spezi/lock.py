@@ -1,4 +1,4 @@
-"""The file `spezi.lock`: the commit, the folders and the hash of each copy (§000082).
+"""The file `spezi.lock`: the commit, the folders and the hash of each copy (spec 000082).
 
 `spezi.toml` names a tag, a branch or a commit as `ref`. `spezi.lock` holds the commit that
 `ref` named at the last `spezi update` or `spezi add`, and the hash of the copy below
@@ -33,7 +33,7 @@ class Locked:
         include: The folders of the copy below `specs/`, without slashes; empty for all.
         hash: The hash of the copy (`tree_hash`).
         via: The direct upstreams that bring a transitive upstream, sorted; empty for a direct
-            upstream (§000092).
+            upstream (spec 000092).
     """
 
     ref: str

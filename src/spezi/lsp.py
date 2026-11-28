@@ -1,4 +1,4 @@
-"""`spezi lsp`: the language server of the specs on stdin and stdout (§000088).
+"""`spezi lsp`: the language server of the specs on stdin and stdout (spec 000088).
 
 The server shows the errors of `spezi check` at their line. It checks the whole project when
 the client starts it and after each save, and the open file 300 ms after its last change, with

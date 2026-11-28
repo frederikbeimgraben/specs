@@ -1,4 +1,4 @@
-"""Migrations of a project and of its copies to the format of this program (§000081).
+"""Migrations of a project and of its copies to the format of this program (spec 000081).
 
 Each migration names the commit of the kit that changed the format. A project or a copy whose
 kit ref does not hold this commit gets the migration. A migration changes only what it finds in
@@ -18,6 +18,7 @@ from spezi.migrations import (
     m0003_agents_marker,
     m0004_specs_paths,
     m0005_spezi_name,
+    m0006_spec_references,
 )
 from spezi.project import kit_rev
 
@@ -71,6 +72,12 @@ MIGRATIONS: tuple[Migration, ...] = (
         m0005_spezi_name.DESCRIPTION,
         m0005_spezi_name.project,
         m0005_spezi_name.copy,
+    ),
+    Migration(
+        m0006_spec_references.COMMIT,
+        m0006_spec_references.DESCRIPTION,
+        m0006_spec_references.project,
+        m0006_spec_references.copy,
     ),
 )
 

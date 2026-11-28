@@ -1,4 +1,4 @@
-"""Create a new spec from its template (§000008)."""
+"""Create a new spec from its template (spec 000008)."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ def git_owner(project: Project) -> str | None:
 
 
 def next_number(project: Project) -> str:
-    """Return the highest number of the project and the base branch plus one (§000013).
+    """Return the highest number of the project and the base branch plus one (spec 000013).
 
     Args:
         project: The project.
@@ -160,7 +160,7 @@ def new(
         name: The short name of the file, in kebab case.
         title: The title.
         owner: The login of the owner, or None for `git config <forge>.user`.
-        scope: The paths of `scope`, from the root of the project (§000069).
+        scope: The paths of `scope`, from the root of the project (spec 000069).
 
     Returns:
         The path of the new file.
@@ -203,7 +203,7 @@ def new(
 
 
 def _json_template(text: str) -> bool:
-    """Return True when the `media_type` of a new protocol spec is a JSON format (§000028).
+    """Return True when the `media_type` of a new protocol spec is a JSON format (spec 000028).
 
     Args:
         text: The text of the new spec.

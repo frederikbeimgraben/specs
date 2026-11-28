@@ -1,4 +1,4 @@
-"""Migration 3: name `specs install` in the first line of the block in `AGENTS.md` (§000079).
+"""Migration 3: name `specs install` in the first line of the block in `AGENTS.md` (spec 000079).
 
 `specs check --write` wrote the block before `specs install` took its place.
 """

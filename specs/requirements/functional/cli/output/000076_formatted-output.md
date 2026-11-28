@@ -26,15 +26,15 @@ output:
 
 | Command | Formatted output |
 | --- | --- |
-| `check` | Each error in red, then the line with the counts of 000065, green without errors. |
-| `list`, `search` | A table with the columns of 000072, with a color for each status. |
+| `check` | Each error in red, then the line with the counts of (spec 000065), green without errors. |
+| `list`, `search` | A table with the columns of (spec 000072), with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
 | `init`, `update`, `add`, `new`, `setup-ide` | The message with a green mark. |
 
 With the option `--raw` after the command, or when stdout is not a terminal, the command must
 print the plain text of its own spec, with no color and no table. With `--json`, the command
-must print JSON (000080). The MCP server must always return the plain text.
+must print JSON (spec 000080). The MCP server must always return the plain text.
 
 The help of `spezi` and of each command must have color, with `rich-argparse`:
 
