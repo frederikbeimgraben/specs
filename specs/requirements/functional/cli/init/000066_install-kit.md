@@ -10,6 +10,7 @@ tests:
   - tests/test_kit.py:test_init_ci_runs_on_the_base_branch
   - tests/test_kit.py:test_init_keeps_an_existing_flake
   - tests/test_kit.py:test_init_takes_the_forge_from_the_remote
+  - tests/test_kit.py:test_init_reads_the_forge_from_the_host_only
   - tests/test_kit.py:test_init_stops_when_the_kit_is_there
 implementation:
   - src/spezi/kit.py
@@ -60,8 +61,8 @@ it must do the steps of `spezi install` (000083).
 
 Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must
 stop with an error and change no file when `spezi.toml` exists, when the forge is unknown, when
-`.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when this
-program is an older commit of the kit than the commit of the `ref`.
+the switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is
+the kit, or when this program is an older commit of the kit than the commit of the `ref`.
 
 Reason: One command gives a project the same start as every other project. The kit never
 changes a `flake.nix` that exists, because it cannot read every form of Nix code, and changes an

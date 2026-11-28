@@ -90,7 +90,7 @@ def _kit_files(project: Project, commit: str) -> None:
         commit: The commit of the kit in `spezi.lock`.
     """
     forge = project.config.forge
-    check_forge(project.root, forge)
+    check_forge(project.root, forge, project.config.on("ci"))
     with ExitStack() as stack:
         source = (
             kit_source()

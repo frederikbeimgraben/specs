@@ -60,6 +60,7 @@
             jsonschema
             mcp
             pygls
+            pyyaml
             questionary
             rich
             tomlkit
@@ -98,9 +99,11 @@
               ps.mcp
               ps.pygls
               ps.pytest
+              ps.pyyaml
               ps.questionary
               ps.rich
               ps.tomlkit
+              ps.types-pyyaml
             ]))
             pkgs.ruff
             pkgs.basedpyright

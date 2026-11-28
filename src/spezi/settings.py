@@ -15,7 +15,7 @@ import tomlkit
 from tomlkit.items import Table
 
 from spezi.changes import write_text
-from spezi.project import FEATURES, Config, ConfigError, config_file, read_config
+from spezi.project import FEATURES, FORGES, Config, ConfigError, config_file, read_config
 
 type Value = str | int | bool | tuple[str, ...]
 
@@ -28,7 +28,6 @@ SIMPLE: Mapping[str, str] = {
     "max_elements": "number",
     **{f"features.{name}": "switch" for name in FEATURES},
 }
-FORGES = ("github", "gitlab", "codeberg")
 
 
 class SettingError(Exception):
