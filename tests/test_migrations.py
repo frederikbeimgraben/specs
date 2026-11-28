@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import shutil
+import stat
 from pathlib import Path
 
 from conftest import RULES_REPO, Kit, git, write_rule
+
+from specs_kit.changes import move_tree
 
 
 def _old_layout(project: Path) -> None:
@@ -34,6 +37,27 @@ def test_update_moves_the_old_layout(kit: Kit, project: Path) -> None:
     ).is_dir()
     assert "migrated: move .specs/ below specs/" in result.out
     assert "D .specs/index.md" in result.out
+
+
+def test_a_read_only_folder_moves_and_stays_writable(tmp_path: Path) -> None:
+    """An old program copied the kit with the read-only modes of the Nix store.
+
+    The move must delete the old folder and give a copy that can change.
+    """
+    old = tmp_path / ".specs" / "templates"
+    old.mkdir(parents=True)
+    (old / "TEMPLATE.md").write_text("template\n", encoding="utf-8")
+    for path in (old / "TEMPLATE.md", old, old.parent):
+        path.chmod(0o444 if path.is_file() else 0o555)
+    new = tmp_path / "specs" / ".templates"
+    try:
+        move_tree(old, new)
+    finally:
+        for path in (old.parent, *old.parent.rglob("*")) if old.parent.exists() else ():
+            path.chmod(0o755)
+    assert not old.exists()
+    assert (new / "TEMPLATE.md").read_text(encoding="utf-8") == "template\n"
+    assert all(p.stat().st_mode & stat.S_IWUSR for p in (new, *new.rglob("*")))
 
 
 def test_update_changes_the_old_paths_in_the_specs(kit: Kit, project: Path) -> None:

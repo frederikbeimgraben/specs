@@ -7,6 +7,7 @@ list at its end. A write with the same content is no change.
 from __future__ import annotations
 
 import shutil
+import stat
 from collections.abc import Generator, Iterable, Mapping
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -146,6 +147,30 @@ def _files(root: Path) -> Mapping[Path, bytes]:
     )
 
 
+def unlock(folder: Path) -> None:
+    """Give the owner write access to a folder and to all its files and folders.
+
+    A copy from the Nix store is read-only, so that a later move or delete would fail.
+
+    Args:
+        folder: The folder. Nothing happens when it does not exist.
+    """
+    for path in (
+        p for p in ((folder, *folder.rglob("*")) if folder.is_dir() else ()) if not p.is_symlink()
+    ):
+        path.chmod(path.stat().st_mode | stat.S_IWUSR)
+
+
+def _rmtree(folder: Path) -> None:
+    """Delete a folder with its read-only parts, when it exists.
+
+    Args:
+        folder: The folder.
+    """
+    unlock(folder)
+    shutil.rmtree(folder, ignore_errors=True)
+
+
 def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> None:
     """Replace the folder `target` with a copy of `source`, and record each changed file.
 
@@ -158,13 +183,14 @@ def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> Non
         folders: The folders of `source` to copy, or empty for all of `source`.
     """
     old = _files(target)
-    shutil.rmtree(target, ignore_errors=True)
+    _rmtree(target)
     match tuple(folders):
         case ():
             shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream", ".*"))
         case chosen:
             for folder in chosen:
                 shutil.copytree(source / folder, target / folder)
+    unlock(target)
     new = _files(target)
     for rel in sorted({*old, *new}):
         _compare_bytes(target / rel, old.get(rel), new.get(rel))
@@ -192,6 +218,7 @@ def move_tree(source: Path, target: Path) -> None:
         return
     old = _files(source)
     replace_tree_all(source, target)
+    unlock(source)
     shutil.rmtree(source)
     for rel in sorted(old):
         _compare_bytes(source / rel, old[rel], None)
@@ -205,9 +232,10 @@ def replace_tree_all(source: Path, target: Path) -> None:
         target: The folder to replace.
     """
     old = _files(target)
-    shutil.rmtree(target, ignore_errors=True)
+    _rmtree(target)
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(source, target)
+    unlock(target)
     new = _files(target)
     for rel in sorted({*old, *new}):
         _compare_bytes(target / rel, old.get(rel), new.get(rel))
@@ -258,6 +286,6 @@ def remove_tree(folder: Path) -> None:
         folder: The folder.
     """
     old = _files(folder)
-    shutil.rmtree(folder, ignore_errors=True)
+    _rmtree(folder)
     for rel in sorted(old):
         _compare_bytes(folder / rel, old[rel], None)
