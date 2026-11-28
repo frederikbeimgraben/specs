@@ -100,7 +100,7 @@ def _kit_text(project: Project, src: Path, dst: Path) -> str:
     """
     text = src.read_text(encoding="utf-8")
     skill = dst.is_relative_to(project.root / ".claude" / "skills") and dst.suffix == ".md"
-    return for_project(project.upstream_dir, text) if skill else text
+    return for_project(project.config.upstream, text) if skill else text
 
 
 def _kit_files(project: Project, commit: str) -> None:

@@ -17,7 +17,7 @@ from functools import reduce
 from pathlib import Path
 
 from spezi.changes import write_text
-from spezi.project import CONFIG_NAME, NUMBER, PREFIXES, REPO, UPSTREAM, hidden, read_config
+from spezi.project import CONFIG_NAME, NUMBER, PREFIXES, REPO, hidden, read_config
 from spezi.refs import SPEC_REF, for_project, markdown_files, prose
 
 COMMIT = "6bbce6f83d3451c3d3b34ecb35296eb43aeaea1a"
@@ -183,7 +183,7 @@ def project(root: Path) -> None:
     for rel in texts:
         _rewrite(root / rel, lambda text, rel=rel: _markdown(text, rel))
     for path in sorted((root / ".claude" / "skills").glob("spezi-*/**/*.md")):
-        _rewrite(path, lambda text: for_project(root / "specs" / UPSTREAM, text))
+        _rewrite(path, lambda text: for_project(config.upstream, text))
 
 
 def copy(folder: Path) -> None:

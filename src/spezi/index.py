@@ -106,7 +106,7 @@ def index(
     upstream = tuple(s for s in copied if foreign.get(s.short) in IN_FORCE)
     head = ("| ID | Title | Status |", "| --- | --- | --- |")
     return for_project(
-        project.upstream_dir,
+        project.config.upstream,
         "\n".join(
             (
                 "# Specs",

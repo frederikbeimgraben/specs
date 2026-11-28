@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 import subprocess
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -189,18 +189,18 @@ def kit_form(text: str) -> str:
     )
 
 
-def for_project(upstream_dir: Path, text: str) -> str:
+def for_project(upstream: Collection[str], text: str) -> str:
     """Return a text of the kit for a project.
 
     Args:
-        upstream_dir: The folder `specs/.upstream/` of the project.
+        upstream: The repositories of `[upstream]` in `spezi.toml` of the project.
         text: A text of the kit.
 
     Returns:
-        The text with the foreign short form when the project has a copy of the kit, else the
-        text as it is, for the kit itself.
+        The text with the foreign short form when the project takes the kit as an upstream, else
+        the text as it is, for the kit itself.
     """
-    return kit_form(text) if (upstream_dir / KIT_REPO).is_dir() else text
+    return kit_form(text) if KIT_REPO in upstream else text
 
 
 def markdown_files(root: Path, *, new: bool = False) -> tuple[str, ...]:

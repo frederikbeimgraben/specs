@@ -533,8 +533,8 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
         replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
         for path in sorted((project.root / ".claude" / "skills" / skill.name).rglob("*.md")):
             text = path.read_text(encoding="utf-8")
-            if for_project(project.upstream_dir, text) != text:
-                write_text(path, for_project(project.upstream_dir, text))
+            if for_project(project.config.upstream, text) != text:
+                write_text(path, for_project(project.config.upstream, text))
     branch = config.base_ref.removeprefix("origin/")
     if config.on("ci"):
         write_text(
@@ -1304,7 +1304,7 @@ def _changed_kit_files(project: Project, source: Path, old: str) -> Mapping[Path
         for local, new, bases, rel in pairs
         if local.read_text(encoding="utf-8")
         != (
-            for_project(project.upstream_dir, new.read_text(encoding="utf-8"))
+            for_project(project.config.upstream, new.read_text(encoding="utf-8"))
             if new.is_file()
             else None
         )
