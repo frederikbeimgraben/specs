@@ -16,12 +16,15 @@ type Seen = dict[str, list[types.Diagnostic]]
 
 
 @asynccontextmanager
-async def _session(kit: Kit, project: Path) -> AsyncGenerator[tuple[LanguageClient, Seen]]:
+async def _session(
+    kit: Kit, project: Path, *, links: bool = False
+) -> AsyncGenerator[tuple[LanguageClient, Seen]]:
     """Start the server in the project and initialize it.
 
     Args:
         kit: The kit.
         project: The root of the project.
+        links: Whether the client takes a `LocationLink` as the definition.
 
     Yields:
         The client and the last diagnostics of each URI.
@@ -36,7 +39,12 @@ async def _session(kit: Kit, project: Path) -> AsyncGenerator[tuple[LanguageClie
     await client.start_io(sys.executable, "-m", "specs_kit", "lsp", cwd=project, env=dict(kit.env))
     await client.initialize_async(
         types.InitializeParams(
-            capabilities=types.ClientCapabilities(), root_uri=project.resolve().as_uri()
+            capabilities=types.ClientCapabilities(
+                text_document=types.TextDocumentClientCapabilities(
+                    definition=types.DefinitionClientCapabilities(link_support=links)
+                )
+            ),
+            root_uri=project.resolve().as_uri(),
         )
     )
     client.initialized(types.InitializedParams())
@@ -199,6 +207,10 @@ def test_the_hover_shows_the_rule(kit: Kit, project: Path) -> None:
             assert "Rule 000100" in text
             assert "approved" in text
             assert "A name must be short." in text
+            assert hover.range == types.Range(
+                start=types.Position(line=14, character=28),
+                end=types.Position(line=14, character=34),
+            )
 
     _run(test())
 
@@ -237,3 +249,38 @@ def test_the_server_writes_no_file(kit: Kit, project: Path) -> None:
 
     _run(test())
     assert index.read_text(encoding="utf-8") == before
+
+
+def test_the_link_marks_the_reference_in_the_code(kit: Kit, project: Path) -> None:
+    """With links, the definition marks the `§` reference in the code and not the whole line."""
+    rule = _rule(project, "000100", "short-names", "A name must be short.")
+    code = project / "src" / "names.py"
+    code.write_text("# Short names, see §000100.\n", encoding="utf-8")
+    assert kit.run(project, "configure", "code_dirs", "src").code == 0
+    assert kit.run(project, "install", "--raw").code == 0
+
+    async def test() -> None:
+        async with _session(kit, project, links=True) as (client, _):
+            uri = _open(client, code)
+            found = await client.text_document_definition_async(
+                types.DefinitionParams(
+                    text_document=types.TextDocumentIdentifier(uri=uri),
+                    position=types.Position(line=0, character=22),
+                )
+            )
+            assert isinstance(found, list)
+            assert [
+                (f.target_uri, f.origin_selection_range)
+                for f in found
+                if isinstance(f, types.LocationLink)
+            ] == [
+                (
+                    rule.resolve().as_uri(),
+                    types.Range(
+                        start=types.Position(line=0, character=19),
+                        end=types.Position(line=0, character=26),
+                    ),
+                )
+            ]
+
+    _run(test())
