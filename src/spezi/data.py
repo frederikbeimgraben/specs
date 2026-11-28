@@ -104,12 +104,13 @@ def error(line: str) -> Json:
     }
 
 
-def report(count: Count, errors: tuple[str, ...]) -> dict[str, Json]:
+def report(count: Count, errors: tuple[str, ...], warnings: tuple[str, ...]) -> dict[str, Json]:
     """Return the report of the check.
 
     Args:
         count: The counts of the rules of the project and of the copies.
         errors: The error lines.
+        warnings: The warning lines (spec 000093).
 
     Returns:
         The object.
@@ -118,6 +119,7 @@ def report(count: Count, errors: tuple[str, ...]) -> dict[str, Json]:
         "specs": count.specs,
         "upstream": count.upstream,
         "errors": [error(e) for e in errors],
+        "warnings": [error(w.replace(": warning: ", ": ", 1)) for w in warnings],
     }
 
 

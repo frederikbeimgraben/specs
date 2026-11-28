@@ -36,6 +36,8 @@ LOCATED = re.compile(r"^(?P<file>[^\s:][^:]*?)(?::(?P<line>[0-9]+))?: (?P<text>.
 RULE_ID = rf"(?:{REPO}:)?(?:(?:{PREFIXES})/[a-z0-9-]+/[a-z0-9-]+/)?{NUMBER}"
 IN_FRONT_MATTER = re.compile(rf"(?<![\w/.:-])({RULE_ID})(?![0-9])")
 
+WARNING = "warning: "
+
 type Found = Mapping[Path, tuple[types.Diagnostic, ...]]
 
 
@@ -57,11 +59,11 @@ state = State()
 
 
 def _diagnostic(line: int, text: str) -> types.Diagnostic:
-    """Return the diagnostic of one error.
+    """Return the diagnostic of one error or of one warning (spec 000093).
 
     Args:
         line: The line of the error, from 1.
-        text: The text of the error.
+        text: The text of the error, or `warning: ` and the text of a warning.
 
     Returns:
         The diagnostic over the whole line.
@@ -71,8 +73,10 @@ def _diagnostic(line: int, text: str) -> types.Diagnostic:
             start=types.Position(line=line - 1, character=0),
             end=types.Position(line=line, character=0),
         ),
-        message=text,
-        severity=types.DiagnosticSeverity.Error,
+        message=text.removeprefix(WARNING),
+        severity=types.DiagnosticSeverity.Warning
+        if text.startswith(WARNING)
+        else types.DiagnosticSeverity.Error,
         source="spezi",
     )
 
@@ -121,11 +125,12 @@ def check(root: Path, texts: Mapping[Path, str]) -> tuple[str, ...]:
         texts: The text of each file that the editor changed, by absolute path.
 
     Returns:
-        The error lines, or the error of `spezi.toml` when it is not valid.
+        The error lines and the warning lines, or the error of `spezi.toml` when it is not valid.
     """
     try:
         with editing(texts):
-            return run(Project.open(root), write=False)[1]
+            _, errors, warnings = run(Project.open(root), write=False)
+            return (*errors, *warnings)
     except ConfigError as error:
         return (str(error),)
 

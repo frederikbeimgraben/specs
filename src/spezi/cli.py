@@ -291,23 +291,23 @@ def _check(
         The exit code: 1 when the check finds errors.
     """
     project = Project.open(root)
-    count, errors = run(project, write=write)
+    count, errors, warnings = run(project, write=write)
     changed = lines(log, project.root)
     arranged = None if message is None else (message[0], repos_first(message[1]))
     head = () if arranged is None else (_lines(*arranged),)
-    checked = data.report(count, tuple(errors))
+    checked = data.report(count, errors, warnings)
     _emit(
         mode,
         lambda: (
             "".join(f"{h}\n" for h in head)
             + _raw_changes(changed)
-            + "".join(f"{e}\n" for e in errors)
-            + f"{summary(count, errors)}\n"
+            + "".join(f"{e}\n" for e in (*errors, *warnings))
+            + f"{summary(count, errors, warnings)}\n"
         ),
         lambda: Group(
             *(() if arranged is None else (outcome(*arranged),)),
             file_list(changed),
-            report(count, tuple(errors)),
+            report(count, errors, warnings),
         ),
         lambda: (
             {**checked, "changed": data.changed(changed)}

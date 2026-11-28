@@ -72,23 +72,43 @@ def spec_text(text: str) -> Group:
     )
 
 
-def report(count: Count, errors: tuple[str, ...]) -> Group:
-    """Return the errors of the check in red and a summary.
+def report(count: Count, errors: tuple[str, ...], warnings: tuple[str, ...]) -> Group:
+    """Return the errors in red, the warnings in yellow and a summary (spec 000076).
 
     Args:
         count: The counts of the rules of the project and of the copies.
         errors: The errors.
+        warnings: The warnings (spec 000093).
 
     Returns:
-        The report.
+        The report. The summary is green without errors and warnings, yellow with only
+        warnings, else red.
     """
-    line = summary(count, errors)
+    mark, style = _summary_mark(errors, warnings)
     return Group(
         *(Text.assemble(("✗ ", "bold red"), (e, "red")) for e in errors),
-        Text(f"✓ {line}", style="bold green")
-        if not errors
-        else Text(f"✗ {line}", style="bold red"),
+        *(Text.assemble(("! ", "bold yellow"), (w, "yellow")) for w in warnings),
+        Text(f"{mark} {summary(count, errors, warnings)}", style=style),
     )
+
+
+def _summary_mark(errors: tuple[str, ...], warnings: tuple[str, ...]) -> tuple[str, str]:
+    """Return the mark and the style of the summary of the check (spec 000076).
+
+    Args:
+        errors: The errors.
+        warnings: The warnings.
+
+    Returns:
+        Green without errors and warnings, yellow with only warnings, else red.
+    """
+    match errors, warnings:
+        case (), ():
+            return "✓", "bold green"
+        case (), _:
+            return "!", "bold yellow"
+        case _:
+            return "✗", "bold red"
 
 
 def done(text: str) -> Text:

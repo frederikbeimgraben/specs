@@ -35,11 +35,12 @@ scope:
 `spezi check` must run every check of the conventions on the specs of the project. It must also
 check that `spezi.toml`, `spezi.lock` and the copies agree (spec 000048, 000082). It must check
 each reference to a rule in the files of `code_dirs` and in each Markdown file that git tracks
-(spec 000017). It must read each rule of the copies, report each rule that it cannot read, for
-example without front matter, and not count it. It must not run the other checks of the
-conventions on the rules of the copies. It must print one line for each error. The last line
-must give the count of the rules of the project, of the rules of the copies and of the errors,
-for example `0 specs, 89 upstream, 0 errors`. An error line must start with `<path>:<line>: `.
+(spec 000017). It must check the rules of ASD-STE100 (spec 000093). It must read each rule of
+the copies, report each rule that it cannot read, for example without front matter, and not
+count it. It must not run the other checks of the conventions on the rules of the copies. It
+must print one line for each error, then one line for each warning (spec 000093). The last line
+must count the rules of the project and of the copies, the errors and the warnings, for example
+`0 specs, 89 upstream, 0 errors, 0 warnings`. An error line must start with `<path>:<line>: `.
 The line must be the line of the front matter key, of the entry or of the reference that the
 error names, else 1. An error of a folder or of a missing file must have only `<path>: `. The
 command must exit with 1 when it finds an error, else with 0. The command must not change a file

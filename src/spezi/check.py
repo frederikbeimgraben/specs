@@ -47,6 +47,7 @@ from spezi.refs import (
     references,
 )
 from spezi.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
+from spezi.ste import findings
 from spezi.transitive import Wanted, conflicts, kept, missing, wanted
 
 KEYS = (
@@ -1017,20 +1018,54 @@ class Count:
     upstream: int
 
 
-def summary(count: Count, errors: Errors) -> str:
+def summary(count: Count, errors: Errors, warnings: Errors) -> str:
     """Return the last line of the check (spec 000065).
 
     Args:
         count: The counts.
         errors: The errors.
+        warnings: The warnings (spec 000093).
 
     Returns:
-        The line, for example `0 specs, 89 upstream, 0 errors`.
+        The line, for example `0 specs, 89 upstream, 0 errors, 0 warnings`.
     """
-    return f"{count.specs} specs, {count.upstream} upstream, {len(errors)} errors"
+    return (
+        f"{count.specs} specs, {count.upstream} upstream, {len(errors)} errors,"
+        f" {len(warnings)} warnings"
+    )
 
 
-def run(project: Project, *, write: bool) -> tuple[Count, Errors]:
+def _body_line(spec: Spec) -> int:
+    """Return the count of the lines of a spec file before its body.
+
+    Args:
+        spec: The spec.
+
+    Returns:
+        The count of lines of the front matter and its two `---` lines.
+    """
+    text = source(spec.path, "ignore")
+    return text[: len(text) - len(spec.body)].count("\n")
+
+
+def ste_findings(project: Project, specs: tuple[Spec, ...]) -> Errors:
+    """Return the warnings of the rules of ASD-STE100 (spec 000093).
+
+    Args:
+        project: The project.
+        specs: The rules of the project.
+
+    Returns:
+        The warning lines, or nothing with `ste = false`.
+    """
+    return tuple(
+        f"{where(project, s)}:{_body_line(s) + f.line}: warning: {f.message}"
+        for s in (specs if project.config.ste else ())
+        for f in findings(s.body)
+    )
+
+
+def run(project: Project, *, write: bool) -> tuple[Count, Errors, Errors]:
     """Run every check. With `write`, write the index, its copy and `AGENTS.md` first.
 
     Args:
@@ -1038,7 +1073,8 @@ def run(project: Project, *, write: bool) -> tuple[Count, Errors]:
         write: True to write `specs/README.md` and `AGENTS.md`.
 
     Returns:
-        The counts of the rules of the project and of the copies, and the errors.
+        The counts of the rules of the project and of the copies, the errors and the warnings
+        (spec 000093).
     """
     specs, layout = project.load()
     copied = project.load_upstream()
@@ -1054,32 +1090,38 @@ def run(project: Project, *, write: bool) -> tuple[Count, Errors]:
     if write and agents is not None:
         write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
-    return Count(len(specs), len(copied)), tuple(
-        with_line(project.root, e)
-        for e in (
-            *layout,
-            *project.copy_errors(),
-            *_upstream_errors(project),
-            *_lock_errors(project),
-            *_check_replaces(ctx, specs, raw),
-            *_number_errors(project, specs),
-            *(e for s in specs for e in (*_check_meta(ctx, s), *_check_body(ctx, s))),
-            *_base_errors(project, specs),
-            *_schema_errors(project, specs),
-            *(
-                ()
-                if _read(project.index_path) == text
-                else ("specs/README.md: the index is not current; run spezi install (000007)",)
-            ),
-            *(
-                ()
-                if agents is None or _read(agents_path) == agents
-                else (
-                    f"{AGENTS}: the rules for agents are not current; run spezi install (000079)",
-                )
-            ),
-            *_code_refs(ctx),
-            *_markdown_refs(ctx, specs),
-            *_own_refs(ctx),
-        )
+    warnings = ste_findings(project, specs)
+    return (
+        Count(len(specs), len(copied)),
+        tuple(
+            with_line(project.root, e)
+            for e in (
+                *layout,
+                *project.copy_errors(),
+                *_upstream_errors(project),
+                *_lock_errors(project),
+                *_check_replaces(ctx, specs, raw),
+                *_number_errors(project, specs),
+                *(e for s in specs for e in (*_check_meta(ctx, s), *_check_body(ctx, s))),
+                *_base_errors(project, specs),
+                *_schema_errors(project, specs),
+                *(
+                    ()
+                    if _read(project.index_path) == text
+                    else ("specs/README.md: the index is not current; run spezi install (000007)",)
+                ),
+                *(
+                    ()
+                    if agents is None or _read(agents_path) == agents
+                    else (
+                        f"{AGENTS}: the rules for agents are not current;"
+                        " run spezi install (000079)",
+                    )
+                ),
+                *_code_refs(ctx),
+                *_markdown_refs(ctx, specs),
+                *_own_refs(ctx),
+            )
+        ),
+        warnings,
     )

@@ -31,7 +31,7 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-spezi = ["data/*", "data/editors/zed/*", "data/editors/zed/src/*"]
+spezi = ["data/*", "data/ste/*", "data/editors/zed/*", "data/editors/zed/src/*"]
 
 [tool.ruff]
 target-version = "py313"
