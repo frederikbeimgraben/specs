@@ -15,6 +15,7 @@ tests:
   - tests/test_install.py:test_install_stops_for_mcp_servers_that_are_no_object
   - tests/test_transitive.py:test_install_restores_a_transitive_copy
   - tests/test_install.py:test_install_adds_the_line_to_gitattributes
+  - tests/test_transitive.py:test_add_with_recursive_copies_the_transitive_upstream
 implementation:
   - src/spezi/install.py
   - src/spezi/kit.py
@@ -41,6 +42,11 @@ It must do these steps in this order:
    the copy again at the commit that the `spezi.lock` in the copy of its direct upstream names
    (000092), and write this commit to `spezi.lock`. Remove each copy and each entry of
    `spezi.lock` whose repository is not in `spezi.toml` and not in a list `transitive`.
+   For each transitive upstream that had no entry in `spezi.lock` before, give the hint
+   `installed <repo> at <commit> via <direct>`. For each transitive upstream whose commit
+   changed, give the hint `updated <repo> to <commit> via <direct>`. `<direct>` is the list
+   `via` of `spezi.lock` (000082), separated by `, `. These hints come first, sorted by
+   repository.
 5. When `specs/.upstream/` holds a copy, add the line `specs/.upstream/** -text` to
    `.gitattributes` when the file does not hold it (000048).
 6. Write each file of the table of 000066 that does not exist: the templates, the skills, the

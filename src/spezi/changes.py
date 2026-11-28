@@ -6,6 +6,7 @@ list at its end. A write with the same content is no change.
 
 from __future__ import annotations
 
+import re
 import shutil
 import stat
 from collections.abc import Callable, Generator, Iterable, Mapping
@@ -16,6 +17,26 @@ from pathlib import Path
 
 MIGRATED = "migrated: "
 """The start of the hint line of a migration that ran (§000081)."""
+
+REPO_LINE = re.compile(
+    r"(updated \S+ to |installed \S+ at |\S+ is up to date at )[0-9a-f]+( via \S+(, \S+)*)?"
+)
+"""The line of one repository that a command loaded or checked (§000067, §000083)."""
+
+
+def repos_first(hints: tuple[str, ...]) -> tuple[str, ...]:
+    """Return the hints with the lines of the repositories first, each group in its order.
+
+    Args:
+        hints: The hints.
+
+    Returns:
+        The same hints in the new order.
+    """
+    return (
+        *(h for h in hints if REPO_LINE.fullmatch(h)),
+        *(h for h in hints if not REPO_LINE.fullmatch(h)),
+    )
 
 
 class Mark(StrEnum):
@@ -196,7 +217,11 @@ def _ignore(source: Path, left_out: frozenset[str]) -> Callable[[str, list[str]]
 
 
 def replace_tree(
-    source: Path, target: Path, folders: Iterable[str] = (), left_out: Iterable[str] = ()
+    source: Path,
+    target: Path,
+    folders: Iterable[str] = (),
+    left_out: Iterable[str] = (),
+    files: Iterable[tuple[str, Path]] = (),
 ) -> None:
     """Replace the folder `target` with a copy of `source`, and record each changed file.
 
@@ -209,6 +234,7 @@ def replace_tree(
         target: The folder to replace.
         folders: The folders of `source` to copy, or empty for all of `source`.
         left_out: The folders below `source` that the copy leaves out, also inside `folders`.
+        files: More files of the copy, each as its name below `target` and its source file.
     """
     skip = frozenset(f.strip("/") for f in left_out)
     old = _files(target)
@@ -225,6 +251,8 @@ def replace_tree(
                         n for n in names if (Path(at) / n).relative_to(source).as_posix() in skip
                     },
                 )
+    for name, path in files:
+        shutil.copyfile(path, target / name)
     unlock(target)
     new = _files(target)
     for rel in sorted({*old, *new}):

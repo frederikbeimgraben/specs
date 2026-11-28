@@ -13,6 +13,7 @@ import pytest
 from conftest import Kit
 from rich.console import Console
 
+from spezi.changes import repos_first
 from spezi.view import outcome
 
 ANSI = re.compile(r"\x1b\[")
@@ -153,3 +154,17 @@ def test_a_migration_has_a_blue_mark() -> None:
     screen.print(outcome("updated", ("migrated: move .specs/ below specs/", "add a line")))
     assert screen.export_text(clear=False) == "✓ updated\n↻ move .specs/ below specs/\nadd a line\n"
     assert "\x1b[1;34m↻" in screen.export_text(styles=True)
+
+
+def test_each_repository_has_a_green_mark() -> None:
+    """On a terminal, each repository has its own line with a green mark (§000076, §000067)."""
+    screen = Console(record=True, width=200, force_terminal=True, color_system="standard")
+    message = "updated a.org/x/y to abc1\na.org/x/k is up to date at abc2"
+    hints = ("add a line", "installed a.org/x/z at abc3 via a.org/x/y")
+    screen.print(outcome(message, repos_first(hints)))
+    assert screen.export_text(clear=False) == (
+        "✓ updated a.org/x/y to abc1\n"
+        "✓ a.org/x/k is up to date at abc2\n"
+        "✓ installed a.org/x/z at abc3 via a.org/x/y\n"
+        "add a line\n"
+    )

@@ -34,7 +34,7 @@ from spezi.kit import (
     templates,
     write_mcp,
 )
-from spezi.lock import read_lock
+from spezi.lock import Locked, read_lock
 from spezi.migrations import migrate_project
 from spezi.project import (
     ATTRIBUTES_NAME,
@@ -142,16 +142,44 @@ def _add_attribute(project: Project) -> None:
         )
 
 
-def install(project: Project) -> tuple[str, ...]:
+def _transitive_line(repo: str, new: Locked, old: Locked | None, same: bool) -> tuple[str, ...]:
+    """Return the line of one transitive upstream, from its entries of `spezi.lock` (§000083).
+
+    Args:
+        repo: The repository.
+        new: The entry after the command.
+        old: The entry before the command, or None.
+        same: True to give a line also when the commit did not change.
+
+    Returns:
+        The line, or nothing.
+    """
+    via = ", ".join(new.via)
+    match old:
+        case None:
+            return (f"installed {repo} at {new.commit} via {via}",)
+        case Locked(commit=commit) if commit != new.commit:
+            return (f"updated {repo} to {new.commit} via {via}",)
+        case _ if same:
+            return (f"{repo} is up to date at {new.commit} via {via}",)
+        case _:
+            return ()
+
+
+def install(project: Project, same: bool = False) -> tuple[str, ...]:
     """Bring a project to the state of `spezi.toml` and `spezi.lock`, without a change of a pin.
 
     Args:
         project: The project.
+        same: True to give the line of each transitive upstream also when its commit did not
+            change, for `spezi update` (§000067).
 
     Returns:
-        The hints: one line `migrated: <description>` for each migration that ran, and the lines
+        The hints: one line for each transitive upstream that the command installed or
+        updated, one line `migrated: <description>` for each migration that ran, and the lines
         to add to an existing `.envrc` or `CLAUDE.md`.
     """
+    before = read_lock(project.root)
     with lazy_history() as history:
         own = own_ref(project)
         check_program(history, own)
@@ -164,6 +192,12 @@ def install(project: Project) -> tuple[str, ...]:
         _kit_files(fresh, locked.commit)
     config = fresh.config
     return (
+        *(
+            line
+            for repo, entry in sorted(read_lock(fresh.root).items())
+            if entry.via
+            for line in _transitive_line(repo, entry, before.get(repo), same)
+        ),
         *(f"{MIGRATED}{d}" for d in dict.fromkeys((*ran, *copied))),
         *(envrc(fresh.root) if locked is not None and config.on("envrc") else ()),
         *(claude_import(fresh.root) if config.on("claude") else ()),
