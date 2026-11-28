@@ -2,7 +2,7 @@
 id: "000078"
 title: spezi.toml holds the settings of the spezi command
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
