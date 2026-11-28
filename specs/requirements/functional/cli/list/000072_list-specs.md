@@ -2,7 +2,7 @@
 id: "000072"
 title: spezi list prints every rule
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -19,10 +19,10 @@ scope:
 # spezi list prints every rule
 
 `spezi list [<kind>]` must print one line for each rule of the project, then one line for each
-rule of the copies. With `<kind>`, the kind or its letter (spec 000004), it must print only the
-rules of this kind, and stop with an error for an unknown kind. The MCP tool `list` must take
-`kind` as an optional argument. A line must hold the kind letter, the short form (spec 000047), the
-status and the title, in this order and separated by tabs. For example:
+rule of the copies. `<kind>` is a kind or its letter (spec 000004). With `<kind>`, it must print
+only the rules of this kind, and stop with an error for an unknown kind. The MCP tool `list`
+must take `kind` as an optional argument. A line must hold the kind letter, the short form
+(spec 000047), the status and the title, in this order and separated by tabs. For example:
 
 ```text
 S	github.com/frederikbeimgraben/spezi-python:000001	approved	Python code needs Python 3.13 or later

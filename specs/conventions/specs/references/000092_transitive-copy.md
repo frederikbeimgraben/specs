@@ -2,7 +2,7 @@
 id: "000092"
 title: A copy brings the upstreams of its repository
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -60,7 +60,11 @@ upstream makes the reference readable without a network. The commit of the upstr
 for example when two repositories copy the rules of each other. The copy of `spezi.lock` lets
 the check find a conflict without a network. A conflict of two commits needs a decision of a person.
 
-Test: `spezi check` checks that each repository of `transitive` has a copy or is skipped by the
-table above, that the commit and the `include` of each copy agree with the `spezi.lock` of its
-direct upstreams in their `specs/.upstream/<repo>/spezi.lock`, and that no two direct upstreams
-name different commits. The check uses no network.
+Test: `spezi check` checks these conditions:
+
+- Each repository of `transitive` has a copy, or the table above skips it.
+- The commit and the `include` of each copy agree with the `spezi.lock` of its direct upstreams
+  in their `specs/.upstream/<repo>/spezi.lock`.
+- No two direct upstreams name different commits.
+
+The check uses no network.

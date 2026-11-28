@@ -2,7 +2,7 @@
 id: "000088"
 title: spezi lsp runs the language server
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -45,7 +45,7 @@ definition must give the first line of the file of the rule. The hover and the d
 mark only the rule ID of the item, for example `000089` in `(spec 000088, 000089)`. They must
 not mark `(spec `, the parentheses or the whole line. The server must not write a file.
 
-Reason: The editor shows the errors of the check at their line while a person writes, and the
-text of a rule without a change of file.
+Reason: The editor shows the errors of the check at their line while a person writes. It also
+shows the text of a rule without a change of file.
 
 Test: `tests/test_lsp.py`.

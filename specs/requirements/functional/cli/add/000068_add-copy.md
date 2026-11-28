@@ -2,7 +2,7 @@
 id: "000068"
 title: spezi add adds the copy of a different repository
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -21,22 +21,22 @@ scope:
 
 # spezi add adds the copy of a different repository
 
-`spezi add [<repo> [<ref>]] [-y] [-r]` must ask the questions (spec 000085), and must then copy the
-`specs/` folder of `<repo>` at `<ref>` to `specs/.upstream/<repo>/`, add `[upstream."<repo>"]`
-with `<ref>` as given as `ref` to `spezi.toml`, and write the entry of `<repo>` to `spezi.lock`
-(spec 000082). Without `<ref>`, the command must take or propose the tag with the highest version,
-for example `v1.10` before `v1.9`. A tag has a version when it has the form `1.2.3` or `v1.2.3`
-with one or more numbers. Without such a tag, it must take the name of the default branch.
-`<repo>` must have the form `<host>/<group>/.../<repo>` with one or more groups. With one or
-more `--include <folder>`, or with the folders of the checklist (spec 000085), the command must copy
-only these folders below `specs/` and must write them as `include` to the table (spec 000048). A
-folder below a different folder of `include` must not go to `include`. The command must stop
-with an error and change no file when `<repo>` is in `spezi.toml` already, or when `<repo>` at
-`<ref>` has no folder of `--include`.
+`spezi add [<repo> [<ref>]] [-y] [-r]` must ask the questions (spec 000085). It must then copy
+the `specs/` folder of `<repo>` at `<ref>` to `specs/.upstream/<repo>/`. It must add
+`[upstream."<repo>"]` with `<ref>` as given as `ref` to `spezi.toml`, and write the entry of
+`<repo>` to `spezi.lock` (spec 000082). Without `<ref>`, the command must take or propose the
+tag with the highest version, for example `v1.10` before `v1.9`. A tag has a version when it has
+the form `1.2.3` or `v1.2.3` with one or more numbers. Without such a tag, it must take the name
+of the default branch. `<repo>` must have the form `<host>/<group>/.../<repo>` with one or more
+groups. The folders to copy can come from one or more `--include <folder>` or from the checklist
+(spec 000085). Then the command must copy only these folders below `specs/` and must write them
+as `include` to the table (spec 000048). A folder below a different folder of `include` must not
+go to `include`. The command must stop with an error and change no file when `<repo>` is in
+`spezi.toml` already, or when `<repo>` at `<ref>` has no folder of `--include`.
 
-The command must then copy the transitive upstreams (spec 000092) that the user chooses (spec 000085), and
-write them as `transitive` to the table. With `-r` (also `--recursive`), it must copy each
-transitive upstream without a question.
+The command must then copy the transitive upstreams (spec 000092) that the user chooses
+(spec 000085), and write them as `transitive` to the table. With `-r` (also `--recursive`), it
+must copy each transitive upstream without a question.
 
 Before it copies, the command must run the migrations (spec 000081). It must stop with an error when
 this program is an older commit of the kit than the kit commit in `spezi.lock`.

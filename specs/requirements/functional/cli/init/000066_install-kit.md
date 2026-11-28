@@ -2,7 +2,7 @@
 id: "000066"
 title: spezi init adds the kit to a project
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -25,12 +25,12 @@ scope:
 # spezi init adds the kit to a project
 
 `spezi init [<dir>] [--forge github|gitlab|codeberg] [-y] [-r]` must add the kit to the project
-in `<dir>`, or in the current folder. First it must ask the questions (spec 000085), and it must write
-the answers to `spezi.toml`. It must write these files:
+in `<dir>`, or in the current folder. First it must ask the questions (spec 000085), and it must
+write the answers to `spezi.toml`. It must write these files:
 
 | File | Content |
 | --- | --- |
-| `spezi.toml` | The settings, with the answers (spec 000085) and the `ref` of the kit: the tag of the kit with the highest version, else its default branch (spec 000068). |
+| `spezi.toml` | The settings, with the answers (spec 000085) and the `ref` of the kit. The `ref` is the tag of the kit with the highest version, else its default branch (spec 000068). |
 | `spezi.lock` | The commit that this `ref` names, the hash of the copy of the kit, and the entry of each copy of a transitive upstream (spec 000082). |
 | `specs/` | An empty folder for the rules of the project. |
 | `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit, with its `spezi.lock` (spec 000048). |
@@ -59,10 +59,14 @@ The input `spezi` must not follow the input `nixpkgs` of the project.
 The command must write only the parts whose switch in `[features]` is on (spec 000084). At its end,
 it must do the steps of `spezi install` (spec 000083).
 
-Without `--forge`, the command must propose the forge of `git remote origin` (spec 000085). It must
-stop with an error and change no file when `spezi.toml` exists, when the forge is unknown, when
-the switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is
-the kit, or when this program is an older commit of the kit than the commit of the `ref`.
+Without `--forge`, the command must propose the forge of `git remote origin` (spec 000085). It
+must stop with an error and change no file in these cases:
+
+- `spezi.toml` exists.
+- The forge is unknown.
+- The switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list.
+- `<dir>` is the kit.
+- This program is an older commit of the kit than the commit of the `ref`.
 
 Reason: One command gives a project the same start as every other project. The kit never
 changes a `flake.nix` that exists, because it cannot read every form of Nix code, and changes an

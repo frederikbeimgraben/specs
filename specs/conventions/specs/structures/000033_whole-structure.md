@@ -2,7 +2,7 @@
 id: "000033"
 title: A structure spec shows one structure as one diagram
 kind: convention
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
@@ -15,9 +15,9 @@ scope:
 
 # A structure spec shows one structure as one diagram
 
-A structure spec must show one structure of the product as one UML diagram: for example the
-classes of one module, the states of one life cycle or the messages of one sequence. It must
-not show two structures. One structure must not spread over several specs.
+A structure spec must show one structure of the product as one UML diagram. Examples are the
+classes of one module, the states of one life cycle or the messages of one sequence. It must not
+show two structures. One structure must not spread over several specs.
 
 The body must have the `#` title, the rule text and then exactly these `##` sections, in this
 order:

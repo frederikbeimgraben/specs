@@ -2,7 +2,7 @@
 id: "000081"
 title: spezi migrates a project and its copies to a new kit
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -23,8 +23,8 @@ scope:
 # spezi migrates a project and its copies to a new kit
 
 A change of the kit that changes a file place, a file format or `spezi.toml` must come with a
-migration: a Python function in `src/spezi/migrations/` that names the commit of the kit
-with the change. A migration must change only what it finds in the old format, so that a
+migration. A migration is a Python function in `src/spezi/migrations/` that names the commit of
+the kit with the change. A migration must change only what it finds in the old format, so that a
 second run changes nothing.
 
 A kit ref holds a migration when its commit is the commit of the migration or a later commit
@@ -41,13 +41,12 @@ copy:
 
 The kit had the name `specs` before. A project or a repository from that time has `specs.toml`
 and `specs.lock`, and names the kit `github.com/frederikbeimgraben/specs`. Until a migration gives
-them the new names, the command must read these files and this name as the files and the name
-of the kit.
+them the new names, the command must read these files and this name as those of the kit.
 
-When a different repository needs a kit that the kit ref of the project does not hold, the
-command must stop with an error that tells to run `spezi update` first, and change no file.
-The command must print one line `migrated: <description>` for each migration that ran, and
-list the changed files (spec 000077).
+A different repository can need a kit that the kit ref of the project does not hold. Then the
+command must stop with an error that tells to run `spezi update` first, and change no file. The
+command must print one line `migrated: <description>` for each migration that ran, and list the
+changed files (spec 000077).
 
 Reason: A new kit can change the format without manual work in each project, and the copies of
 older repositories stay readable.
