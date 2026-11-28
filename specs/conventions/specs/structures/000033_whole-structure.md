@@ -4,7 +4,7 @@ title: A structure spec shows one structure as one diagram
 kind: convention
 status: draft
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
   - src/spezi/sections.py

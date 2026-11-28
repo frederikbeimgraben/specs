@@ -4,7 +4,7 @@ title: The number is the identity of a rule
 kind: convention
 status: draft
 owner: frederikbeimgraben
-updated: 2026-11-26
+updated: 2026-11-28
 implementation:
   - src/spezi/check.py
   - spezi.toml

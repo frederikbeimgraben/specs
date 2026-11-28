@@ -4,7 +4,7 @@ title: spezi configure changes the settings in spezi.toml
 kind: functional
 status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_configure.py:test_configure_sets_a_switch
   - tests/test_configure.py:test_configure_keeps_the_comments
