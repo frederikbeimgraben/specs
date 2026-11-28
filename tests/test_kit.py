@@ -283,3 +283,10 @@ def test_init_gives_the_skills_the_foreign_short_form(kit: Kit, project: Path) -
     text = (project / ".claude/skills/spezi-approve/SKILL.md").read_text(encoding="utf-8")
     assert "(spec github.com/frederikbeimgraben/spezi:000045)" in text
     assert "(spec 000045)" not in text
+
+
+def test_update_of_the_kit_without_a_new_commit_changes_no_skill(kit: Kit, project: Path) -> None:
+    """A second `spezi update` of the kit at the same commit lists no skill as changed."""
+    result = kit.run(project, "update", "kit", "-y", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert ".claude/skills/" not in result.out

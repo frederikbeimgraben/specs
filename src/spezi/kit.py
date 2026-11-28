@@ -9,6 +9,7 @@ from __future__ import annotations
 import difflib
 import json
 import re
+import shutil
 import subprocess
 import tempfile
 import tomllib
@@ -425,6 +426,29 @@ def skills(source: Path) -> tuple[Path, ...]:
     return tuple(sorted(p for p in folder.glob("spezi-*") if p.is_dir())) if folder.is_dir() else ()
 
 
+def _stage_skill(skill: Path, staging: Path, project: Project) -> Path:
+    """Copy a skill of the kit to a staging folder in the form for the project (spec 000017).
+
+    The copy of the project then changes only when the text for the project changes.
+
+    Args:
+        skill: The skill folder of the kit.
+        staging: An empty temporary folder.
+        project: The project.
+
+    Returns:
+        The copy of the skill.
+    """
+    target = staging / skill.name
+    shutil.copytree(skill, target)
+    for path in sorted(target.rglob("*.md")):
+        path.write_text(
+            for_project(project.config.upstream, path.read_text(encoding="utf-8")),
+            encoding="utf-8",
+        )
+    return target
+
+
 def read_mcp(path: Path) -> dict[str, object]:
     """Read `.mcp.json`. A missing file gives an empty object.
 
@@ -551,12 +575,12 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     config = project.config
     root_text = gitlab_root_text(project.root) if forge == "gitlab" and config.on("ci") else None
     replace_tree(templates(source), project.templates_dir)
-    for skill in skills(source) if config.on("skills") else ():
-        replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
-        for path in sorted((project.root / ".claude" / "skills" / skill.name).rglob("*.md")):
-            text = path.read_text(encoding="utf-8")
-            if for_project(project.config.upstream, text) != text:
-                write_text(path, for_project(project.config.upstream, text))
+    with tempfile.TemporaryDirectory() as staging:
+        for skill in skills(source) if config.on("skills") else ():
+            replace_tree(
+                _stage_skill(skill, Path(staging), project),
+                project.root / ".claude" / "skills" / skill.name,
+            )
     branch = config.base_ref.removeprefix("origin/")
     if config.on("ci"):
         write_text(
