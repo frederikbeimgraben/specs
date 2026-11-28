@@ -2,7 +2,7 @@
 id: "000081"
 title: spezi migrates a project and its copies to a new kit
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
