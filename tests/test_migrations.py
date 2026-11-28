@@ -42,12 +42,13 @@ def test_update_moves_the_old_layout(kit: Kit, project: Path) -> None:
 def test_a_read_only_folder_moves_and_stays_writable(tmp_path: Path) -> None:
     """An old program copied the kit with the read-only modes of the Nix store.
 
-    The move must delete the old folder and give a copy that can change.
+    Only the copy is read-only, not the folder that holds it. The move must delete the copy and
+    give a new copy that can change.
     """
     old = tmp_path / ".specs" / "templates"
     old.mkdir(parents=True)
     (old / "TEMPLATE.md").write_text("template\n", encoding="utf-8")
-    for path in (old / "TEMPLATE.md", old, old.parent):
+    for path in (old / "TEMPLATE.md", old):
         path.chmod(0o444 if path.is_file() else 0o555)
     new = tmp_path / "specs" / ".templates"
     try:
