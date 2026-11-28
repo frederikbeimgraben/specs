@@ -73,9 +73,7 @@ def _code(text: str) -> str:
     Returns:
         The new text.
     """
-    return OLD_SINGLE.sub(
-        lambda m: f"(spec {m[1]})", OLD_GROUP.sub(lambda m: _list(m[1]), text)
-    )
+    return OLD_SINGLE.sub(lambda m: f"(spec {m[1]})", OLD_GROUP.sub(lambda m: _list(m[1]), text))
 
 
 def _step(text: str, rel: str, pattern: re.Pattern[str], change: Change) -> str:
@@ -95,8 +93,7 @@ def _step(text: str, rel: str, pattern: re.Pattern[str], change: Change) -> str:
     return pattern.sub(
         lambda m: (
             change(m)
-            if mask[m.start() : m.end()] == m[0]
-            and not any(s <= m.start() < e for s, e in spans)
+            if mask[m.start() : m.end()] == m[0] and not any(s <= m.start() < e for s, e in spans)
             else m[0]
         ),
         text,
@@ -161,8 +158,7 @@ def project(root: Path) -> None:
                 *(
                     rel
                     for rel in markdown_files(root)
-                    if not rel.startswith("specs/")
-                    or not hidden(Path(rel).relative_to("specs"))
+                    if not rel.startswith("specs/") or not hidden(Path(rel).relative_to("specs"))
                 ),
             )
         )

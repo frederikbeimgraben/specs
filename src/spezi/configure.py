@@ -1,4 +1,4 @@
-"""`spezi configure`: change the settings of `spezi.toml` in a menu, or one key at a time (spec 000086).
+"""`spezi configure`: change the settings of `spezi.toml` in a menu or by key (spec 000086).
 
 The menu shows each key with its value, and each repository of `[upstream]`. A change stays in
 memory until `save`. `save` writes `spezi.toml` with its comments, and the command then runs

@@ -108,7 +108,7 @@ def _parts(inner: str, offset: int) -> Iterator[tuple[str, int]]:
 
 
 def bad_references(text: str) -> Iterator[str]:
-    """Return each `(spec ...)` reference with a rule number that holds more than a list of short forms.
+    """Return each `(spec ...)` reference with a rule number and more than short forms.
 
     A reference without a rule number, for example `(spec <number>)`, is a placeholder.
 
@@ -182,4 +182,3 @@ def markdown_files(root: Path) -> tuple[str, ...]:
     except (OSError, subprocess.CalledProcessError):
         return ()
     return tuple(p for p in listed.split("\0") if p and (root / p).is_file())
-

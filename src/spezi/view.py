@@ -104,7 +104,7 @@ def done(text: str) -> Text:
 
 
 def file_list(changed: tuple[tuple[Mark, str], ...]) -> Group:
-    """Return the changed files as in `git status --short`, with a color for each mark (spec 000077).
+    """Return the changed files as in `git status --short`, with a color per mark (spec 000077).
 
     Args:
         changed: The mark and the path of each change.
