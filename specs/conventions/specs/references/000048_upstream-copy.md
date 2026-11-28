@@ -2,7 +2,7 @@
 id: "000048"
 title: The rules of a different repository are an unchanged copy
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
