@@ -37,7 +37,7 @@ from rich.style import StyleType
 from rich.text import Text
 from rich_argparse import RichHelpFormatter
 
-from spezi import data, ide, lsp, queries
+from spezi import data, ide, queries
 from spezi.ask import Ask, Cancelled, Stop, asker
 from spezi.changes import MIGRATED, Mark, lines, recording, repos_first
 from spezi.check import run, summary
@@ -45,7 +45,6 @@ from spezi.configure import configure, set_value
 from spezi.devshell import init_flake, update_flake
 from spezi.install import install
 from spezi.kit import KitError, add, init, offer_lines, remove, update
-from spezi.mcp_server import serve
 from spezi.new import NewError, new
 from spezi.project import KIT_REPO, ConfigError, Project
 from spezi.view import console, file_list, outcome, report, spec_text, table
@@ -515,8 +514,12 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
                 lambda: [data.rule(project, s) for s in found],
             )
         case "mcp":
-            return serve()
+            from spezi import mcp_server
+
+            return mcp_server.serve()
         case "lsp":
+            from spezi import lsp
+
             return lsp.serve()
         case _:
             raise KitError(f"unknown command {command!r}")

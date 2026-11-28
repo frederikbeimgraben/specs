@@ -15,12 +15,14 @@ specs/
   requirements/
     functional/
       cli/  add, agents, check, configure, init, install, list, lsp, mcp, migrate, new, output, questions, remove, resolve, search, settings, setup-ide, show, update
+    non-functional/
+      cli/  startup
   structures/
     specs/  lifecycle, model
   conventions/
     specs/  content, decisions, format, layout, protocols, references, structures
   workflow/
-    kit/    migrations, release
+    kit/    migrations, release, tests
     specs/  process
   agents/
     work/  approval, questions
@@ -37,7 +39,7 @@ specs/
 | [A/work/approval/000046](/specs/agents/work/approval/000046_show-the-whole-spec.md) | An agent shows the whole spec for its approval | approved |
 | [A/work/questions/000043](/specs/agents/work/questions/000043_ask-each-detail.md) | An agent asks the user about each open detail | approved |
 | [A/work/questions/000044](/specs/agents/work/questions/000044_follow-the-spec.md) | To follow a spec is not an assumption | approved |
-| [A/work/questions/000095](/specs/agents/work/questions/000095_one-detail-per-question.md) | An agent asks about one detail in one question | approved |
+| [A/work/questions/000345](/specs/agents/work/questions/000345_one-detail-per-question.md) | An agent asks about one detail in one question | approved |
 | [C/specs/content/000018](/specs/conventions/specs/content/000018_only-the-rule.md) | A spec contains only the rule | approved |
 | [C/specs/content/000019](/specs/conventions/specs/content/000019_one-thing.md) | One rule controls one thing | approved |
 | [C/specs/content/000020](/specs/conventions/specs/content/000020_examinable.md) | A rule can be examined | approved |
@@ -47,7 +49,6 @@ specs/
 | [C/specs/content/000024](/specs/conventions/specs/content/000024_current-rule.md) | A spec states the current rule | approved |
 | [C/specs/content/000025](/specs/conventions/specs/content/000025_ste.md) | A spec is written in ASD-STE100 | approved |
 | [C/specs/content/000026](/specs/conventions/specs/content/000026_product-terms.md) | Product terms stay as the product shows them | approved |
-| [C/specs/content/000096](/specs/conventions/specs/content/000096_measurable-words.md) | A rule gives a value for a quality word | approved |
 | [C/specs/content/000097](/specs/conventions/specs/content/000097_present-tense-facts.md) | A fact in a rule is in the present tense | approved |
 | [C/specs/content/000098](/specs/conventions/specs/content/000098_short-keeps-reason.md) | A shorter version of a rule keeps the cause | approved |
 | [C/specs/content/000099](/specs/conventions/specs/content/000099_unit-tests-key.md) | The unit tests of a rule are in tests | approved |
@@ -60,6 +61,7 @@ specs/
 | [C/specs/content/000106](/specs/conventions/specs/content/000106_one-instruction.md) | One sentence holds one instruction | approved |
 | [C/specs/content/000107](/specs/conventions/specs/content/000107_one-word.md) | A spec uses one word for one thing | approved |
 | [C/specs/content/000108](/specs/conventions/specs/content/000108_no-ing.md) | A spec uses no -ing form as a noun or an adjective | approved |
+| [C/specs/content/000346](/specs/conventions/specs/content/000346_measurable-words.md) | A rule gives a value for a quality word | approved |
 | [C/specs/decisions/000042](/specs/conventions/specs/decisions/000042_whole-decision.md) | A decision spec has fixed sections | approved |
 | [C/specs/decisions/000109](/specs/conventions/specs/decisions/000109_one-decision.md) | A decision spec records one decision | approved |
 | [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | approved |
@@ -349,6 +351,7 @@ specs/
 | [F/cli/update/000300](/specs/requirements/functional/cli/update/000300_update-flake.md) | spezi update sets the flake input to the new commit | approved |
 | [F/cli/update/000301](/specs/requirements/functional/cli/update/000301_update-shell-hint.md) | spezi update tells to load the devShell again | approved |
 | [F/cli/update/000302](/specs/requirements/functional/cli/update/000302_update-stops.md) | spezi update stops in four cases | approved |
+| [NF/cli/startup/000095](/specs/requirements/non-functional/cli/startup/000095_load-only-needed-libraries.md) | A command loads only the libraries that it needs | approved |
 | [U/specs/lifecycle/000041](/specs/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | approved |
 | [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
 | [W/kit/migrations/000090](/specs/workflow/kit/migrations/000090_migration-ci.md) | The CI migrates demo projects from each migration | approved |
@@ -359,6 +362,9 @@ specs/
 | [W/kit/release/000206](/specs/workflow/kit/release/000206_publish-after-binaries.md) | The release publishes only after each binary passes | approved |
 | [W/kit/release/000207](/specs/workflow/kit/release/000207_version-from-git.md) | The version comes from the git tag | approved |
 | [W/kit/release/000208](/specs/workflow/kit/release/000208_flake-version.md) | The flake sets the version from the commit | approved |
+| [W/kit/tests/000096](/specs/workflow/kit/tests/000096_parallel-tests.md) | The tests of the kit run in parallel | approved |
+| [W/kit/tests/000347](/specs/workflow/kit/tests/000347_xdist-in-shell.md) | The development shell has pytest-xdist | approved |
+| [W/kit/tests/000348](/specs/workflow/kit/tests/000348_test-isolation.md) | A test uses only its own files | approved |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
 | [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |

@@ -1,5 +1,5 @@
 ---
-id: "000096"
+id: "000346"
 title: A rule gives a value for a quality word
 kind: convention
 status: approved
