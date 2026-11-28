@@ -107,7 +107,7 @@ def outcome(text: str, hints: tuple[str, ...]) -> Group:
     """Return the message of a command with a green mark and its hints below it.
 
     A hint of a migration that ran gets a blue mark, as the lines of the changed files
-    (§000081).
+    (spec 000081).
 
     Args:
         text: The message.

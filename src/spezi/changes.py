@@ -15,7 +15,7 @@ from enum import StrEnum
 from pathlib import Path
 
 MIGRATED = "migrated: "
-"""The start of the hint line of a migration that ran (§000081)."""
+"""The start of the hint line of a migration that ran (spec 000081)."""
 
 
 class Mark(StrEnum):
