@@ -99,7 +99,7 @@ specs/
 | [F/cli/remove/000087](/specs/requirements/functional/cli/remove/000087_remove.md) | spezi remove removes the copy of a different repository | approved |
 | [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | spezi resolve prints the long form of an ID | approved |
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | spezi search finds rules by a text | approved |
-| [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | spezi.toml holds the settings of the spezi command | approved |
+| [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | spezi.toml holds the settings of the spezi command | draft |
 | [F/cli/settings/000084](/specs/requirements/functional/cli/settings/000084_feature-switches.md) | spezi.toml switches the optional parts of the kit on and off | approved |
 | [F/cli/setup-ide/000089](/specs/requirements/functional/cli/setup-ide/000089_setup-ide.md) | spezi setup-ide adds the language server to Zed or VS Code | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | spezi show prints the full text of a spec | approved |
