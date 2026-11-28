@@ -55,12 +55,14 @@ def test_show_gives_meta_and_body(kit: Kit, project: Path) -> None:
 
 
 def test_check_gives_errors_as_objects(kit: Kit, project: Path) -> None:
-    """`specs check` gives the count, each error as an object, and the changed files."""
+    """`specs check` gives the counts, each error as an object, and the changed files."""
     (project / "specs" / "README.md").write_text("changed\n", encoding="utf-8")
     result = kit.run(project, "check", "--json")
     checked = json.loads(result.out)
     assert result.code == 1
     assert checked["changed"] == []
+    assert checked["specs"] == 0
+    assert checked["upstream"] > 0
     assert {
         "file": "specs/README.md",
         "line": 1,

@@ -40,7 +40,7 @@ from rich_argparse import RichHelpFormatter
 from spezi import data, ide, lsp, queries
 from spezi.ask import Ask, Cancelled, Stop, asker
 from spezi.changes import Mark, lines, recording
-from spezi.check import run
+from spezi.check import run, summary
 from spezi.configure import configure, set_value
 from spezi.devshell import init_flake, update_flake
 from spezi.install import install
@@ -301,7 +301,7 @@ def _check(
             "".join(f"{h}\n" for h in head)
             + _raw_changes(changed)
             + "".join(f"{e}\n" for e in errors)
-            + f"{count} specs, {len(errors)} errors\n"
+            + f"{summary(count, errors)}\n"
         ),
         lambda: Group(*(done(h) for h in head), file_list(changed), report(count, tuple(errors))),
         lambda: (

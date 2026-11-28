@@ -7,6 +7,7 @@ import re
 from collections.abc import Mapping
 
 from spezi.changes import Mark
+from spezi.check import Count
 from spezi.project import Project, Spec
 
 type Json = None | bool | int | str | list[Json] | dict[str, Json]
@@ -103,17 +104,21 @@ def error(line: str) -> Json:
     }
 
 
-def report(count: int, errors: tuple[str, ...]) -> dict[str, Json]:
+def report(count: Count, errors: tuple[str, ...]) -> dict[str, Json]:
     """Return the report of the check.
 
     Args:
-        count: The count of specs.
+        count: The counts of the rules of the project and of the copies.
         errors: The error lines.
 
     Returns:
         The object.
     """
-    return {"specs": count, "errors": [error(e) for e in errors]}
+    return {
+        "specs": count.specs,
+        "upstream": count.upstream,
+        "errors": [error(e) for e in errors],
+    }
 
 
 def changed(lines: tuple[tuple[Mark, str], ...]) -> Json:
