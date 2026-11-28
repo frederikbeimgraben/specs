@@ -19,7 +19,7 @@ from spezi.changes import write_text
 from spezi.project import CONFIG_NAME, NUMBER, PREFIXES, REPO, hidden, read_config
 from spezi.refs import SPEC_REF, markdown_files, prose
 
-COMMIT = "0000000000000000000000000000000000000000"
+COMMIT = "6bbce6f83d3451c3d3b34ecb35296eb43aeaea1a"
 DESCRIPTION = "write each reference to a rule as (spec <ref>)"
 
 RULE = rf"(?:{REPO}:)?(?:(?:{PREFIXES})/[a-z0-9/-]+/)?{NUMBER}"
