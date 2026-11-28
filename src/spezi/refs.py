@@ -162,18 +162,26 @@ def bare_numbers(text: str) -> Iterator[str]:
     return (m[1] for m in BARE_REF.finditer(_blank(text, SPEC_REF)))
 
 
-def markdown_files(root: Path) -> tuple[str, ...]:
+def markdown_files(root: Path, *, new: bool = False) -> tuple[str, ...]:
     """Return the Markdown files that git tracks in a project.
 
     Args:
         root: The root of the project.
+        new: True to add the new files that git does not ignore.
 
     Returns:
         The paths below the root, or nothing outside a git repository.
     """
     try:
         listed = subprocess.run(
-            ["git", "ls-files", "-z", "--", "*.md"],
+            [
+                "git",
+                "ls-files",
+                "-z",
+                *(("--others", "--cached", "--exclude-standard") if new else ()),
+                "--",
+                "*.md",
+            ],
             cwd=root,
             capture_output=True,
             text=True,

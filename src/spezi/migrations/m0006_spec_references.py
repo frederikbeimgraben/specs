@@ -171,7 +171,7 @@ def project(root: Path) -> None:
                 *rules,
                 *(
                     rel
-                    for rel in markdown_files(root)
+                    for rel in markdown_files(root, new=True)
                     if not rel.startswith("specs/") or not hidden(Path(rel).relative_to("specs"))
                 ),
             )
