@@ -20,7 +20,7 @@
         pkgs.buildNpmPackage {
           pname = "spezi-vscode";
           inherit version;
-          src = ./editors/code;
+          src = ./src/spezi/data/editors/code;
           npmDepsHash = "sha256-QnFcSREAPCSW9q8rf6KJd76DblQvhKHoU7YKTRvasu8=";
           dontNpmBuild = true;
           nativeBuildInputs = [

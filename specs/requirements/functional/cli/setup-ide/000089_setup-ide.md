@@ -4,7 +4,7 @@ title: spezi setup-ide adds the language server to Zed or VS Code
 kind: functional
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_setup_ide.py:test_zed_gets_the_source_of_the_extension
   - tests/test_setup_ide.py:test_code_gets_the_vsix
@@ -16,11 +16,9 @@ implementation:
   - src/spezi/cli.py
   - src/spezi/kit.py
   - src/spezi/data/editors/
-  - editors/code/
   - flake.nix
 scope:
   - src/spezi/
-  - editors/
   - flake.nix
 ---
 
@@ -58,10 +56,10 @@ The command must write the whole folder again when it exists. It must add the fo
 `.gitignore`, except when git tracks a file of the folder or the folder is ignored already.
 
 For `code`, the command must then ask, with the questions of 000085, whether to run
-`code --install-extension .vscode/spezi/specs.vsix`. With `-y` or without a terminal, it must
+`code --install-extension .vscode/spezi/spezi.vsix`. With `-y` or without a terminal, it must
 only show this command. For `zed`, it must show that the Zed action `zed: install dev extension`
 with the folder `.zed/spezi/` installs the extension, and that Zed needs rustup to build it.
-The command must stop with an error and change no file when the program has no `specs.vsix`.
+The command must stop with an error and change no file when the program has no `spezi.vsix`.
 
 Reason: A person adds the language server to the editor with one command. The folder stays out
 of git, because `server.json` holds a path of one computer.
