@@ -29,7 +29,7 @@ optional and must have this type and default:
 | `code_suffixes` | list of strings | `.py`, `.ts`, `.js`, `.go`, `.rs`, `.java`, `.kt`, `.nix`, `.sh` | The file types in `code_dirs`. |
 | `max_elements` | whole number from 1 | `25` | The highest count of elements in one diagram (000037). |
 | `[features]` | table | each switch `true` | The switches of the optional parts of the kit (000084). |
-| `[upstream."<repo>"]` | table | none | One table for each copy, with `ref` (string: a tag, a branch or a commit), the optional `include` (list of strings) and the optional `transitive` (list of strings) (000048, 000082, 000092). |
+| `[upstream."<repo>"]` | table | none | One table for each direct upstream, with `ref` (string: a tag, a branch or a commit), the optional `include` (list of strings) and the optional `transitive` (list of strings) (000048, 000082, 000092). |
 
 The template `src/spezi/data/spezi.toml` must hold each key with its default and a comment.
 When `spezi.toml` is no valid TOML, or a key has a different type, each command must stop with
