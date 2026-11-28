@@ -62,6 +62,7 @@
             pygls
             pyyaml
             questionary
+            rich-argparse
             rich
             tomlkit
           ];
@@ -101,6 +102,7 @@
               ps.pytest
               ps.pyyaml
               ps.questionary
+              ps.rich-argparse
               ps.rich
               ps.tomlkit
               ps.types-pyyaml

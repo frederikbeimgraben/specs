@@ -3,6 +3,8 @@ name = "spezi-kit"
 dynamic = ["version"]
 description = "Check and manage the specs of a project: the spezi command and its MCP server."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
     "jsonschema>=4",
@@ -11,6 +13,7 @@ dependencies = [
     "pyyaml>=6",
     "questionary>=2",
     "rich>=13",
+    "rich-argparse>=1.8",
     "tomlkit>=0.13",
 ]
 
@@ -19,7 +22,7 @@ spezi = "spezi.cli:main"
 specs = "spezi.cli:main"
 
 [build-system]
-requires = ["setuptools>=69", "setuptools-scm>=8"]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
