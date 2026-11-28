@@ -42,7 +42,8 @@ this program is an older commit of the kit than the kit commit in `spezi.lock`.
 At its end, the command must do the steps of `spezi install` (000083).
 
 Reason: A project takes the rules of a different repository, or only the rules that it needs,
-with one command (000048). The new rules can show errors in the project, and the index must
+with one command (000048). With `-r`, a script copies the rules that the rules of `<repo>`
+refer to, without a question. The new rules can show errors in the project, and the index must
 show them.
 
 Test: `tests/test_kit.py`.
