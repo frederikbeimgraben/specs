@@ -22,8 +22,8 @@ scope:
 
 # spezi update resolves the refs again and replaces the copies
 
-`spezi update [<repo> [<ref>]] [-y] [-r]` must update the copies below `specs/.upstream/` (000048),
-after the questions of 000085:
+`spezi update [<repo> [<ref>]] [-y] [-r]` must update the copies below `specs/.upstream/`
+(000048), after the questions of 000085:
 
 | Form | Effect |
 | --- | --- |
@@ -42,7 +42,8 @@ The command must keep `transitive` and copy each of its repositories at the comm
 `spezi.lock` of the direct upstream (000092). For a transitive upstream that the new
 `spezi.lock` names and `transitive` does not hold, it must ask as 000085 tells. With `-r`
 (also `--recursive`), it must copy each such upstream without a question. A repository of
-`transitive` that the new `spezi.lock` does not name must leave `transitive` and lose its copy.
+`transitive` that the new `spezi.lock` does not name must leave `transitive`. Its copy must go
+when no other list `transitive` holds it.
 
 For the kit, the command must also replace the templates, the skills, the CI files of 000066 and
 the entry `spezi` in `.mcp.json`. A template or a skill that the user keeps (000085) must stay.
