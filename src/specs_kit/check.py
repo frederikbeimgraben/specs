@@ -20,6 +20,7 @@ from specs_kit.context import Context, Errors, where
 from specs_kit.index import index
 from specs_kit.lock import LOCK_NAME, read_lock, tree_hash
 from specs_kit.project import (
+    FILE_NAME,
     IN_FORCE,
     KINDS_BY_PREFIX,
     LONG_LOCAL,
@@ -30,6 +31,7 @@ from specs_kit.project import (
     STATUSES,
     Project,
     Spec,
+    hidden,
     source,
 )
 from specs_kit.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
@@ -653,7 +655,10 @@ def _git(project: Project, *args: str) -> str | None:
 
 
 def git_numbers(project: Project, ref: str) -> Mapping[str, str] | None:
-    """Return number to spec path at a git ref.
+    """Return number to spec path of the rules of the project at a git ref (§000013).
+
+    The copies of different repositories keep their own numbers (§000047), so the files below
+    a hidden folder of `specs/` do not count, and neither do the schema files.
 
     Args:
         project: The project.
@@ -669,7 +674,7 @@ def git_numbers(project: Project, ref: str) -> Mapping[str, str] | None:
         else {
             Path(line).name[:6]: line
             for line in out.splitlines()
-            if re.match(r"^[0-9]{6}_", Path(line).name)
+            if FILE_NAME.match(Path(line).name) and not hidden(Path(line).relative_to("specs"))
         }
     )
 

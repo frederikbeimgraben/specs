@@ -7,7 +7,7 @@ list at its end. A write with the same content is no change.
 from __future__ import annotations
 
 import shutil
-from collections.abc import Generator, Iterable, Mapping
+from collections.abc import Callable, Generator, Iterable, Mapping
 from contextlib import contextmanager
 from contextvars import ContextVar
 from enum import StrEnum
@@ -146,11 +146,27 @@ def _files(root: Path) -> Mapping[Path, bytes]:
     )
 
 
+def _ignore(source: Path) -> Callable[[str, list[str]], set[str]]:
+    """Return the names that a copy of a `specs/` folder leaves out (§000048).
+
+    Args:
+        source: The folder to copy.
+
+    Returns:
+        The function for `shutil.copytree`: each hidden name, and `upstream` at the top.
+    """
+    top = str(source)
+    return lambda folder, names: {
+        n for n in names if n.startswith(".") or (folder == top and n == "upstream")
+    }
+
+
 def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> None:
     """Replace the folder `target` with a copy of `source`, and record each changed file.
 
-    Without `folders`, the copy holds all of `source` except each folder `upstream` and each
-    hidden file or folder, for example `.upstream/` and `.templates/`.
+    Without `folders`, the copy holds all of `source` except each hidden file or folder, for
+    example `.upstream/` and `.templates/`, and the folder `upstream/` at the top of `source`,
+    where the copies of a kit before `.upstream/` were (§000048).
 
     Args:
         source: The folder to copy.
@@ -161,7 +177,7 @@ def replace_tree(source: Path, target: Path, folders: Iterable[str] = ()) -> Non
     shutil.rmtree(target, ignore_errors=True)
     match tuple(folders):
         case ():
-            shutil.copytree(source, target, ignore=shutil.ignore_patterns("upstream", ".*"))
+            shutil.copytree(source, target, ignore=_ignore(source))
         case chosen:
             for folder in chosen:
                 shutil.copytree(source / folder, target / folder)

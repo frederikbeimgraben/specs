@@ -195,6 +195,33 @@ def drop_repo(document: tomlkit.TOMLDocument, repo: str) -> None:
         del upstream[repo]
 
 
+def set_repo(
+    document: tomlkit.TOMLDocument, repo: str, ref: str, include: tuple[str, ...] | None
+) -> None:
+    """Set `ref` and `include` of one repository. Add its table when it is missing.
+
+    Args:
+        document: The document of `specs.toml`.
+        repo: The repository.
+        ref: The ref.
+        include: The folders of the copy, empty for all, or None to keep `include` as it is.
+    """
+    if not isinstance(document.get("upstream"), Table):
+        document["upstream"] = tomlkit.table(is_super_table=True)
+    upstream = cast("Table", document["upstream"])
+    table = cast("Table", upstream[repo]) if repo in upstream else tomlkit.table()
+    table["ref"] = ref
+    match include:
+        case None:
+            pass
+        case ():
+            table.pop("include", None)
+        case _:
+            table["include"] = [f"{f}/" for f in include]
+    if repo not in upstream:
+        upstream[repo] = table
+
+
 def write_settings(root: Path, change: Callable[[tomlkit.TOMLDocument], None]) -> None:
     """Change `specs.toml` of a project in place.
 

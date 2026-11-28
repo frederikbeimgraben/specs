@@ -26,6 +26,7 @@ from specs_kit.kit import (
     lazy_history,
     own_ref,
     package_data,
+    read_mcp,
     skills,
     sync_copies,
     templates,
@@ -109,8 +110,8 @@ def _kit_files(project: Project, commit: str) -> None:
     if root_text is not None:
         write_text(project.root / GITLAB_ROOT, root_text)
     mcp = project.root / ".mcp.json"
-    if project.config.on("mcp") and (
-        not mcp.is_file() or '"specs"' not in mcp.read_text(encoding="utf-8")
+    if project.config.on("mcp") and "specs" not in cast(
+        "dict[str, object]", read_mcp(mcp).get("mcpServers", {})
     ):
         write_mcp(project, commit)
 
@@ -171,11 +172,7 @@ def _remove_mcp(path: Path) -> None:
     Args:
         path: The file `.mcp.json`.
     """
-    data = (
-        cast("dict[str, object]", json.loads(path.read_text(encoding="utf-8")))
-        if path.is_file()
-        else {}
-    )
+    data = read_mcp(path)
     servers = cast("dict[str, object]", data.get("mcpServers", {}))
     if "specs" not in servers:
         return
