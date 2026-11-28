@@ -1,4 +1,4 @@
-"""`spezi lsp`: the language server of the specs on stdin and stdout (§000088).
+"""`spezi lsp`: the language server of the specs on stdin and stdout (spec 000088).
 
 The server shows the errors of `spezi check` at their line. It checks the whole project when
 the client starts it and after each save, and the open file 300 ms after its last change, with
@@ -29,12 +29,12 @@ from spezi.project import (
     Spec,
     editing,
 )
+from spezi.refs import LOOSE_ITEM, items, markdown_files
 
 DELAY = 0.3
 LOCATED = re.compile(r"^(?P<file>[^\s:][^:]*?)(?::(?P<line>[0-9]+))?: (?P<text>.+)$")
 RULE_ID = rf"(?:{REPO}:)?(?:(?:{PREFIXES})/[a-z0-9-]+/[a-z0-9-]+/)?{NUMBER}"
-IN_SPEC = re.compile(rf"(?<![\w/.:-])({RULE_ID})(?![0-9])")
-IN_CODE = re.compile(rf"§({RULE_ID})(?![0-9])")
+IN_FRONT_MATTER = re.compile(rf"(?<![\w/.:-])({RULE_ID})(?![0-9])")
 
 type Found = Mapping[Path, tuple[types.Diagnostic, ...]]
 
@@ -218,58 +218,90 @@ def _cancel(uri: str) -> None:
             pass
 
 
-def _pattern(project: Project, path: Path) -> re.Pattern[str] | None:
-    """Return the pattern of a reference in a file that the server serves.
+def _kind(project: Project, path: Path) -> str | None:
+    """Return the kind of a file that the server serves.
 
     Args:
         project: The project.
         path: The absolute path of the file.
 
     Returns:
-        A rule ID for a spec below `specs/`, a `§` reference for a file of `code_dirs` with a
-        suffix of the code, else None.
+        `spec` for a Markdown file below `specs/`, `text` for a different Markdown file that git
+        tracks or a file of `code_dirs` with a suffix of the code, else None.
     """
+    rel = path.relative_to(project.root).as_posix() if path.is_relative_to(project.root) else ""
     spec = path.is_relative_to(project.specs_dir) and path.suffix == ".md"
     code = path.suffix in project.config.code_suffixes and any(
         path.is_relative_to(project.root / d) for d in project.config.code_dirs
     )
-    match spec, code:
+    match spec, code or rel in markdown_files(project.root):
         case True, _:
-            return IN_SPEC
+            return "spec"
         case _, True:
-            return IN_CODE
+            return "text"
         case _:
             return None
 
 
-def reference(
-    pattern: re.Pattern[str], text: str, line: int, column: int
-) -> tuple[str, types.Range] | None:
-    """Return the rule ID at a position and the range of the reference.
+def _front_matter_end(lines: list[str]) -> int:
+    """Return the line after the front matter.
 
     Args:
-        pattern: The pattern of a reference, with the ID in group 1.
+        lines: The lines of the file.
+
+    Returns:
+        The line of the second `---`, from 0, or 0 without front matter.
+    """
+    return (
+        next(
+            (n for n, line in enumerate(lines[1:], 1) if line == "---"),
+            0,
+        )
+        if lines[:1] == ["---"]
+        else 0
+    )
+
+
+def _span(line: int, start: int, end: int) -> types.Range:
+    """Return the range of a part of one line.
+
+    Args:
+        line: The line, from 0.
+        start: The first column, from 0.
+        end: The column after the part.
+
+    Returns:
+        The range.
+    """
+    return types.Range(
+        start=types.Position(line=line, character=start),
+        end=types.Position(line=line, character=end),
+    )
+
+
+def reference(kind: str, text: str, line: int, column: int) -> tuple[str, types.Range] | None:
+    """Return the rule ID at a position and the range of the rule ID.
+
+    Args:
+        kind: `spec` or `text`, see `_kind`.
         text: The text of the file.
         line: The line, from 0.
         column: The column, from 0.
 
     Returns:
-        The ID and the range of the whole reference, with `§` in code, or None.
+        The ID and its range: a rule ID in the front matter of a spec, else a rule ID in a
+        `(spec ...)` reference. None when there is no reference at the position.
     """
     lines = text.splitlines()
     here = lines[line] if line < len(lines) else ""
+    front = kind == "spec" and 0 < line < _front_matter_end(lines)
+    found = (
+        ((m[1], m.start(1), m.end(1)) for m in IN_FRONT_MATTER.finditer(here))
+        if front
+        else ((i.text, i.start, i.end) for i in items(here) if LOOSE_ITEM.fullmatch(i.text))
+    )
     return next(
-        (
-            (
-                m[1],
-                types.Range(
-                    start=types.Position(line=line, character=m.start()),
-                    end=types.Position(line=line, character=m.end()),
-                ),
-            )
-            for m in pattern.finditer(here)
-            if m.start() <= column <= m.end()
-        ),
+        ((ref, _span(line, start, end)) for ref, start, end in found if start <= column <= end),
         None,
     )
 
@@ -309,9 +341,9 @@ def target(
         project = Project.open(_root(ls))
     except ConfigError:
         return None
-    pattern = _pattern(project, path)
+    kind = _kind(project, path)
     text = ls.workspace.get_text_document(uri).source
-    found = reference(pattern, text, position.line, position.character) if pattern else None
+    found = reference(kind, text, position.line, position.character) if kind else None
     match found:
         case (ref, span):
             spec = project.find(_in_copy(project, path, ref))

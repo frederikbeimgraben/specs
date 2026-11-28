@@ -1,4 +1,4 @@
-"""Tests of the switches in `[features]` of `spezi.toml` (§000084)."""
+"""Tests of the switches in `[features]` of `spezi.toml` (spec 000084)."""
 
 from __future__ import annotations
 

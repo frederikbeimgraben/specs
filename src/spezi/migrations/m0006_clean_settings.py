@@ -1,4 +1,4 @@
-"""Migration 6: remove the comments of the template from `spezi.toml` (§000078).
+"""Migration 6: remove the comments of the template from `spezi.toml` (spec 000078).
 
 Before this migration, the template of `spezi.toml` had a comment for each key. The migration
 removes each line that is a comment of an earlier template, and then the empty lines at the
@@ -34,6 +34,7 @@ TEMPLATE_COMMENTS = frozenset(
         "# The file types of the code in code_dirs.",
         "# The folders that hold code. The check finds a § reference to a rule"
         " that does not exist.",
+        "# The folders that hold code. The check finds a reference to a rule that does not exist.",
         "# The full name of this project, <host>/<group>/.../<repo>. A"
         " transitive upstream of this name",
         "# The highest count of elements in one structure diagram (000037).",
@@ -95,8 +96,9 @@ def clean(text: str) -> str:
         text: The text.
 
     Returns:
-        The text without the lines of `TEMPLATE_COMMENTS`, without empty lines at the start and
-        with one empty line at most between two lines.
+        The text without the lines of `TEMPLATE_COMMENTS`, also with `(spec <ref>)` in place of
+        `(<ref>)`, without empty lines at the start and with one empty line at most between two
+        lines.
     """
     return re.sub(
         r"\n{3,}",
@@ -104,7 +106,7 @@ def clean(text: str) -> str:
         "".join(
             line
             for line in text.splitlines(keepends=True)
-            if line.rstrip() not in TEMPLATE_COMMENTS
+            if line.rstrip().replace("(spec ", "(") not in TEMPLATE_COMMENTS
         ).lstrip("\n"),
     )
 

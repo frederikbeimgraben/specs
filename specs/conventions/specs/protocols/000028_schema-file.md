@@ -25,7 +25,7 @@ A format that is not JSON must not have a schema file. Its `## Schema` section m
 of its parts. Every `.json` file below `specs/protocols/` must be the schema file of a protocol
 spec.
 
-Reason: The schema exists before the code (000002). One schema language lets one validator
+Reason: The schema exists before the code (spec 000002). One schema language lets one validator
 check every example and every implementation.
 
 Test: `spezi check` checks the file, `$schema` and the schema itself.

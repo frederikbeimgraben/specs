@@ -18,7 +18,7 @@ description: Add the spec format of frederikbeimgraben/spezi to a new or an exis
    ```
 
    `init` writes `spezi.toml` and `spezi.lock`, makes `specs/`, and puts the rules of the kit in
-   `specs/.upstream/github.com/frederikbeimgraben/spezi/` as an unchanged copy (000048). It
+   `specs/.upstream/github.com/frederikbeimgraben/spezi/` as an unchanged copy (spec 000048). It
    copies the templates to `specs/.templates/` and the skills to `.claude/skills/`. It writes the
    CI file (`.github/workflows/spezi.yml` or `.gitlab/ci/spezi.yml`, included from `.gitlab-ci.yml`) and the MCP server `spezi` in
    `.mcp.json`. It finds the forge in `git remote origin`. Give `--forge github` or
@@ -29,30 +29,30 @@ description: Add the spec format of frederikbeimgraben/spezi to a new or an exis
 4. Add the text below to `CLAUDE.md` or `AGENTS.md`.
 5. Commit and open a pull request.
 6. The project numbers its own rules from `000001`. A reference to a kit rule has the form
-   `github.com/frederikbeimgraben/spezi:<number>` (000047).
+   `github.com/frederikbeimgraben/spezi:<number>` (spec 000047).
 
 ## Project with its own `specs/`
 
-1. Move the files in `specs/` that are not rules out of `specs/` (000051). Move an old
+1. Move the files in `specs/` that are not rules out of `specs/` (spec 000051). Move an old
    `specs/config.toml` to `spezi.toml`.
 2. Run `init`. It stops if `spezi.toml` exists. Then merge the settings by hand.
 3. Compare the rules of the project with the kit rules in `specs/.upstream/`. If a project rule
    contradicts a kit rule, ask the owner which one applies. Replace the kit rule with
-   `replaces`, or change the project rule (000050).
-4. Move the project specs to the kind folders of 000004. A moved rule keeps its number (000014).
+   `replaces`, or change the project rule (spec 000050).
+4. Move the project specs to the kind folders (spec 000004). A moved rule keeps its number (spec 000014).
 
 ## Update the kit
 
 1. Run `spezi update kit`. It resolves the `ref` of the kit in `spezi.toml` again. To change the
    version, run `spezi update kit <ref>`. It replaces the copy, the templates, the skills, the CI
-   file and the MCP server entry, and writes the new commit to `spezi.lock` (000048, 000082).
+   file and the MCP server entry, and writes the new commit to `spezi.lock` (spec 000048, 000082).
    `spezi update` without arguments does this for each repository of `spezi.toml`.
-2. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (000049),
+2. Read the diff of the copy. Replace a new rule that must not apply with `replaces` (spec 000049),
    and fix each error. Open a pull request.
 
 The rules of a different repository: `spezi add <repo> [<ref>]` adds a copy, and
 `spezi update <repo> [<ref>]` replaces it. After a clone, or when a file of the kit is missing,
-run `spezi install`. It changes no version (000083). `<repo>` is the full path, with each GitLab subgroup.
+run `spezi install`. It changes no version (spec 000083). `<repo>` is the full path, with each GitLab subgroup.
 To take only some rules, add `--include <folder>` once for each folder below `specs/`, for
 example `--include style/python/`.
 

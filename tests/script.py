@@ -1,4 +1,4 @@
-"""A scripted user for the tests of the questions (§000085, §000086)."""
+"""A scripted user for the tests of the questions (spec 000085, 000086)."""
 
 from __future__ import annotations
 

@@ -23,13 +23,13 @@ scope:
 
 # spezi writes the rules for agents to AGENTS.md
 
-When the switch `agents` of `[features]` is on (000084), `spezi install` must write one block
+When the switch `agents` of `[features]` is on (spec 000084), `spezi install` must write one block
 to `AGENTS.md` in the root of the project. The block must start with the line
 `<!-- spezi:begin (written by spezi install, do not edit) -->` and end with the line
 `<!-- spezi:end -->`. Between these lines, the block must hold a short text that tells an agent
-how to use the rules, and the table of `specs/README.md` (000007) with only the A and W rules
+how to use the rules, and the table of `specs/README.md` (spec 000007) with only the A and W rules
 that have the status `approved`, first the rules of the project and then the rules of the
-copies (000049).
+copies (spec 000049).
 
 | State of `AGENTS.md` | `spezi install` |
 | --- | --- |
@@ -42,7 +42,7 @@ the block is not current. `spezi init` must create `CLAUDE.md` with the line
 `@AGENTS.md` when it does not exist. When `CLAUDE.md` exists without that line, `spezi init`
 must not change it and must print the line to add. A block that starts with the older line
 `<!-- specs:begin (written by specs check --write, do not edit) -->` or with the markers of the
-old name `specs` gets the new lines through the migrations of 000081.
+old name `specs` gets the new lines through the migrations (spec 000081).
 
 Reason: An agent finds every rule that applies in the file that it reads first, and the file
 stays current with the specs. Claude Code reads `AGENTS.md` through the import in `CLAUDE.md`.

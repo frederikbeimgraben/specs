@@ -1,4 +1,4 @@
-"""The questions of `init`, `add`, `update` and `configure` (§000085).
+"""The questions of `init`, `add`, `update` and `configure` (spec 000085).
 
 On a terminal the commands ask with questionary. Without a terminal, with `--yes` or with
 `--json`, each question takes its proposal, and a question with a risk stops the command.

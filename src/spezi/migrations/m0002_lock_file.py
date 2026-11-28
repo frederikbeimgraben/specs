@@ -1,4 +1,4 @@
-"""Migration 2: write `specs.lock` from the commits in `specs.toml` (§000082).
+"""Migration 2: write `specs.lock` from the commits in `specs.toml` (spec 000082).
 
 Before this migration, `ref` in `specs.toml` was the commit of each copy, and `specs.lock` did not
 exist. The migration writes an entry for each repository whose `ref` is a commit and whose copy

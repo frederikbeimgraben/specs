@@ -1,4 +1,4 @@
-"""Migration 4: change the paths below `.specs/` in the specs of the project (§000051).
+"""Migration 4: change the paths below `.specs/` in the specs of the project (spec 000051).
 
 Migration 1 moved the files of `.specs/` below `specs/`, but a spec of the project can still
 name an old path, for example in `implementation` or in the element table of a structure.

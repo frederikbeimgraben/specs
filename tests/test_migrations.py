@@ -1,4 +1,4 @@
-"""Tests of the migrations (§000081)."""
+"""Tests of the migrations (spec 000081)."""
 
 from __future__ import annotations
 
@@ -87,7 +87,7 @@ def test_update_changes_the_old_paths_in_the_specs(kit: Kit, project: Path) -> N
         "conventions/specs/format",
         "000100",
         "templates",
-        "Rule 000100",
+        "Rule templates",
         "convention",
         "A spec must copy `.specs/templates/TEMPLATE.md`, see `.specs/index.md` and"
         " `.specs/upstream/`.",
@@ -244,7 +244,7 @@ def test_migration_6_removes_the_comments_of_the_template(tmp_path: Path) -> Non
         "# github, gitlab or codeberg.\n"
         'forge = "github"\n'
         "\n"
-        "# The highest count of elements in one structure diagram (000037).\n"
+        "# The highest count of elements in one structure diagram (spec 000037).\n"
         "# Our diagrams are small.\n"
         "max_elements = 25\n"
         "\n"

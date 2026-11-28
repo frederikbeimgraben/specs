@@ -1,4 +1,4 @@
-"""Record the files that a command creates, changes or deletes (§000077).
+"""Record the files that a command creates, changes or deletes (spec 000077).
 
 Each place that writes a file reports it here. A command that runs in `recording()` gets the
 list at its end. A write with the same content is no change.
@@ -16,12 +16,12 @@ from enum import StrEnum
 from pathlib import Path
 
 MIGRATED = "migrated: "
-"""The start of the hint line of a migration that ran (§000081)."""
+"""The start of the hint line of a migration that ran (spec 000081)."""
 
 REPO_LINE = re.compile(
     r"(updated \S+ to |installed \S+ at |\S+ is up to date at )[0-9a-f]+( via \S+(, \S+)*)?"
 )
-"""The line of one repository that a command loaded or checked (§000067, §000083)."""
+"""The line of one repository that a command loaded or checked (spec 000067, 000083)."""
 
 
 def repos_first(hints: tuple[str, ...]) -> tuple[str, ...]:
@@ -196,7 +196,7 @@ def _rmtree(folder: Path) -> None:
 
 
 def _ignore(source: Path, left_out: frozenset[str]) -> Callable[[str, list[str]], set[str]]:
-    """Return the names that a copy of a `specs/` folder leaves out (§000048).
+    """Return the names that a copy of a `specs/` folder leaves out (spec 000048).
 
     Args:
         source: The folder to copy.
@@ -227,7 +227,7 @@ def replace_tree(
 
     Without `folders`, the copy holds all of `source` except each hidden file or folder, for
     example `.upstream/` and `.templates/`, and the folder `upstream/` at the top of `source`,
-    where the copies of a kit before `.upstream/` were (§000048).
+    where the copies of a kit before `.upstream/` were (spec 000048).
 
     Args:
         source: The folder to copy.

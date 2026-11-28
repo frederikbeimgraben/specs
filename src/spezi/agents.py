@@ -1,4 +1,4 @@
-"""Write the rules for agents to a block in `AGENTS.md` (§000079).
+"""Write the rules for agents to a block in `AGENTS.md` (spec 000079).
 
 The block holds the A and W rules with the status `approved`. The text outside the block stays
 as the person wrote it. `CLAUDE.md` imports `AGENTS.md` with the line `@AGENTS.md`.

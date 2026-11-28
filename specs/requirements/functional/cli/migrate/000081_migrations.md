@@ -47,7 +47,7 @@ of the kit.
 When a different repository needs a kit that the kit ref of the project does not hold, the
 command must stop with an error that tells to run `spezi update` first, and change no file.
 The command must print one line `migrated: <description>` for each migration that ran, and
-list the changed files (000077).
+list the changed files (spec 000077).
 
 Reason: A new kit can change the format without manual work in each project, and the copies of
 older repositories stay readable.

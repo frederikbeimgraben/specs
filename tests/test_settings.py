@@ -1,4 +1,4 @@
-"""Tests of `spezi.toml` (§000078) and of the block in `AGENTS.md` (§000079)."""
+"""Tests of `spezi.toml` (spec 000078) and of the block in `AGENTS.md` (spec 000079)."""
 
 from __future__ import annotations
 

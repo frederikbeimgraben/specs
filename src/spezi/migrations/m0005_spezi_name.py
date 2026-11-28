@@ -1,4 +1,4 @@
-"""Migration 5: give the files of the kit in a project the new name `spezi` (§000081).
+"""Migration 5: give the files of the kit in a project the new name `spezi` (spec 000081).
 
 The kit was `github.com/frederikbeimgraben/specs` with the command `specs`. Its files in a
 project had this name too: `specs.toml`, `specs.lock`, the skills `spec-*`, the folders of the

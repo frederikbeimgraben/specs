@@ -99,7 +99,7 @@ def _headings(spec: Spec) -> tuple[str, ...]:
 
 
 def schema_path(spec_path: Path) -> Path:
-    """Return the path of the schema file beside a protocol spec (§000028).
+    """Return the path of the schema file beside a protocol spec (spec 000028).
 
     Args:
         spec_path: The path of the protocol spec.
@@ -220,7 +220,7 @@ def _example_errors(rel: str, validator: Validator, number: int, block: str) -> 
 
 
 def _check_examples(rel: str, schema: dict[str, object], example: str) -> Errors:
-    """Validate the schema and each `json` block of `## Example` (§000028, §000029).
+    """Validate the schema and each `json` block of `## Example` (spec 000028, 000029).
 
     Args:
         rel: The path of the spec.
@@ -368,7 +368,7 @@ def _check_structure(ctx: Context, spec: Spec) -> Errors:
 
 
 def _check_decision(ctx: Context, spec: Spec) -> Errors:
-    """Check the sections of a decision spec (§000042).
+    """Check the sections of a decision spec (spec 000042).
 
     Args:
         ctx: The context of the check.

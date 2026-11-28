@@ -1,4 +1,4 @@
-"""Tests of the JSON output (§000080)."""
+"""Tests of the JSON output (spec 000080)."""
 
 from __future__ import annotations
 

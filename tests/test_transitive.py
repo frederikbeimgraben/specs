@@ -1,4 +1,4 @@
-"""Tests of the transitive upstreams (§000092, §000082, §000083, §000068, §000067)."""
+"""Tests of the transitive upstreams (spec 000092, 000082, 000083, 000068, 000067)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Tests of `specs init`, `specs update` and `specs add` (§000066, §000067, §000068)."""
+"""Tests of `specs init`, `specs update` and `specs add` (spec 000066, 000067, 000068)."""
 
 from __future__ import annotations
 

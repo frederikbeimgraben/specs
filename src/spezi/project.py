@@ -2,8 +2,8 @@
 
 `specs/` holds the rules of the project in its kind folders, the index `specs/README.md`, the
 copies of different repositories in `specs/.upstream/` and the templates in `specs/.templates/`
-(§000004). The settings are in `spezi.toml` in the
-root of the project (§000013).
+(spec 000004). The settings are in `spezi.toml` in the
+root of the project (spec 000013).
 """
 
 from __future__ import annotations
@@ -79,7 +79,7 @@ _TEXTS: ContextVar[Mapping[Path, str]] = ContextVar("texts", default=MappingProx
 
 @contextmanager
 def editing(texts: Mapping[Path, str]) -> Generator[None]:
-    """Read the texts of an editor in place of the files on the disk in the block (§000088).
+    """Read the texts of an editor in place of the files on the disk in the block (spec 000088).
 
     Args:
         texts: The text of each file by absolute path.
@@ -117,18 +117,18 @@ class Config:
     """The settings of `spezi.toml`.
 
     Attributes:
-        base_ref: The base branch for the check of the numbers (§000013).
+        base_ref: The base branch for the check of the numbers (spec 000013).
         forge: `github`, `gitlab` or `codeberg`.
-        code_dirs: The folders that hold code with `§` references (§000017).
+        code_dirs: The folders with code that refers to rules (spec 000017).
         code_suffixes: The file types of the code.
         max_elements: The highest count of elements in one structure diagram.
-        upstream: The `ref` of each repository with a copy below `specs/.upstream/` (§000048).
-        include: The folders of each repository that the copy holds; empty for all (§000048).
-        transitive: The transitive upstreams that the copy of each repository brings (§000092).
-        repo: The full name of the project, or empty (§000092).
-        features: The switch of each optional part of the kit (§000084).
+        upstream: The `ref` of each repository with a copy below `specs/.upstream/` (spec 000048).
+        include: The folders of each repository that the copy holds; empty for all (spec 000048).
+        transitive: The transitive upstreams that the copy of each repository brings (spec 000092).
+        repo: The full name of the project, or empty (spec 000092).
+        features: The switch of each optional part of the kit (spec 000084).
         own: The folders below `specs/` that hold the rules of this repository only. A copy
-            of the repository leaves them out (§000048).
+            of the repository leaves them out (spec 000048).
     """
 
     base_ref: str = "origin/main"
@@ -208,12 +208,12 @@ class Spec:
 
     @property
     def short(self) -> str:
-        """Return the short form of the ID (§000047)."""
+        """Return the short form of the ID (spec 000047)."""
         return f"{self.repo}:{self.number}" if self.repo else self.number
 
     @property
     def long(self) -> str:
-        """Return the long form of the ID (§000047)."""
+        """Return the long form of the ID (spec 000047)."""
         return f"{self.repo}:{self.full_id}" if self.repo else self.full_id
 
     @property
@@ -269,7 +269,7 @@ def _value(node: yaml.Node) -> str | tuple[str, ...]:
 
 
 def _pairs(block: str) -> tuple[tuple[str, str | tuple[str, ...]], ...]:
-    """Return the keys and values of a front matter block, read as YAML (§000009).
+    """Return the keys and values of a front matter block, read as YAML (spec 000009).
 
     Args:
         block: The text between the two `---` lines.
@@ -424,7 +424,7 @@ def _text(data: Mapping[str, object], key: str, default: str) -> str:
 
 
 def _forge(data: Mapping[str, object], default: str) -> str:
-    """Return the key `forge` of `spezi.toml` (§000078).
+    """Return the key `forge` of `spezi.toml` (spec 000078).
 
     Args:
         data: The table.
@@ -512,7 +512,7 @@ def _upstream(data: Mapping[str, object]) -> Mapping[str, Mapping[str, object]]:
 
 
 def _known(data: Mapping[str, object]) -> Mapping[str, object]:
-    """Return the table of `spezi.toml` when each key of its top level is known (§000078).
+    """Return the table of `spezi.toml` when each key of its top level is known (spec 000078).
 
     Args:
         data: The whole file.
@@ -531,7 +531,7 @@ def _known(data: Mapping[str, object]) -> Mapping[str, object]:
 
 
 def _features(data: Mapping[str, object]) -> Mapping[str, bool]:
-    """Return the switches of `[features]` of `spezi.toml` (§000084).
+    """Return the switches of `[features]` of `spezi.toml` (spec 000084).
 
     Args:
         data: The whole file.
@@ -674,7 +674,7 @@ class Project:
         return frozenset(r for r in roots if not any(r.startswith(f"{o}/") for o in roots))
 
     def needs_attribute(self) -> bool:
-        """Return True when a copy exists and `.gitattributes` lacks the line of §000048."""
+        """Return True when a copy exists and `.gitattributes` lacks the line of (spec 000048)."""
         path = self.root / ATTRIBUTES_NAME
         lines = path.read_text(encoding="utf-8").splitlines() if path.is_file() else ()
         return bool(self.copies()) and UPSTREAM_ATTRIBUTE not in (s.strip() for s in lines)
@@ -733,7 +733,7 @@ class Project:
         return tuple(spec for _, (spec, errors) in self._parse_upstream() if spec and not errors)
 
     def copy_errors(self) -> tuple[str, ...]:
-        """Return the errors of each rule of the copies that the program cannot read (§000065).
+        """Return the errors of each rule of the copies that the program cannot read (spec 000065).
 
         Returns:
             One error per problem, as `<path>: <message>`.
@@ -762,7 +762,7 @@ class Project:
         return (*self.load()[0], *self.load_upstream())
 
     def find(self, ref: str) -> Spec | None:
-        """Return the spec of a short or a long ID (§000047).
+        """Return the spec of a short or a long ID (spec 000047).
 
         Args:
             ref: The ID, for example `000012` or `github.com/o/r:C/specs/format/000012`.

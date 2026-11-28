@@ -13,14 +13,14 @@ scope:
 
 # specs/ holds the rules of the project and the files of the kit
 
-`specs/` must hold the rules of the project in its kind folders (000004). All other files of
+`specs/` must hold the rules of the project in its kind folders (spec 000004). All other files of
 the kit must be in these places of `specs/`:
 
 | Path | Content |
 | --- | --- |
-| `specs/README.md` | The index (000007). |
-| `specs/.upstream/` | The copies of the rules of different repositories (000048). |
-| `specs/.templates/` | The templates for a new spec (000008). |
+| `specs/README.md` | The index (spec 000007). |
+| `specs/.upstream/` | The copies of the rules of different repositories (spec 000048). |
+| `specs/.templates/` | The templates for a new spec (spec 000008). |
 
 The settings must be in `spezi.toml` in the root of the repository.
 

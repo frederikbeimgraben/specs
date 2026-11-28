@@ -1,5 +1,5 @@
 /**
- * The VS Code extension of the spezi kit: it starts `spezi lsp` (§000088, §000089).
+ * The VS Code extension of the spezi kit: it starts `spezi lsp` (spec 000088, 000089).
  *
  * The extension starts `spezi` from PATH. When PATH has no `spezi`, it starts the command in
  * `.vscode/spezi/server.json`, which `spezi setup-ide code` writes.

@@ -1,4 +1,4 @@
-"""Tests of the output of the command (§000076, §000077) and of the MCP tools (§000074)."""
+"""Tests of the output of the command (spec 000076, 000077) and of the MCP tools (spec 000074)."""
 
 from __future__ import annotations
 
@@ -157,7 +157,7 @@ def test_a_migration_has_a_blue_mark() -> None:
 
 
 def test_each_repository_has_a_green_mark() -> None:
-    """On a terminal, each repository has its own line with a green mark (§000076, §000067)."""
+    """On a terminal, each repository has its own line with a green mark (spec 000076, 000067)."""
     screen = Console(record=True, width=200, force_terminal=True, color_system="standard")
     message = "updated a.org/x/y to abc1\na.org/x/k is up to date at abc2"
     hints = ("add a line", "installed a.org/x/z at abc3 via a.org/x/y")

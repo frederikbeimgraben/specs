@@ -31,7 +31,7 @@ def find(project: Project, ref: str) -> Spec:
 
 
 def resolve(project: Project, ref: str) -> str:
-    """Return the long form of a short or a long ID (§000047).
+    """Return the long form of a short or a long ID (spec 000047).
 
     Args:
         project: The project.
@@ -69,7 +69,7 @@ def _line(spec: Spec) -> str:
 
 
 def rules(project: Project, kind: str | None = None) -> tuple[Spec, ...]:
-    """Return the rules of the project and of the copies, optionally of one kind (§000072).
+    """Return the rules of the project and of the copies, optionally of one kind (spec 000072).
 
     Args:
         project: The project.

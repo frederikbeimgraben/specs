@@ -16,10 +16,10 @@ scope:
 A change to a spec must follow these steps:
 
 1. Find the topic folder. If there is none, make it.
-2. Make the spec with `spezi new` (000008). It gives the rule its number (000013).
+2. Make the spec with `spezi new` (spec 000008). It gives the rule its number (spec 000013).
 3. Set `status: draft` and set `updated` to the current date.
-4. Update the index with `spezi install` (000007).
-5. Open a pull request. The owner sets `approved` (000010).
+4. Update the index with `spezi install` (spec 000007).
+5. Open a pull request. The owner sets `approved` (spec 000010).
 6. Before the merge, bring the branch up to the base branch and run the check again.
 
 Reason: Step 6 shows a number that the base branch took in the meantime.
