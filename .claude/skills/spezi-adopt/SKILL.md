@@ -52,7 +52,7 @@ description: Add the spec format of frederikbeimgraben/spezi to a new or an exis
 
 The rules of a different repository: `spezi add <repo> [<ref>]` adds a copy, and
 `spezi update <repo> [<ref>]` replaces it. After a clone, or when a file of the kit is missing,
-run `spezi install`. It changes no version (spec 000083). `<repo>` is the full path, with each GitLab subgroup.
+run `spezi install`. It changes no version. `<repo>` is the full path, with each GitLab subgroup.
 To take only some rules, add `--include <folder>` once for each folder below `specs/`, for
 example `--include style/python/`.
 

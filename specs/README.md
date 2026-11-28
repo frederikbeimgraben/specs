@@ -84,6 +84,7 @@ specs/
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | spezi add adds the copy of a different repository | approved |
 | [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | spezi writes the rules for agents to AGENTS.md | approved |
 | [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | approved |
+| [F/cli/check/000094](/specs/requirements/functional/cli/check/000094_own-references.md) | spezi check finds a reference to a rule of own in a file for projects | approved |
 | [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | spezi configure changes the settings in spezi.toml | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | approved |
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | spezi install brings a project to the state of its settings | approved |

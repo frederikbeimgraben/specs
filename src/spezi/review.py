@@ -18,13 +18,16 @@ from spezi.refs import INLINE_CODE
 type Change = tuple[str, str, str]
 
 
-def rules_in(folder: Path, repo: str, include: tuple[str, ...] = ()) -> Mapping[str, Spec]:
+def rules_in(
+    folder: Path, repo: str, include: tuple[str, ...] = (), own: tuple[str, ...] = ()
+) -> Mapping[str, Spec]:
     """Return the rules of a `specs/` folder by their number.
 
     Args:
         folder: The folder that holds the kind folders.
         repo: The repository of the rules.
         include: The folders below `folder` to read, or empty for all.
+        own: The folders below `folder` that a copy leaves out (spec 000048).
 
     Returns:
         The spec of each number.
@@ -39,6 +42,7 @@ def rules_in(folder: Path, repo: str, include: tuple[str, ...] = ()) -> Mapping[
                 not include
                 or any(p.relative_to(folder).as_posix().startswith(f"{f}/") for f in include)
             )
+            and not any(p.relative_to(folder).as_posix().startswith(f"{o}/") for o in own)
         )
         if folder.is_dir()
         else ()
