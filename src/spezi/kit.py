@@ -699,7 +699,9 @@ def fetch_copy(
             )
         plan = review(source, commit) if review else Plan(include)
         copy_rules(source, project, repo, plan.include, direct=direct)
-        ran = migrate_copy(history, project.upstream_dir / repo, theirs)
+        ran = migrate_copy(
+            history, project.upstream_dir / repo, commit if repo == KIT_REPO else theirs
+        )
         if kit_files:
             install_kit_files(source, project, commit)
         for path, text in plan.keep.items():

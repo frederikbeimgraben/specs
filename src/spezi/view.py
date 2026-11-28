@@ -11,7 +11,7 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 
-from spezi.changes import Mark
+from spezi.changes import MIGRATED, Mark
 from spezi.check import Count, summary
 from spezi.project import Spec
 
@@ -101,6 +101,30 @@ def done(text: str) -> Text:
         The message with a green mark.
     """
     return Text.assemble(("✓ ", "bold green"), text)
+
+
+def outcome(text: str, hints: tuple[str, ...]) -> Group:
+    """Return the message of a command with a green mark and its hints below it.
+
+    A hint of a migration that ran gets a blue mark, as the lines of the changed files
+    (§000081).
+
+    Args:
+        text: The message.
+        hints: The hints.
+
+    Returns:
+        The message, the migrations, and the other hints.
+    """
+    return Group(
+        done(text),
+        *(
+            Text.assemble(("↻ ", "bold blue"), (h.removeprefix(MIGRATED), "blue"))
+            if h.startswith(MIGRATED)
+            else Text(h)
+            for h in hints
+        ),
+    )
 
 
 def file_list(changed: tuple[tuple[Mark, str], ...]) -> Group:
