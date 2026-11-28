@@ -12,7 +12,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from specs_kit.migrations import m0001_specs_folder, m0002_lock_file, m0003_agents_marker
+from specs_kit.migrations import (
+    m0001_specs_folder,
+    m0002_lock_file,
+    m0003_agents_marker,
+    m0004_specs_paths,
+)
 from specs_kit.project import kit_rev
 
 type History = Callable[[], Path]
@@ -53,6 +58,12 @@ MIGRATIONS: tuple[Migration, ...] = (
         m0003_agents_marker.DESCRIPTION,
         m0003_agents_marker.project,
         m0003_agents_marker.copy,
+    ),
+    Migration(
+        m0004_specs_paths.COMMIT,
+        m0004_specs_paths.DESCRIPTION,
+        m0004_specs_paths.project,
+        m0004_specs_paths.copy,
     ),
 )
 

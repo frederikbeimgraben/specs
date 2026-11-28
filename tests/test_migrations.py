@@ -5,7 +5,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from conftest import RULES_REPO, Kit, git
+from conftest import RULES_REPO, Kit, git, write_rule
 
 
 def _old_layout(project: Path) -> None:
@@ -34,6 +34,31 @@ def test_update_moves_the_old_layout(kit: Kit, project: Path) -> None:
     ).is_dir()
     assert "migrated: move .specs/ below specs/" in result.out
     assert "D .specs/index.md" in result.out
+
+
+def test_update_changes_the_old_paths_in_the_specs(kit: Kit, project: Path) -> None:
+    """`specs update` changes a path below `.specs/` in a spec of the project to its new place."""
+    (project / "src").mkdir(exist_ok=True)
+    rule = write_rule(
+        project,
+        "conventions/specs/format",
+        "000100",
+        "templates",
+        "Rule 000100",
+        "convention",
+        "A spec must copy `.specs/templates/TEMPLATE.md`, see `.specs/index.md` and"
+        " `.specs/upstream/`.",
+    )
+    _old_layout(project)
+    result = kit.run(project, "update", "kit", kit.rev, "--raw")
+    text = rule.read_text(encoding="utf-8")
+    assert result.code == 0, result.out + result.err
+    assert (
+        "copy `specs/.templates/TEMPLATE.md`, see `specs/README.md` and `specs/.upstream/`" in text
+    )
+    assert ".specs/" not in text
+    assert "migrated: change the paths below .specs/ in the specs of the project" in result.out
+    assert "M specs/conventions/specs/format/000100_templates.md" in result.out
 
 
 def test_a_migration_changes_nothing_twice(kit: Kit, project: Path) -> None:

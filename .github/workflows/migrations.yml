@@ -1,0 +1,38 @@
+name: migrations
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  starts:
+    runs-on: ubuntu-latest
+    outputs:
+      starts: ${{ steps.list.outputs.starts }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - id: list
+        run: echo "starts=$(nix develop -c env PYTHONPATH=src python .github/scripts/migration_starts.py)" >> "$GITHUB_OUTPUT"
+
+  migrate:
+    needs: starts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        start: ${{ fromJSON(needs.starts.outputs.starts) }}
+        demo: [kit, init]
+    name: ${{ matrix.demo }} from ${{ matrix.start }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - run: .github/scripts/migration-demo.sh "${{ matrix.start }}" "${{ matrix.demo }}"

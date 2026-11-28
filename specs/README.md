@@ -23,6 +23,7 @@ specs/
   conventions/
     specs/  content, decisions, format, layout, protocols, references, structures
   workflow/
+    kit/    migrations
     specs/  process
   agents/
     work/  approval, questions
@@ -118,6 +119,7 @@ specs/
 | [S/shared/functional/000059](/specs/style/shared/functional/000059_exceptions.md) | The exceptions of the functional style are named | approved |
 | [U/specs/lifecycle/000041](/specs/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | approved |
 | [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
+| [W/kit/migrations/000090](/specs/workflow/kit/migrations/000090_migration-ci.md) | The CI migrates demo projects from each migration | draft |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
 | [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |
