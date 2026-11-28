@@ -2,9 +2,9 @@
 id: "000072"
 title: spezi list prints every rule
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_queries.py:test_list_prints_one_line_for_each_rule
   - tests/test_queries.py:test_list_filters_by_kind
@@ -25,7 +25,7 @@ rules of this kind, and stop with an error for an unknown kind. The MCP tool `li
 status and the title, in this order and separated by tabs. For example:
 
 ```text
-S	000060	approved	Python code needs Python 3.13 or later
+S	github.com/frederikbeimgraben/spezi-python:000001	approved	Python code needs Python 3.13 or later
 ```
 
 Reason: An agent sees all rules in one call. The short form is the form that code and specs
