@@ -38,8 +38,8 @@ long form), `status`, `title` and `path`. An error object must hold `file`, `lin
 number from 1), `message` and `rule` (the number of the rule that the error names), and `null`
 for a part that the error line does not have. Each object of `changed` must hold `mark` and
 `path`. When a command stops with an error, also for a wrong argument, it must print
-`{"error": "<error>"}` to stdout, nothing to stderr, and end with the exit code 1. A path must be relative to the root of the
-project.
+`{"error": "<error>"}` to stdout, nothing to stderr, and end with the exit code 1. A path must
+be relative to the root of the project.
 
 Reason: A script reads every command in the same way, without parsing text.
 
