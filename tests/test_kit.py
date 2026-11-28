@@ -7,6 +7,9 @@ from pathlib import Path
 
 from conftest import RULES_REPO, Kit, git, write_rule
 
+from specs_kit.kit import copy_rules, write_repo
+from specs_kit.project import Project
+
 KIT = "specs/.upstream/github.com/frederikbeimgraben/specs"
 
 
@@ -200,3 +203,42 @@ def test_update_without_arguments_updates_each_repository(kit: Kit, project: Pat
         assert f"updated github.com/frederikbeimgraben/specs to {kit.rev}" in result.out
     finally:
         git(kit.rules, "reset", "-q", "--hard", kit.rules_rev, env=kit.env)
+
+
+def test_update_reads_a_ref_without_spaces(kit: Kit, project: Path) -> None:
+    """`specs update` sets the ref of a table that writes `ref="..."` without spaces."""
+    assert kit.run(project, "add", RULES_REPO, kit.rules_rev).code == 0
+    path = project / "specs.toml"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text.replace(f'ref = "{kit.rules_rev}"', f'ref="{kit.rules_rev}"'))
+    result = kit.run(project, "update", RULES_REPO, "main", "--raw")
+    assert result.code == 0, result.out + result.err
+    assert _upstream(project)[RULES_REPO]["ref"] == "main"
+
+
+def test_update_writes_include_once(tmp_path: Path) -> None:
+    """A new `include` replaces the `include` of the table and does not add a second key."""
+    (tmp_path / "specs.toml").write_text(
+        f'[upstream."{RULES_REPO}"]\nref = "v1"\ninclude = ["style/"]\n', encoding="utf-8"
+    )
+    write_repo(Project.open(tmp_path), RULES_REPO, "v2", ("agents", "style"))
+    assert _upstream(tmp_path)[RULES_REPO] == {"ref": "v2", "include": ["agents/", "style/"]}
+    write_repo(Project.open(tmp_path), RULES_REPO, "v3")
+    assert _upstream(tmp_path)[RULES_REPO] == {"ref": "v3", "include": ["agents/", "style/"]}
+
+
+def test_a_copy_keeps_a_folder_named_upstream(tmp_path: Path) -> None:
+    """A copy holds an area or a topic `upstream`, but no hidden folder and no top `upstream/`."""
+    source = tmp_path / "source" / "specs"
+    for name in (
+        "workflow/upstream/process/000001_one.md",
+        "upstream/github.com/o/r/README.md",
+        ".templates/TEMPLATE.md",
+    ):
+        (source / name).parent.mkdir(parents=True, exist_ok=True)
+        (source / name).write_text("text\n", encoding="utf-8")
+    copy_rules(source.parent, Project.open(tmp_path), RULES_REPO)
+    copy = tmp_path / "specs/.upstream" / RULES_REPO
+    assert sorted(p.relative_to(copy).as_posix() for p in copy.rglob("*") if p.is_file()) == [
+        "workflow/upstream/process/000001_one.md"
+    ]

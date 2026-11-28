@@ -69,3 +69,24 @@ def test_install_keeps_a_changed_template(kit: Kit, project: Path) -> None:
     result = kit.run(project, "install", "--raw")
     assert result.code == 0, result.out + result.err
     assert path.read_text(encoding="utf-8") == "my template\n"
+
+
+def test_install_stops_for_a_broken_mcp_file(kit: Kit, project: Path) -> None:
+    """`specs install` stops with an error and keeps a `.mcp.json` that is no valid JSON."""
+    path = project / ".mcp.json"
+    path.write_text("{broken\n", encoding="utf-8")
+    result = kit.run(project, "install", "--raw")
+    assert result.code == 1, result.out + result.err
+    assert "specs: .mcp.json: no valid JSON:" in result.err
+    assert "Traceback" not in result.err
+    assert path.read_text(encoding="utf-8") == "{broken\n"
+
+
+def test_install_stops_for_mcp_servers_that_are_no_object(kit: Kit, project: Path) -> None:
+    """`specs install` stops with an error when `mcpServers` in `.mcp.json` is not an object."""
+    path = project / ".mcp.json"
+    path.write_text('{"mcpServers": []}\n', encoding="utf-8")
+    result = kit.run(project, "install", "--raw")
+    assert result.code == 1, result.out + result.err
+    assert "specs: .mcp.json: mcpServers is not an object" in result.err
+    assert path.read_text(encoding="utf-8") == '{"mcpServers": []}\n'

@@ -4,13 +4,15 @@ title: specs install brings a project to the state of its settings
 kind: functional
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_install.py:test_install_changes_nothing_on_a_current_project
   - tests/test_install.py:test_install_restores_a_changed_copy
   - tests/test_install.py:test_install_writes_missing_kit_files
   - tests/test_install.py:test_install_keeps_a_changed_template
   - tests/test_install.py:test_install_loads_a_missing_copy
+  - tests/test_install.py:test_install_stops_for_a_broken_mcp_file
+  - tests/test_install.py:test_install_stops_for_mcp_servers_that_are_no_object
 implementation:
   - src/specs_kit/install.py
   - src/specs_kit/kit.py
@@ -41,6 +43,10 @@ It must do these steps in this order:
 6. Write the index `specs/README.md` (000007) and the block in `AGENTS.md` (000079).
 7. Run `specs check` (000065). Print its own message, the hints, the changed files (000077)
    and then the report of the check. End with the exit code 1 when the check finds errors.
+
+When `.mcp.json` is no valid JSON, is not a JSON object, or has a `mcpServers` that is not an
+object, the command must stop with an error that names `.mcp.json`, and must not change
+`.mcp.json`.
 
 When each copy agrees with `specs.lock` and this program is the kit at the commit of
 `specs.lock`, the command must not use the network. `specs init`, `specs update` and

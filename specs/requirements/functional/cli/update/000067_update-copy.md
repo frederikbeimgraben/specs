@@ -4,12 +4,14 @@ title: specs update resolves the refs again and replaces the copies
 kind: functional
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_update_replaces_the_copy_and_keeps_include
   - tests/test_kit.py:test_update_stops_for_an_unknown_repository
   - tests/test_kit.py:test_update_of_the_kit_runs_the_check
   - tests/test_kit.py:test_update_without_arguments_updates_each_repository
+  - tests/test_kit.py:test_update_reads_a_ref_without_spaces
+  - tests/test_kit.py:test_update_writes_include_once
 implementation:
   - src/specs_kit/kit.py
   - src/specs_kit/cli.py

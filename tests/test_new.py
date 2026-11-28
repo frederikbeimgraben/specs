@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from conftest import Kit
+from conftest import Kit, git
 
 
 def _new(kit: Kit, project: Path, *args: str) -> tuple[int, str, str]:
@@ -61,3 +61,15 @@ def test_new_needs_a_scope(kit: Kit, project: Path) -> None:
     code, _, err = _new(kit, project, "F", "app/login", "sign-in", "Sign in")
     assert code == 2
     assert "--scope" in err
+
+
+def test_new_skips_the_numbers_of_the_copies(kit: Kit, project: Path) -> None:
+    """The next number counts the rules of the project on the base branch, not the copies."""
+    (project / "src").mkdir()
+    (project / "src/app.py").write_text("x = 1\n", encoding="utf-8")
+    git(project, "add", "-A", env=kit.env)
+    git(project, "commit", "-q", "-m", "start", env=kit.env)
+    git(project, "update-ref", "refs/remotes/origin/main", "HEAD", env=kit.env)
+    code, out, err = _new(kit, project, "F", "app/login", "sign-in", "Sign in", "--scope", "src")
+    assert code == 0, out + err
+    assert (project / "specs/requirements/functional/app/login/000001_sign-in.md").is_file()
