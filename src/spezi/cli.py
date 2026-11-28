@@ -525,7 +525,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
 def main() -> None:
     """Run the command line and exit with its code.
 
-    A command that stops prints `specs: <error>` to stderr, or with `--json` the object
+    A command that stops prints `spezi: <error>` to stderr, or with `--json` the object
     `{"error": "<error>"}` to stdout (spec 000080). The exit code is then 1.
     """
     try:
