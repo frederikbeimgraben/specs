@@ -95,7 +95,7 @@ specs/
 | [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | spezi formats its output for a terminal | approved |
 | [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | spezi lists the files that a command changes | approved |
 | [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | spezi prints its data as JSON | approved |
-| [F/cli/questions/000085](/specs/requirements/functional/cli/questions/000085_questions.md) | init, add and update ask questions on a terminal | draft |
+| [F/cli/questions/000085](/specs/requirements/functional/cli/questions/000085_questions.md) | init, add and update ask questions on a terminal | approved |
 | [F/cli/remove/000087](/specs/requirements/functional/cli/remove/000087_remove.md) | spezi remove removes the copy of a different repository | approved |
 | [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | spezi resolve prints the long form of an ID | approved |
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | spezi search finds rules by a text | approved |
