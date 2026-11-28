@@ -21,6 +21,7 @@ from spezi.context import Context, Errors, where
 from spezi.index import index
 from spezi.lock import LOCK_NAME, read_lock, tree_hash
 from spezi.project import (
+    ATTRIBUTES_NAME,
     FILE_NAME,
     IN_FORCE,
     KINDS_BY_PREFIX,
@@ -30,6 +31,7 @@ from spezi.project import (
     REPO,
     SHORT,
     STATUSES,
+    UPSTREAM_ATTRIBUTE,
     Project,
     Spec,
     hidden,
@@ -528,6 +530,14 @@ def _upstream_errors(project: Project) -> Errors:
             for e in _include_errors(project, repo, include)
         ),
         *_transitive_errors(project, want, copies),
+        *(
+            (
+                f"{ATTRIBUTES_NAME}: the line {UPSTREAM_ATTRIBUTE!r} is missing; run spezi install"
+                " (000048)",
+            )
+            if project.needs_attribute()
+            else ()
+        ),
     )
 
 

@@ -36,7 +36,14 @@ from spezi.kit import (
 )
 from spezi.lock import read_lock
 from spezi.migrations import migrate_project
-from spezi.project import KIT_REPO, Project, kit_rev, kit_source
+from spezi.project import (
+    ATTRIBUTES_NAME,
+    KIT_REPO,
+    UPSTREAM_ATTRIBUTE,
+    Project,
+    kit_rev,
+    kit_source,
+)
 
 
 def _files(folder: Path) -> tuple[Path, ...]:
@@ -118,6 +125,23 @@ def _kit_files(project: Project, commit: str) -> None:
         write_mcp(project, commit)
 
 
+def _add_attribute(project: Project) -> None:
+    """Add the line of §000048 to `.gitattributes` when a copy needs it, and keep each other line.
+
+    Args:
+        project: The project.
+    """
+    path = project.root / ATTRIBUTES_NAME
+    text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    if project.needs_attribute():
+        write_text(
+            path,
+            "".join(
+                (text, "\n" if text and not text.endswith("\n") else "", UPSTREAM_ATTRIBUTE, "\n")
+            ),
+        )
+
+
 def install(project: Project) -> tuple[str, ...]:
     """Bring a project to the state of `spezi.toml` and `spezi.lock`, without a change of a pin.
 
@@ -134,6 +158,7 @@ def install(project: Project) -> tuple[str, ...]:
         ran = () if own is None else migrate_project(history, project.root, own)
         fresh = Project.open(project.root)
         copied = (*sync_copies(fresh, history), *sync_transitive(fresh, history))
+    _add_attribute(fresh)
     locked = read_lock(fresh.root).get(KIT_REPO)
     if locked is not None:
         _kit_files(fresh, locked.commit)
