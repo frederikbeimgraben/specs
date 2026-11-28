@@ -3,7 +3,15 @@
 from __future__ import annotations
 
 from spezi.migrations.m0006_spec_references import _code, _markdown
-from spezi.refs import bad_references, bare_numbers, items, old_references, prose, references
+from spezi.refs import (
+    bad_references,
+    bare_numbers,
+    items,
+    kit_form,
+    old_references,
+    prose,
+    references,
+)
 
 
 def test_a_list_gives_each_item() -> None:
@@ -54,3 +62,13 @@ def test_the_migration_changes_nothing_twice() -> None:
     once = _markdown(text, "README.md")
     assert _markdown(once, "README.md") == once
     assert _code(_code("# §000017")) == "# (spec 000017)"
+
+
+def test_a_text_of_the_kit_gets_the_foreign_form() -> None:
+    """In a project, a text of the kit names a rule of the kit with the foreign form."""
+    text = "See (spec 000017, github.com/o/r:000012) and (spec <ref>)."
+    assert kit_form(text) == (
+        "See (spec github.com/frederikbeimgraben/spezi:000017, github.com/o/r:000012)"
+        " and (spec <ref>)."
+    )
+    assert kit_form(kit_form(text)) == kit_form(text)

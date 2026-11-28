@@ -13,8 +13,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from spezi.agents import BLOCK
-from spezi.project import LONG_LOCAL, NUMBER, PREFIXES, REPO
+from spezi.project import KIT_REPO, LONG_LOCAL, NUMBER, PREFIXES, REPO
 
 SPEC_REF = re.compile(r"\(spec ([^()\n]*)\)")
 ITEM = re.compile(rf"(?:{REPO}:)?{NUMBER}")
@@ -25,6 +24,9 @@ FRONT_MATTER = re.compile(r"\A---\n.*?^---$", re.MULTILINE | re.DOTALL)
 FENCE = re.compile(r"^ *(```|~~~)[^\n]*\n.*?^ *\1[^\n]*$", re.MULTILINE | re.DOTALL)
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 TABLE_ROW = re.compile(r"^\|.*$", re.MULTILINE)
+BLOCK = re.compile(
+    r"^<!-- (?:spezi|specs):begin .*?^<!-- (?:spezi|specs):end -->$", re.MULTILINE | re.DOTALL
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -160,6 +162,45 @@ def bare_numbers(text: str) -> Iterator[str]:
         The rule numbers and the foreign short forms.
     """
     return (m[1] for m in BARE_REF.finditer(_blank(text, SPEC_REF)))
+
+
+def kit_form(text: str) -> str:
+    """Give each local item of each `(spec ...)` reference the repository of the kit.
+
+    A text of the kit names the rules of the kit with the local short form. In a project, these
+    rules are rules of a copy, so the text needs the foreign short form (spec 000047).
+
+    Args:
+        text: A text of the kit.
+
+    Returns:
+        The text for a project.
+    """
+    return SPEC_REF.sub(
+        lambda m: (
+            "(spec "
+            + ", ".join(
+                part if ":" in part or not ITEM.fullmatch(part) else f"{KIT_REPO}:{part}"
+                for part, _ in _parts(m[1], 0)
+            )
+            + ")"
+        ),
+        text,
+    )
+
+
+def for_project(upstream_dir: Path, text: str) -> str:
+    """Return a text of the kit for a project.
+
+    Args:
+        upstream_dir: The folder `specs/.upstream/` of the project.
+        text: A text of the kit.
+
+    Returns:
+        The text with the foreign short form when the project has a copy of the kit, else the
+        text as it is, for the kit itself.
+    """
+    return kit_form(text) if (upstream_dir / KIT_REPO).is_dir() else text
 
 
 def markdown_files(root: Path, *, new: bool = False) -> tuple[str, ...]:

@@ -44,6 +44,7 @@ from spezi.project import (
     kit_rev,
     kit_source,
 )
+from spezi.refs import for_project
 
 
 def _files(folder: Path) -> tuple[Path, ...]:
@@ -86,6 +87,22 @@ def _missing(source: Path, project: Project) -> tuple[tuple[Path, Path], ...]:
     return tuple((src, dst) for src, dst in pairs if not dst.exists())
 
 
+def _kit_text(project: Project, src: Path, dst: Path) -> str:
+    """Return the text of a file of the kit for the project.
+
+    Args:
+        project: The project.
+        src: The file of the kit.
+        dst: The file of the project.
+
+    Returns:
+        The text. A skill gets the foreign short form of the rules of the kit (spec 000017).
+    """
+    text = src.read_text(encoding="utf-8")
+    skill = dst.is_relative_to(project.root / ".claude" / "skills") and dst.suffix == ".md"
+    return for_project(project.upstream_dir, text) if skill else text
+
+
 def _kit_files(project: Project, commit: str) -> None:
     """Write each missing template, and each missing skill, CI file and MCP entry that is on.
 
@@ -105,7 +122,7 @@ def _kit_files(project: Project, commit: str) -> None:
             else stack.enter_context(checkout(KIT_REPO, commit))
         )
         for src, dst in _missing(source, project):
-            write_text(dst, src.read_text(encoding="utf-8"))
+            write_text(dst, _kit_text(project, src, dst))
     data_name, target = CI_FILES[forge]
     branch = project.config.base_ref.removeprefix("origin/")
     if project.config.on("ci") and not (project.root / target).exists():

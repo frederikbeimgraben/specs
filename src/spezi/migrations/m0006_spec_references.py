@@ -5,7 +5,8 @@ reference in a Markdown file as the bare rule number. The migration writes each 
 `(spec <ref>)`. A list of references in one pair of parentheses becomes one list, and a range
 `<a> to <b>` becomes the list of each number from `a` to `b`. In a Markdown file, the migration
 does not change the front matter, a code block, text in backticks or a table that `spezi`
-writes. In a rule, it does not change the `#` heading, which repeats the title.
+writes. In a rule, it does not change the `#` heading, which repeats the title. The skills of
+the kit in a project get the foreign short form of the rules of the kit.
 """
 
 from __future__ import annotations
@@ -16,8 +17,8 @@ from functools import reduce
 from pathlib import Path
 
 from spezi.changes import write_text
-from spezi.project import CONFIG_NAME, NUMBER, PREFIXES, REPO, hidden, read_config
-from spezi.refs import SPEC_REF, markdown_files, prose
+from spezi.project import CONFIG_NAME, NUMBER, PREFIXES, REPO, UPSTREAM, hidden, read_config
+from spezi.refs import SPEC_REF, for_project, markdown_files, prose
 
 COMMIT = "6bbce6f83d3451c3d3b34ecb35296eb43aeaea1a"
 DESCRIPTION = "write each reference to a rule as (spec <ref>)"
@@ -181,6 +182,8 @@ def project(root: Path) -> None:
         _rewrite(path, _code)
     for rel in texts:
         _rewrite(root / rel, lambda text, rel=rel: _markdown(text, rel))
+    for path in sorted((root / ".claude" / "skills").glob("spezi-*/**/*.md")):
+        _rewrite(path, lambda text: for_project(root / "specs" / UPSTREAM, text))
 
 
 def copy(folder: Path) -> None:

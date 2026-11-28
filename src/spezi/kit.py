@@ -38,6 +38,7 @@ from spezi.project import (
     kit_rev,
     kit_source,
 )
+from spezi.refs import for_project
 from spezi.review import broken_references, change_lines, rule_changes, rules_in
 from spezi.settings import (
     FORGES,
@@ -530,6 +531,10 @@ def install_kit_files(source: Path, project: Project, ref: str) -> None:
     replace_tree(templates(source), project.templates_dir)
     for skill in skills(source) if config.on("skills") else ():
         replace_tree(skill, project.root / ".claude" / "skills" / skill.name)
+        for path in sorted((project.root / ".claude" / "skills" / skill.name).rglob("*.md")):
+            text = path.read_text(encoding="utf-8")
+            if for_project(project.upstream_dir, text) != text:
+                write_text(path, for_project(project.upstream_dir, text))
     branch = config.base_ref.removeprefix("origin/")
     if config.on("ci"):
         write_text(
@@ -1298,7 +1303,11 @@ def _changed_kit_files(project: Project, source: Path, old: str) -> Mapping[Path
         (local, new, bases, rel)
         for local, new, bases, rel in pairs
         if local.read_text(encoding="utf-8")
-        != (new.read_text(encoding="utf-8") if new.is_file() else None)
+        != (
+            for_project(project.upstream_dir, new.read_text(encoding="utf-8"))
+            if new.is_file()
+            else None
+        )
     )
     if not differs:
         return {}

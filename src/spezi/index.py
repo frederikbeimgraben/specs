@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from spezi.project import IN_FORCE, KINDS, Project, Spec
+from spezi.refs import for_project
 
 
 def _topics(area: Path) -> str:
@@ -104,7 +105,8 @@ def index(
     """
     upstream = tuple(s for s in copied if foreign.get(s.short) in IN_FORCE)
     head = ("| ID | Title | Status |", "| --- | --- | --- |")
-    return (
+    return for_project(
+        project.upstream_dir,
         "\n".join(
             (
                 "# Specs",
@@ -139,5 +141,5 @@ def index(
                 ),
             )
         )
-        + "\n"
+        + "\n",
     )
