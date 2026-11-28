@@ -100,6 +100,7 @@
               ps.mcp
               ps.pygls
               ps.pytest
+              ps.pytest-xdist
               ps.pyyaml
               ps.questionary
               ps.rich-argparse
