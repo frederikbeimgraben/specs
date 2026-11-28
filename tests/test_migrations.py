@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import shutil
+import stat
 from pathlib import Path
 
-from conftest import RULES_REPO, Kit, git
+from conftest import RULES_REPO, Kit, git, write_rule
+
+from specs_kit.changes import move_tree
 
 
 def _old_layout(project: Path) -> None:
@@ -34,6 +37,53 @@ def test_update_moves_the_old_layout(kit: Kit, project: Path) -> None:
     ).is_dir()
     assert "migrated: move .specs/ below specs/" in result.out
     assert "D .specs/index.md" in result.out
+
+
+def test_a_read_only_folder_moves_and_stays_writable(tmp_path: Path) -> None:
+    """An old program copied the kit with the read-only modes of the Nix store.
+
+    Only the copy is read-only, not the folder that holds it. The move must delete the copy and
+    give a new copy that can change.
+    """
+    old = tmp_path / ".specs" / "templates"
+    old.mkdir(parents=True)
+    (old / "TEMPLATE.md").write_text("template\n", encoding="utf-8")
+    for path in (old / "TEMPLATE.md", old):
+        path.chmod(0o444 if path.is_file() else 0o555)
+    new = tmp_path / "specs" / ".templates"
+    try:
+        move_tree(old, new)
+    finally:
+        for path in (old.parent, *old.parent.rglob("*")) if old.parent.exists() else ():
+            path.chmod(0o755)
+    assert not old.exists()
+    assert (new / "TEMPLATE.md").read_text(encoding="utf-8") == "template\n"
+    assert all(p.stat().st_mode & stat.S_IWUSR for p in (new, *new.rglob("*")))
+
+
+def test_update_changes_the_old_paths_in_the_specs(kit: Kit, project: Path) -> None:
+    """`specs update` changes a path below `.specs/` in a spec of the project to its new place."""
+    (project / "src").mkdir(exist_ok=True)
+    rule = write_rule(
+        project,
+        "conventions/specs/format",
+        "000100",
+        "templates",
+        "Rule 000100",
+        "convention",
+        "A spec must copy `.specs/templates/TEMPLATE.md`, see `.specs/index.md` and"
+        " `.specs/upstream/`.",
+    )
+    _old_layout(project)
+    result = kit.run(project, "update", "kit", kit.rev, "--raw")
+    text = rule.read_text(encoding="utf-8")
+    assert result.code == 0, result.out + result.err
+    assert (
+        "copy `specs/.templates/TEMPLATE.md`, see `specs/README.md` and `specs/.upstream/`" in text
+    )
+    assert ".specs/" not in text
+    assert "migrated: change the paths below .specs/ in the specs of the project" in result.out
+    assert "M specs/conventions/specs/format/000100_templates.md" in result.out
 
 
 def test_a_migration_changes_nothing_twice(kit: Kit, project: Path) -> None:
