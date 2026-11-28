@@ -73,7 +73,7 @@ specs/
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |
 | [C/specs/references/000082](/specs/conventions/specs/references/000082_lock-file.md) | spezi.lock holds the commit and the hash of each copy | draft |
-| [C/specs/references/000092](/specs/conventions/specs/references/000092_transitive-copy.md) | A copy brings the upstreams of its repository | draft |
+| [C/specs/references/000092](/specs/conventions/specs/references/000092_transitive-copy.md) | A copy brings the upstreams of its repository | approved |
 | [C/specs/structures/000033](/specs/conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | approved |
 | [C/specs/structures/000034](/specs/conventions/specs/structures/000034_mermaid-diagram.md) | The diagram is one Mermaid block of a fixed type | approved |
 | [C/specs/structures/000035](/specs/conventions/specs/structures/000035_elements-table.md) | Each element of the diagram has a row in the element table | approved |
