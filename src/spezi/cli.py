@@ -39,7 +39,7 @@ from rich_argparse import RichHelpFormatter
 
 from spezi import data, ide, lsp, queries
 from spezi.ask import Ask, Cancelled, Stop, asker
-from spezi.changes import Mark, lines, recording
+from spezi.changes import MIGRATED, Mark, lines, recording
 from spezi.check import run, summary
 from spezi.configure import configure, set_value
 from spezi.devshell import init_flake, update_flake
@@ -48,7 +48,7 @@ from spezi.kit import KitError, add, init, offer_lines, remove, update
 from spezi.mcp_server import serve
 from spezi.new import NewError, new
 from spezi.project import KIT_REPO, ConfigError, Project
-from spezi.view import console, done, file_list, report, spec_text, table
+from spezi.view import console, file_list, outcome, report, spec_text, table
 
 if TYPE_CHECKING:
     from _typeshed import SupportsWrite
@@ -303,7 +303,11 @@ def _check(
             + "".join(f"{e}\n" for e in errors)
             + f"{summary(count, errors)}\n"
         ),
-        lambda: Group(*(done(h) for h in head), file_list(changed), report(count, tuple(errors))),
+        lambda: Group(
+            *(() if message is None else (outcome(*message),)),
+            file_list(changed),
+            report(count, tuple(errors)),
+        ),
         lambda: (
             {**checked, "changed": data.changed(changed)}
             if message is None
@@ -332,7 +336,7 @@ def _message(
     return _emit(
         mode,
         lambda: f"{_lines(text, hints)}\n{_raw_changes(changed)}",
-        lambda: Group(done(_lines(text, hints)), file_list(changed)),
+        lambda: Group(outcome(text, hints), file_list(changed)),
         lambda: dict(data.result(text, hints, None, changed)),
     )
 
@@ -433,7 +437,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             done, ran = update(project, args.repo, args.ref, _ask(args, mode), args.recursive)
             kit = dict(done).get(KIT_REPO)
             hints = (
-                *(f"migrated: {d}" for d in ran),
+                *(f"{MIGRATED}{d}" for d in ran),
                 *(update_flake(project.root, kit) if kit and project.config.on("flake") else ()),
                 *(ide.refresh(Project.open(project.root)) if kit else ()),
                 *install(Project.open(project.root)),
@@ -450,7 +454,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
                 _ask(args, mode),
                 args.recursive,
             )
-            hints = (*(f"migrated: {d}" for d in ran), *install(Project.open(project.root)))
+            hints = (*(f"{MIGRATED}{d}" for d in ran), *install(Project.open(project.root)))
             return _check(True, mode, log, (f"added at {commit}", hints), project.root)
         case "configure":
             project = Project.open()

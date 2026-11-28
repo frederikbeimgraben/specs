@@ -50,6 +50,13 @@ def test_update_moves_the_old_layout(kit: Kit, project: Path) -> None:
     assert "D .specs/index.md" in result.out
 
 
+def test_update_of_the_kit_runs_no_migration_that_the_kit_holds(kit: Kit, project: Path) -> None:
+    """`spezi update` of the kit at the same commit runs no migration and prints none."""
+    result = kit.run(project, "update", "kit", kit.rev, "--raw")
+    assert result.code == 0, result.out + result.err
+    assert "migrated:" not in result.out
+
+
 def test_a_read_only_folder_moves_and_stays_writable(tmp_path: Path) -> None:
     """An old program copied the kit with the read-only modes of the Nix store.
 

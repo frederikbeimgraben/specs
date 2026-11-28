@@ -14,6 +14,9 @@ from contextvars import ContextVar
 from enum import StrEnum
 from pathlib import Path
 
+MIGRATED = "migrated: "
+"""The start of the hint line of a migration that ran (§000081)."""
+
 
 class Mark(StrEnum):
     """The mark of a change, as in `git status --short`."""

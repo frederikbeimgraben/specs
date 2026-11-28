@@ -7,6 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
   - tests/test_migrations.py:test_update_moves_the_old_layout
+  - tests/test_migrations.py:test_update_of_the_kit_runs_no_migration_that_the_kit_holds
   - tests/test_migrations.py:test_a_migration_changes_nothing_twice
   - tests/test_migrations.py:test_add_stops_for_a_newer_kit
   - tests/test_migrations.py:test_migration_5_gives_the_files_the_new_name
@@ -35,6 +36,7 @@ copy:
 | --- | --- |
 | The project and each copy, on an update of the kit | The kit commit in `spezi.lock` of the project before the update, else the kit ref in its `spezi.toml`. |
 | The project, on `spezi install` | The same ref. Without a kit entry, no migration runs. |
+| The new copy of the kit | The commit of the copy. |
 | The copy of a different repository | The kit commit in `spezi.lock` of that repository at its commit, else the kit ref in its `spezi.toml`. Without one, each migration runs. |
 
 The kit had the name `specs` before. A project or a repository from that time has `specs.toml`
