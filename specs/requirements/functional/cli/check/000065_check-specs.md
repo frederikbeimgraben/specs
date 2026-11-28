@@ -42,8 +42,8 @@ copies and the count of errors, for example `0 specs, 89 upstream, 0 errors`. An
 must start with `<path>:<line>: `. The line must be the line of the front matter key, of the
 entry or of the reference that the error names, else 1. An error of a folder or of a missing
 file must have only `<path>: `. The command must exit with 1 when it finds an error, else with
-0. The command must not change a file and must not use the network. `spezi install` writes the index `specs/README.md` (000007) and the block in
-`AGENTS.md` (000079) (000083).
+0. The command must not change a file and must not use the network. `spezi install` writes the
+index `specs/README.md` (000007) and the block in `AGENTS.md` (000079) (000083).
 
 Reason: CI and an agent run the same check with one command. The count of the copies shows
 that the rules of the kit and of the other repositories are there. The project must not change
