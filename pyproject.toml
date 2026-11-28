@@ -1,6 +1,6 @@
 [project]
 name = "spezi-kit"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Check and manage the specs of a project: the spezi command and its MCP server."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -19,8 +19,10 @@ spezi = "spezi.cli:main"
 specs = "spezi.cli:main"
 
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=69", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
 where = ["src"]

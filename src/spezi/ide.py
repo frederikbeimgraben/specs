@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 from collections.abc import Mapping
+from importlib import resources
 from pathlib import Path
 
 from spezi.ask import Ask
@@ -41,11 +42,15 @@ PROGRAMS = frozenset({"spezi", "specs"})
 def vsix() -> Path | None:
     """Return the `.vsix` of the VS Code extension that the flake of the kit built.
 
+    The single-file program of a release holds the `.vsix` in its package data (§000091).
+
     Returns:
-        The file of `SPEZI_VSIX`, or None when the program has none.
+        The file of `SPEZI_VSIX`, else the file in the package data, or None when the program
+        has none.
     """
     path = Path(os.environ.get("SPEZI_VSIX", ""))
-    return path if path.name and path.is_file() else None
+    bundled = Path(str(resources.files("spezi").joinpath("data", VSIX)))
+    return next((p for p in (path, bundled) if p.name and p.is_file()), None)
 
 
 def program() -> str:

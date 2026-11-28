@@ -3,3 +3,4 @@ __pycache__/
 *.egg-info/
 result
 .zed/
+/src/spezi/data/spezi.vsix
