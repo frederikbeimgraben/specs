@@ -13,7 +13,9 @@ case $demo in
   kit)
     git -C "$kit" worktree add -q --detach "$dir" "$start"
     repo=$(sed -n 's/^KIT_REPO = "\(.*\)"$/\1/p' "$dir"/src/*/project.py)
-    printf '\n[upstream."%s"]\nref = "%s"\n' "$repo" "$start" >> "$dir/specs.toml"
+    config=specs.toml
+    if [ -f "$dir/spezi.toml" ]; then config=spezi.toml; fi
+    printf '\n[upstream."%s"]\nref = "%s"\n' "$repo" "$start" >> "$dir/$config"
     ;;
   init)
     git -C "$dir" init -q

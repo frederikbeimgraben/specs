@@ -1,4 +1,4 @@
-"""Tests of `specs resolve`, `show`, `list` and `search` (§000070 to §000073)."""
+"""Tests of `specs resolve`, `show`, `list` and `search` (spec 000070, 000071, 000072, 000073)."""
 
 from __future__ import annotations
 

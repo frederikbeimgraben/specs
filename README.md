@@ -6,8 +6,9 @@ The command `specs` is a second name of the same command.
 
 ## What it does
 
-- It gives each rule a fixed number, for example `000024`. Code refers to a rule with `§000024`,
-  and to a rule of a different repository with `§github.com/<owner>/<repo>:000024`.
+- It gives each rule a fixed number, for example `000024`. Code and text refer to a rule with
+  `(spec 000024)`, and to a rule of a different repository with
+  `(spec github.com/<owner>/<repo>:000024)`.
 - It records the approval of each rule: `draft`, `approved`, `replaced` or `removed`.
 - It makes each change start as a spec. Code starts after the owner approves the spec.
 - It checks every spec in CI, and it writes the index.
@@ -27,22 +28,22 @@ The command `specs` is a second name of the same command.
 | agent | `A` | `specs/agents/` | What only an agent must do or must not do. |
 | decision | `D` | `specs/decisions/` | One design decision with its alternatives. |
 
-000004 tells which kind a rule gets.
+One rule tells which kind a rule gets (spec 000004).
 
 ## Layout of a project
 
 | Path | Content |
 | --- | --- |
-| `specs/` | The rules of the project in the kind folders, and `README.md`, the index (000051). |
-| `specs/.upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (000048). |
-| `specs/.templates/` | The templates for a new spec (000008). |
-| `spezi.toml` | The settings, with the switches of the optional parts in `[features]` (000078, 000084). |
-| `spezi.lock` | The commit and the hash of each copy below `specs/.upstream/` (000082). |
+| `specs/` | The rules of the project in the kind folders, and `README.md`, the index (spec 000051). |
+| `specs/.upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (spec 000048). |
+| `specs/.templates/` | The templates for a new spec (spec 000008). |
+| `spezi.toml` | The settings, with the switches of the optional parts in `[features]` (spec 000078, 000084). |
+| `spezi.lock` | The commit and the hash of each copy below `specs/.upstream/` (spec 000082). |
 | `.claude/skills/spezi-*` | Skills for agents. |
 | `.mcp.json` | The MCP server `spezi`. |
 | `.github/workflows/spezi.yml`, `.gitlab/ci/spezi.yml` (included from `.gitlab-ci.yml`) or `.forgejo/workflows/spezi.yml` | The CI job. |
-| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `spezi install`, and the import `@AGENTS.md` (000079). |
-| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `spezi` at the commit of the kit (000066). |
+| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `spezi install`, and the import `@AGENTS.md` (spec 000079). |
+| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `spezi` at the commit of the kit (spec 000066). |
 
 ## Commands
 
@@ -52,27 +53,27 @@ nix run github:frederikbeimgraben/spezi/<commit> -- <command>
 
 | Command | Effect |
 | --- | --- |
-| `check` | Checks the specs and the `§` references. It changes no file. |
-| `install` | Loads each copy that does not agree with `spezi.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (000083). |
+| `check` | Checks the specs and the references to rules. It changes no file. |
+| `install` | Loads each copy that does not agree with `spezi.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (spec 000083). |
 | `init [<dir>] [--forge github\|gitlab\|codeberg] [-r]` | Asks for the settings, then adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
 | `update [<repo> [<ref>]] [-r]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `spezi.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `spezi` in `flake.nix`. |
 | `add [<repo> [<ref>]] [--include <folder>]... [-r]` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
-| `configure [<key> <value>]` | Changes `spezi.toml` in a menu, or sets one key such as `features.mcp false`, then installs (000086). |
-| `remove <repo>` | Removes the copy of a different repository, then installs (000087). |
+| `configure [<key> <value>]` | Changes `spezi.toml` in a menu, or sets one key such as `features.mcp false`, then installs (spec 000086). |
+| `remove <repo>` | Removes the copy of a different repository, then installs (spec 000087). |
 | `new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` | Makes a new spec from its template, with the next number and the paths of `scope`. |
 | `resolve <id>` | Prints the long form of an ID, for example `C/specs/format/000012` for `000012`. |
 | `show <id>` | Prints the full text of a spec. |
 | `list` | Lists every rule. |
 | `search <text>` | Lists the rules that hold a text. |
-| `setup-ide zed\|code` | Writes the extension of the language server for Zed or VS Code to `.zed/spezi/` or `.vscode/spezi/` (000089). |
-| `lsp` | Runs the language server on stdin and stdout. It shows the errors of the check at their line, and the rule of a reference in a hover (000088). |
+| `setup-ide zed\|code` | Writes the extension of the language server for Zed or VS Code to `.zed/spezi/` or `.vscode/spezi/` (spec 000089). |
+| `lsp` | Runs the language server on stdin and stdout. It shows the errors of the check at their line, and the rule of a reference in a hover (spec 000088). |
 | `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search`, `new`, `configure` and `remove`. |
 
 On a terminal, `init`, `add`, `update` and `configure` ask questions. `-y` takes the proposals
-instead, as does a run without a terminal (000085). `init`, `add` and `update` also ask which
+instead, as does a run without a terminal (spec 000085). `init`, `add` and `update` also ask which
 upstreams of an upstream to copy, from its `spezi.lock`. `-r` takes each of them without a
 question. Without `-r`, a run without a terminal takes none. `repo` in `spezi.toml` names the
-project, so that a cycle of upstreams stops (000092).
+project, so that a cycle of upstreams stops (spec 000092).
 
 A project runs the command at the commit of the kit in `spezi.lock`. `init` and `update` write
 this commit into the CI file, into `.mcp.json` and into the input `spezi` of `flake.nix`.
@@ -100,4 +101,4 @@ skill [spezi-adopt](.claude/skills/spezi-adopt/SKILL.md).
 | `src/spezi/` | The command `spezi`. |
 | `flake.nix` | The Nix flake with the package, the app and a dev shell. |
 
-All text in this kit follows ASD-STE100 Simplified Technical English (000025).
+All text in this kit follows ASD-STE100 Simplified Technical English (spec 000025).

@@ -1,4 +1,4 @@
-"""Tests of the output of the command (§000076, §000077) and of the MCP tools (§000074)."""
+"""Tests of the output of the command (spec 000076, 000077) and of the MCP tools (spec 000074)."""
 
 from __future__ import annotations
 

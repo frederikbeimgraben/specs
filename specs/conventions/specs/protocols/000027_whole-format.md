@@ -25,9 +25,9 @@ order:
 | Section | Content |
 | --- | --- |
 | `## Transport` | The medium, the direction, the address, the headers and the authentication. |
-| `## Schema` | The name of the schema file, or a table for a format that is not JSON (000028). |
-| `## Example` | At least one complete example in a code block (000029). |
-| `## Compatibility` | What a receiver must accept, so that a compatible change does not break it (000030). |
+| `## Schema` | The name of the schema file, or a table for a format that is not JSON (spec 000028). |
+| `## Example` | At least one complete example in a code block (spec 000029). |
+| `## Compatibility` | What a receiver must accept, so that a compatible change does not break it (spec 000030). |
 
 The labels `Reason:` and `Test:` come after the last section.
 

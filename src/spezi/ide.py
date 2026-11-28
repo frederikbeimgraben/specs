@@ -1,4 +1,4 @@
-"""`spezi setup-ide`: write the extension of the language server for Zed or VS Code (§000089).
+"""`spezi setup-ide`: write the extension of the language server for Zed or VS Code (spec 000089).
 
 The folder `.zed/spezi/` holds the source of the Zed extension, and `.vscode/spezi/` holds the
 `.vsix` that the flake of the kit builds. Both hold `server.json` with the path of this program
@@ -42,7 +42,7 @@ PROGRAMS = frozenset({"spezi", "specs"})
 def vsix() -> Path | None:
     """Return the `.vsix` of the VS Code extension that the flake of the kit built.
 
-    The single-file program of a release holds the `.vsix` in its package data (§000091).
+    The single-file program of a release holds the `.vsix` in its package data (spec 000091).
 
     Returns:
         The file of `SPEZI_VSIX`, else the file in the package data, or None when the program
@@ -196,7 +196,7 @@ def write(project: Project, editor: str) -> tuple[str, ...]:
 
 
 def refresh(project: Project) -> tuple[str, ...]:
-    """Write each folder of an extension again that is in the project (§000067).
+    """Write each folder of an extension again that is in the project (spec 000067).
 
     Args:
         project: The project.
@@ -217,7 +217,7 @@ def refresh(project: Project) -> tuple[str, ...]:
 
 
 def setup(project: Project, editor: str, ask: Ask) -> tuple[str, tuple[str, ...]]:
-    """Write the folder of the extension, then install it in VS Code after a yes (§000089).
+    """Write the folder of the extension, then install it in VS Code after a yes (spec 000089).
 
     Args:
         project: The project.

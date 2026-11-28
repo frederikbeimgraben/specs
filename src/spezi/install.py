@@ -1,4 +1,4 @@
-"""`spezi install`: bring a project to the state of its `spezi.toml` and `spezi.lock` (§000083).
+"""`spezi install`: bring a project to the state of its `spezi.toml` and `spezi.lock` (spec 000083).
 
 The command changes no pin. It runs the migrations, loads each copy that does not agree with
 `spezi.lock`, writes each missing file of the kit and keeps each file that exists.
@@ -44,6 +44,7 @@ from spezi.project import (
     kit_rev,
     kit_source,
 )
+from spezi.refs import for_project
 
 
 def _files(folder: Path) -> tuple[Path, ...]:
@@ -86,6 +87,22 @@ def _missing(source: Path, project: Project) -> tuple[tuple[Path, Path], ...]:
     return tuple((src, dst) for src, dst in pairs if not dst.exists())
 
 
+def _kit_text(project: Project, src: Path, dst: Path) -> str:
+    """Return the text of a file of the kit for the project.
+
+    Args:
+        project: The project.
+        src: The file of the kit.
+        dst: The file of the project.
+
+    Returns:
+        The text. A skill gets the foreign short form of the rules of the kit (spec 000017).
+    """
+    text = src.read_text(encoding="utf-8")
+    skill = dst.is_relative_to(project.root / ".claude" / "skills") and dst.suffix == ".md"
+    return for_project(project.config.upstream, text) if skill else text
+
+
 def _kit_files(project: Project, commit: str) -> None:
     """Write each missing template, and each missing skill, CI file and MCP entry that is on.
 
@@ -105,7 +122,7 @@ def _kit_files(project: Project, commit: str) -> None:
             else stack.enter_context(checkout(KIT_REPO, commit))
         )
         for src, dst in _missing(source, project):
-            write_text(dst, src.read_text(encoding="utf-8"))
+            write_text(dst, _kit_text(project, src, dst))
     data_name, target = CI_FILES[forge]
     branch = project.config.base_ref.removeprefix("origin/")
     if project.config.on("ci") and not (project.root / target).exists():
@@ -126,7 +143,7 @@ def _kit_files(project: Project, commit: str) -> None:
 
 
 def _add_attribute(project: Project) -> None:
-    """Add the line of §000048 to `.gitattributes` when a copy needs it, and keep each other line.
+    """Add the line for the copies to `.gitattributes` when it is missing (spec 000048).
 
     Args:
         project: The project.
@@ -254,7 +271,7 @@ def _remove_gitlab_include(root: Path) -> None:
 
 
 def remove_off(project: Project, commit: str) -> tuple[str, ...]:
-    """Remove each part of the kit whose switch in `[features]` is off (§000084).
+    """Remove each part of the kit whose switch in `[features]` is off (spec 000084).
 
     `flake.nix`, `.envrc` and `CLAUDE.md` go away only when they hold only the text of the kit.
     Else the command gives a hint with what to remove by hand.

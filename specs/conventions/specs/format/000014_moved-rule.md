@@ -16,4 +16,4 @@ scope:
 If a file moves to a different folder, the path part of its ID changes. The number and the file
 name must not change. Every reference must change in the same pull request.
 
-Reason: The number is the identity of a rule (000013).
+Reason: The number is the identity of a rule (spec 000013).

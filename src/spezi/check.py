@@ -2,9 +2,9 @@
 
 The check covers the spec conventions: the file name, the place in the tree, the front matter,
 the headings, the labels, `must` in the rule text, the paths, `replaces`, unique numbers, the
-index and every `§` reference in the code. For a protocol spec it also checks the sections, the
-schema file and the examples. For a structure spec it checks the Mermaid block and the element
-table. For a decision spec it checks the sections.
+index and every reference to a rule in the code and in the Markdown files. For a protocol spec
+it also checks the sections, the schema file and the examples. For a structure spec it checks
+the Mermaid block and the element table. For a decision spec it checks the sections.
 """
 
 from __future__ import annotations
@@ -27,7 +27,6 @@ from spezi.project import (
     KINDS_BY_PREFIX,
     LONG_LOCAL,
     NUMBER,
-    PREFIXES,
     REPO,
     SHORT,
     STATUSES,
@@ -36,6 +35,14 @@ from spezi.project import (
     Spec,
     hidden,
     source,
+)
+from spezi.refs import (
+    bad_references,
+    bare_numbers,
+    markdown_files,
+    old_references,
+    prose,
+    references,
 )
 from spezi.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
 from spezi.transitive import Wanted, conflicts, kept, missing, wanted
@@ -65,15 +72,10 @@ TEST_ENTRY = re.compile(r"^[^:\s]+:[A-Za-z_][A-Za-z0-9_.]*$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 LABEL = re.compile(r"^(Reason|Test):", re.MULTILINE)
 MUST = re.compile(r"\bmust\b")
-CODE_REF = re.compile(rf"§((?:{REPO}:)?{NUMBER})(?![0-9])")
-CODE_LONG_REF = re.compile(rf"§((?:{REPO}:)?{LONG_LOCAL})")
-SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{REPO}:)?(?:{PREFIXES})/[a-z0-9/-]+/)?{NUMBER}\b")
 FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({NUMBER})\b")
 FOREIGN_LONG_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LONG_LOCAL})\b")
-LOCAL_REF = re.compile(rf"(?<![\w/.:§-])({NUMBER})(?![\w-])")
-INLINE_CODE = re.compile(r"`[^`\n]*`")
 QUOTED = re.compile(r"'([^'\n]+)'")
-NAMED_REF = re.compile(rf"§[^\s]+|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+")
+NAMED_REF = re.compile(rf"§[^\s]+|\(spec [^()\n]*\)|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+")
 
 
 def _paths(ctx: Context, spec: Spec, key: str) -> Errors:
@@ -279,7 +281,7 @@ def _check_links(ctx: Context, spec: Spec, key: str, prefix: str, rule: str) -> 
 
 
 def _check_body(ctx: Context, spec: Spec) -> Errors:
-    """Check the headings, the labels, `must`, the `§` signs and the foreign references.
+    """Check the headings, the labels, `must` and the references to rules.
 
     Args:
         ctx: The context of the check.
@@ -291,7 +293,6 @@ def _check_body(ctx: Context, spec: Spec) -> Errors:
     rel = where(ctx.project, spec)
     labels = LABEL.findall(spec.body)
     rule_text = LABEL.split(spec.body, maxsplit=1)[0]
-    text = INLINE_CODE.sub("", spec.body)
     return (
         *SECTION_CHECKS.get(spec.prefix, check_plain)(ctx, spec),
         *(
@@ -304,29 +305,66 @@ def _check_body(ctx: Context, spec: Spec) -> Errors:
             if spec.status in IN_FORCE and not MUST.search(rule_text)
             else ()
         ),
-        *(
-            f"{rel}: a spec refers to a rule without § (000017): {ref}"
-            for ref in SPEC_SECTION_REF.findall(text)
-        ),
-        *(
-            f"{rel}: use the short form {repo}:{rule[-6:]} (000047)"
-            for repo, rule in FOREIGN_LONG_REF.findall(text)
-        ),
-        *(
-            e
-            for repo, number in FOREIGN_REF.findall(text)
-            for e in _foreign_error(rel, f"{repo}:{number}", ctx.foreign)
-        ),
-        *(
-            e
-            for number in dict.fromkeys(LOCAL_REF.findall(text))
-            for e in _local_error(ctx, rel, number)
-        ),
+        *_text_errors(ctx, rel, prose(spec.body), markdown=True),
     )
 
 
+def _text_errors(ctx: Context, rel: str, text: str, *, markdown: bool) -> Errors:
+    """Check the references to rules in a text (spec 000017, 000047).
+
+    Args:
+        ctx: The context of the check.
+        rel: Where the text is.
+        text: The text, for Markdown without the parts that the rule does not cover.
+        markdown: True for a Markdown file, where a rule number must not stand alone.
+
+    Returns:
+        The errors.
+    """
+    return (
+        *(f"{rel}: use (spec {ref}) in place of §{ref} (000017)" for ref in old_references(text)),
+        *(
+            f"{rel}: {ref} must hold only short forms of rules, with ', ' between them (000017)"
+            for ref in bad_references(text)
+        ),
+        *(
+            (
+                *(
+                    f"{rel}: use the short form {repo}:{rule[-6:]} (000047)"
+                    for repo, rule in FOREIGN_LONG_REF.findall(text)
+                ),
+                *(
+                    f"{rel}: a rule number must stand in (spec ...) (000017): '{ref}'"
+                    for ref in bare_numbers(text)
+                ),
+            )
+            if markdown
+            else ()
+        ),
+        *(e for ref in dict.fromkeys(references(text)) for e in _ref_error(ctx, rel, ref)),
+    )
+
+
+def _ref_error(ctx: Context, rel: str, ref: str) -> Errors:
+    """Check one short form in a reference.
+
+    Args:
+        ctx: The context of the check.
+        rel: Where the reference is.
+        ref: The short form.
+
+    Returns:
+        The errors.
+    """
+    match ":" in ref:
+        case True:
+            return _foreign_error(rel, ref, ctx.foreign)
+        case False:
+            return _local_error(ctx, rel, ref)
+
+
 def _local_error(ctx: Context, rel: str, number: str) -> Errors:
-    """Check one reference to a rule of the project (§000047).
+    """Check one reference to a rule of the project (spec 000047).
 
     Args:
         ctx: The context of the check.
@@ -431,7 +469,7 @@ def _replaced_by_entry(ctx: Context, spec: Spec, entry: str) -> Errors:
 
 
 def _check_replaces(ctx: Context, specs: tuple[Spec, ...], foreign: Mapping[str, str]) -> Errors:
-    """Check `replaces`, `replaced_by` and the status `replaced` (§000009, §000010, §000049).
+    """Check `replaces`, `replaced_by` and the status `replaced` (spec 000009, 000010, 000049).
 
     Args:
         ctx: The context of the check.
@@ -490,7 +528,7 @@ def _check_replaces(ctx: Context, specs: tuple[Spec, ...], foreign: Mapping[str,
 
 
 def _upstream_errors(project: Project) -> Errors:
-    """Check that `spezi.toml` and the copies below `specs/.upstream/` agree (§000048).
+    """Check that `spezi.toml` and the copies below `specs/.upstream/` agree (spec 000048).
 
     Args:
         project: The project.
@@ -544,7 +582,7 @@ def _upstream_errors(project: Project) -> Errors:
 def _transitive_errors(
     project: Project, want: Mapping[str, Wanted], copies: frozenset[str]
 ) -> Errors:
-    """Check the copies of the transitive upstreams (§000092).
+    """Check the copies of the transitive upstreams (spec 000092).
 
     Args:
         project: The project.
@@ -587,7 +625,7 @@ def _transitive_errors(
 
 
 def _lock_errors(project: Project) -> Errors:
-    """Check that `spezi.lock`, `spezi.toml` and the copies agree (§000082).
+    """Check that `spezi.lock`, `spezi.toml` and the copies agree (spec 000082).
 
     Args:
         project: The project.
@@ -686,30 +724,8 @@ def _code_files(project: Project) -> Iterable[Path]:
     )
 
 
-def _code_ref_error(ctx: Context, rel: str, ref: str) -> Errors:
-    """Check one `§` reference in the code.
-
-    Args:
-        ctx: The context of the check.
-        rel: The path of the code file.
-        ref: The short form after `§`.
-
-    Returns:
-        The errors.
-    """
-    match ":" in ref, ctx.local.get(ref):
-        case True, _:
-            return _foreign_error(rel, ref, ctx.foreign)
-        case False, None:
-            return (f"{rel}: §{ref} names no spec (000017)",)
-        case False, spec if spec.status in IN_FORCE:
-            return ()
-        case False, spec:
-            return (f"{rel}: §{ref} names a rule with the status {spec.status} (000047)",)
-
-
 def _code_refs(ctx: Context) -> Errors:
-    """Check the `§` references in the code (§000017, §000047).
+    """Check the references to rules in the code (spec 000017, 000047).
 
     Args:
         ctx: The context of the check.
@@ -717,22 +733,33 @@ def _code_refs(ctx: Context) -> Errors:
     Returns:
         The errors.
     """
-    texts = tuple(
-        (p.relative_to(ctx.project.root).as_posix(), source(p, "ignore"))
+    return tuple(
+        e
         for p in _code_files(ctx.project)
+        for e in _text_errors(
+            ctx, p.relative_to(ctx.project.root).as_posix(), source(p, "ignore"), markdown=False
+        )
     )
-    return (
-        *(
-            f"{rel}: §{ref} must use the short form (000017)"
-            for rel, text in texts
-            for ref in CODE_LONG_REF.findall(text)
-        ),
-        *(
-            e
-            for rel, text in texts
-            for ref in CODE_REF.findall(text)
-            for e in _code_ref_error(ctx, rel, ref)
-        ),
+
+
+def _markdown_refs(ctx: Context, specs: Iterable[Spec]) -> Errors:
+    """Check the references to rules in each Markdown file that is no spec (spec 000017).
+
+    Args:
+        ctx: The context of the check.
+        specs: The specs of the project, which the check of the body covers.
+
+    Returns:
+        The errors.
+    """
+    root = ctx.project.root
+    skip = frozenset(s.path.relative_to(root).as_posix() for s in specs)
+    upstream = ctx.project.upstream_dir.relative_to(root).as_posix()
+    return tuple(
+        e
+        for rel in markdown_files(root)
+        if rel not in skip and not rel.startswith(f"{upstream}/")
+        for e in _text_errors(ctx, rel, prose(source(root / rel, "ignore"), rel), markdown=True)
     )
 
 
@@ -755,9 +782,9 @@ def _git(project: Project, *args: str) -> str | None:
 
 
 def git_numbers(project: Project, ref: str) -> Mapping[str, str] | None:
-    """Return number to spec path of the rules of the project at a git ref (§000013).
+    """Return number to spec path of the rules of the project at a git ref (spec 000013).
 
-    The copies of different repositories keep their own numbers (§000047), so the files below
+    The copies of different repositories keep their own numbers (spec 000047), so the files below
     a hidden folder of `specs/` do not count, and neither do the schema files.
 
     Args:
@@ -780,7 +807,7 @@ def git_numbers(project: Project, ref: str) -> Mapping[str, str] | None:
 
 
 def _base_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
-    """Return the numbers that the base branch gave to a different spec (§000013).
+    """Return the numbers that the base branch gave to a different spec (spec 000013).
 
     A number collides when the base branch added it after the branch left the base branch, and
     the working tree has it at a different path. A checkout without the ref checks nothing.
@@ -807,7 +834,7 @@ def _base_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
 
 
 def _number_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
-    """Return an error for each number that two specs use (§000013).
+    """Return an error for each number that two specs use (spec 000013).
 
     Args:
         project: The project.
@@ -825,7 +852,7 @@ def _number_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
 
 
 def _schema_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
-    """Return an error for each schema file that no protocol spec owns (§000028).
+    """Return an error for each schema file that no protocol spec owns (spec 000028).
 
     Args:
         project: The project.
@@ -844,7 +871,7 @@ def _schema_errors(project: Project, specs: tuple[Spec, ...]) -> Errors:
 
 
 def foreign_status(specs: tuple[Spec, ...], upstream: tuple[Spec, ...]) -> Mapping[str, str]:
-    """Return the status of each rule of the copies by short form (§000049).
+    """Return the status of each rule of the copies by short form (spec 000049).
 
     A rule that a spec of the project in force names in `replaces` gets the status `replaced`.
 
@@ -874,7 +901,7 @@ def _read(path: Path) -> str | None:
 
 
 def _line(text: str, message: str) -> int:
-    """Return the line that an error names (§000065).
+    """Return the line that an error names (spec 000065).
 
     Args:
         text: The text of the file.
@@ -899,7 +926,7 @@ def _line(text: str, message: str) -> int:
 
 
 def with_line(root: Path, error: str) -> str:
-    """Add the line to an error of a file, as `<path>:<line>: <message>` (§000065).
+    """Add the line to an error of a file, as `<path>:<line>: <message>` (spec 000065).
 
     Args:
         root: The root of the project.
@@ -919,7 +946,7 @@ def with_line(root: Path, error: str) -> str:
 
 @dataclass(frozen=True, slots=True)
 class Count:
-    """The counts of a check (§000065).
+    """The counts of a check (spec 000065).
 
     Attributes:
         specs: The rules of the project.
@@ -931,7 +958,7 @@ class Count:
 
 
 def summary(count: Count, errors: Errors) -> str:
-    """Return the last line of the check (§000065).
+    """Return the last line of the check (spec 000065).
 
     Args:
         count: The counts.
@@ -992,5 +1019,6 @@ def run(project: Project, *, write: bool) -> tuple[Count, Errors]:
                 )
             ),
             *_code_refs(ctx),
+            *_markdown_refs(ctx, specs),
         )
     )

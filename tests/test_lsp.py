@@ -1,4 +1,4 @@
-"""Tests of `specs lsp`, the language server (§000088)."""
+"""Tests of `specs lsp`, the language server (spec 000088)."""
 
 from __future__ import annotations
 
@@ -95,7 +95,7 @@ def _rule(project: Path, number: str, name: str, text: str) -> Path:
         The file.
     """
     (project / "src").mkdir(exist_ok=True)
-    return write_rule(project, "style/code/names", number, name, f"Rule {number}", "style", text)
+    return write_rule(project, "style/code/names", number, name, f"Rule {name}", "style", text)
 
 
 def _open(client: LanguageClient, path: Path) -> str:
@@ -165,7 +165,7 @@ def test_the_server_checks_the_text_while_it_changes(kit: Kit, project: Path) ->
             )
             found = await _until(lambda: seen.get(uri) or None)
             assert [(d.range.start.line, d.message) for d in found] == [
-                (14, "a spec refers to a rule without § (000017): §000999")
+                (14, "use (spec 000999) in place of §000999 (000017)")
             ]
 
     _run(test())
@@ -182,7 +182,7 @@ def _referring(kit: Kit, project: Path) -> tuple[Path, Path]:
         The rule and the rule that refers to it.
     """
     rule = _rule(project, "000100", "short-names", "A name must be short.")
-    other = _rule(project, "000101", "long-names", "A name must not be long, as 000100 says.")
+    other = _rule(project, "000101", "long-names", "A name must not be long (spec 000100).")
     assert kit.run(project, "install", "--raw").code == 0
     return rule, other
 
@@ -204,12 +204,12 @@ def test_the_hover_shows_the_rule(kit: Kit, project: Path) -> None:
             assert isinstance(hover.contents, types.MarkupContent)
             text = hover.contents.value
             assert "S/code/names/000100" in text
-            assert "Rule 000100" in text
+            assert "Rule short-names" in text
             assert "approved" in text
             assert "A name must be short." in text
             assert hover.range == types.Range(
-                start=types.Position(line=14, character=28),
-                end=types.Position(line=14, character=34),
+                start=types.Position(line=14, character=30),
+                end=types.Position(line=14, character=36),
             )
 
     _run(test())
@@ -252,10 +252,10 @@ def test_the_server_writes_no_file(kit: Kit, project: Path) -> None:
 
 
 def test_the_link_marks_the_reference_in_the_code(kit: Kit, project: Path) -> None:
-    """With links, the definition marks the `§` reference in the code and not the whole line."""
+    """With links, the definition marks only the rule ID in the code, not the whole line."""
     rule = _rule(project, "000100", "short-names", "A name must be short.")
     code = project / "src" / "names.py"
-    code.write_text("# Short names, see §000100.\n", encoding="utf-8")
+    code.write_text("# Short names, see (spec 000100).\n", encoding="utf-8")
     assert kit.run(project, "configure", "code_dirs", "src").code == 0
     assert kit.run(project, "install", "--raw").code == 0
 
@@ -265,7 +265,7 @@ def test_the_link_marks_the_reference_in_the_code(kit: Kit, project: Path) -> No
             found = await client.text_document_definition_async(
                 types.DefinitionParams(
                     text_document=types.TextDocumentIdentifier(uri=uri),
-                    position=types.Position(line=0, character=22),
+                    position=types.Position(line=0, character=27),
                 )
             )
             assert isinstance(found, list)
@@ -277,8 +277,8 @@ def test_the_link_marks_the_reference_in_the_code(kit: Kit, project: Path) -> No
                 (
                     rule.resolve().as_uri(),
                     types.Range(
-                        start=types.Position(line=0, character=19),
-                        end=types.Position(line=0, character=26),
+                        start=types.Position(line=0, character=25),
+                        end=types.Position(line=0, character=31),
                     ),
                 )
             ]

@@ -24,8 +24,8 @@ order:
 
 | Section | Content |
 | --- | --- |
-| `## Diagram` | One Mermaid code block (000034). |
-| `## Elements` | One table with one row for each element of the diagram (000035). |
+| `## Diagram` | One Mermaid code block (spec 000034). |
+| `## Elements` | One table with one row for each element of the diagram (spec 000035). |
 
 The labels `Reason:` and `Test:` come after the last section. The rule text must say which
 property of the code must agree with the diagram.

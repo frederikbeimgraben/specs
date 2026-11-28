@@ -1,4 +1,4 @@
-"""Tests of `specs check` and of the checks of the conventions (§000065, §000007)."""
+"""Tests of `specs check` and of the checks of the conventions (spec 000065, 000007)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 import re
 from pathlib import Path
 
-from conftest import Kit, write_rule
+from conftest import Kit, git, write_rule
 
 
 def _rule(project: Path, text: str = "A name must be short.") -> Path:
@@ -97,7 +97,7 @@ def test_check_gives_the_line(kit: Kit, project: Path) -> None:
     result = kit.run(project, "check", "--raw")
     rel = "specs/style/code/names/000100_short-names.md"
     assert f"{rel}:7: updated must be YYYY-MM-DD (000009)" in result.out
-    assert f"{rel}:15: a spec refers to a rule without § (000017): §000999" in result.out
+    assert f"{rel}:15: use (spec 000999) in place of §000999 (000017)" in result.out
     assert "specs/README.md:1: the index is not current" in result.out
 
 
@@ -141,7 +141,7 @@ def test_check_finds_an_old_diagram_type(kit: Kit, project: Path) -> None:
 
 def test_check_finds_a_reference_to_no_rule(kit: Kit, project: Path) -> None:
     """A number in the text of a spec must name a rule of the project."""
-    _rule(project, "A name must be short, as 000999 says.")
+    _rule(project, "A name must be short (spec 000999).")
     result = kit.run(project, "check", "--raw")
     assert result.code == 1
     assert "000999 names no rule of the project (000047)" in result.out
@@ -149,7 +149,7 @@ def test_check_finds_a_reference_to_no_rule(kit: Kit, project: Path) -> None:
 
 def test_check_finds_a_reference_to_a_removed_rule(kit: Kit, project: Path) -> None:
     """A reference in a spec or in the code must not name a rule that is not in force."""
-    _rule(project, "A name must be short, as 000101 says.")
+    _rule(project, "A name must be short (spec 000101).")
     old = write_rule(
         project, "style/code/names", "000101", "old-names", "Old names", "style", "Old: must go."
     )
@@ -157,7 +157,7 @@ def test_check_finds_a_reference_to_a_removed_rule(kit: Kit, project: Path) -> N
         old.read_text(encoding="utf-8").replace("status: approved", "status: removed"),
         encoding="utf-8",
     )
-    (project / "src/app.py").write_text('"""See §000101."""\n', encoding="utf-8")
+    (project / "src/app.py").write_text('"""See (spec 000101)."""\n', encoding="utf-8")
     path = project / "spezi.toml"
     path.write_text(
         path.read_text(encoding="utf-8").replace("code_dirs = []", 'code_dirs = ["src"]'),
@@ -166,7 +166,62 @@ def test_check_finds_a_reference_to_a_removed_rule(kit: Kit, project: Path) -> N
     result = kit.run(project, "check", "--raw")
     assert result.code == 1
     assert "000101 names a rule with the status removed (000047)" in result.out
-    assert "src/app.py:1: §000101 names a rule with the status removed (000047)" in result.out
+    assert "src/app.py:1: 000101 names a rule with the status removed (000047)" in result.out
+
+
+def test_check_finds_a_bare_number_in_a_spec(kit: Kit, project: Path) -> None:
+    """A rule number in the text of a spec must stand in `(spec ...)` (000017)."""
+    _rule(project, "A name must be short, as 000101 says. See `000102` and (spec 000100).")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "a rule number must stand in (spec ...) (000017): '000101'" in result.out
+    assert "000102" not in result.out
+    assert "000100" not in result.out.replace("000100_short-names", "")
+
+
+def test_check_finds_a_bad_reference(kit: Kit, project: Path) -> None:
+    """A `(spec ...)` reference holds only short forms, with `, ` between them (000017)."""
+    _rule(project, "A name must be short (spec 000100 to 000102).")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "(spec 000100 to 000102) must hold only short forms of rules" in result.out
+
+
+def test_check_reads_each_item_of_a_list(kit: Kit, project: Path) -> None:
+    """Each item of a list must name a rule that exists (000017)."""
+    _rule(project, "A name must be short (spec 000100, 000999).")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "000999 names no rule of the project (000047)" in result.out
+
+
+def test_check_finds_an_old_reference_in_the_code(kit: Kit, project: Path) -> None:
+    """A code file of `code_dirs` must not refer to a rule with `§` (spec 000017)."""
+    _rule(project)
+    (project / "src").mkdir(exist_ok=True)
+    (project / "src/app.py").write_text('"""See §000100."""\n', encoding="utf-8")
+    path = project / "spezi.toml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("code_dirs = []", 'code_dirs = ["src"]'),
+        encoding="utf-8",
+    )
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    assert "src/app.py:1: use (spec 000100) in place of §000100 (000017)" in result.out
+
+
+def test_check_reads_each_markdown_file_that_git_tracks(kit: Kit, project: Path) -> None:
+    """A Markdown file outside `specs/` follows the rule when git tracks it (000017)."""
+    _rule(project)
+    (project / "docs").mkdir()
+    (project / "docs/guide.md").write_text("See 000100.\n", encoding="utf-8")
+    (project / "docs/notes.md").write_text("See 000100.\n", encoding="utf-8")
+    git(project, "add", "docs/guide.md")
+    result = kit.run(project, "check", "--raw")
+    assert result.code == 1
+    error = "docs/guide.md:1: a rule number must stand in (spec ...) (000017): '000100'"
+    assert error in result.out
+    assert "docs/notes.md" not in result.out
 
 
 def test_check_finds_front_matter_that_is_no_yaml(kit: Kit, project: Path) -> None:

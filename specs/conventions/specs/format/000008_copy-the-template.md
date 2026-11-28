@@ -25,11 +25,11 @@ A new spec must start as a copy of its template in `specs/.templates/`:
 | `structure` | `specs/.templates/TEMPLATE-structure.md` |
 | `decision` | `specs/.templates/TEMPLATE-decision.md` |
 
-`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` must make the copy (000069). It
+`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` must make the copy (spec 000069). It
 sets the number, the title, the kind, the owner, the date and `scope`. The copy must pass
 `spezi check`.
 
 Reason: The template holds the keys in the correct order and the fixed sections. The command
-gives the next free number (000013), so that nobody must count by hand.
+gives the next free number (spec 000013), so that nobody must count by hand.
 
 Test: `spezi check` checks the result.

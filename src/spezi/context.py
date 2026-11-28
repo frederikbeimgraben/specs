@@ -18,7 +18,7 @@ class Context:
         project: The project.
         local: The specs of the project by number.
         foreign: The status of each rule of the copies by short form. A rule that a spec in
-            force replaces has the status `replaced` (§000049).
+            force replaces has the status `replaced` (spec 000049).
     """
 
     project: Project
