@@ -2,7 +2,7 @@
 id: "000065"
 title: spezi check checks the specs
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
