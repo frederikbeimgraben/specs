@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import re
 from pathlib import Path
 
 from conftest import Kit, write_rule
@@ -24,10 +26,10 @@ def _rule(project: Path, text: str = "A name must be short.") -> Path:
 
 
 def test_check_passes_after_init(kit: Kit, project: Path) -> None:
-    """A new project has no errors and exit code 0."""
+    """A new project has no errors and exit code 0, and the check counts the rules of the kit."""
     result = kit.run(project, "check", "--raw")
     assert result.code == 0
-    assert result.out.endswith("0 specs, 0 errors\n")
+    assert re.search(r"(^|\n)0 specs, [1-9][0-9]* upstream, 0 errors\n$", result.out)
 
 
 def test_check_changes_no_file(kit: Kit, project: Path) -> None:
@@ -180,3 +182,18 @@ def test_check_finds_front_matter_that_is_no_yaml(kit: Kit, project: Path) -> No
     assert result.code == 1
     assert "front matter: no valid YAML" in result.out
     assert "(000009)" in result.out
+
+
+def test_check_finds_a_rule_of_a_copy_that_it_cannot_read(kit: Kit, project: Path) -> None:
+    """A rule of a copy without front matter is an error, and the check does not count it."""
+    copy = project / "specs/.upstream/github.com/frederikbeimgraben/spezi"
+    before = kit.run(project, "check", "--json")
+    rule = next(copy.glob("workflow/specs/process/000001_*.md"))
+    rule.write_text("No front matter.\n", encoding="utf-8")
+    result = kit.run(project, "check", "--raw")
+    rel = rule.relative_to(project).as_posix()
+    assert result.code == 1
+    assert f"{rel}:1: no front matter (000009)" in result.out
+    assert json.loads(kit.run(project, "check", "--json").out)["upstream"] == (
+        json.loads(before.out)["upstream"] - 1
+    )

@@ -2,9 +2,9 @@
 id: "000076"
 title: spezi formats its output for a terminal
 kind: functional
-status: approved
+status: draft
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_output.py:test_terminal_output_has_color
   - tests/test_output.py:test_raw_output_has_no_color
@@ -22,7 +22,7 @@ output:
 
 | Command | Formatted output |
 | --- | --- |
-| `check` | Each error in red, then the count of specs and errors, green without errors. |
+| `check` | Each error in red, then the line with the counts of 000065, green without errors. |
 | `list`, `search` | A table with the columns of 000072, with a color for each status. |
 | `show` | The front matter as YAML and the body as rendered Markdown. |
 | `resolve` | The long form in color. |
