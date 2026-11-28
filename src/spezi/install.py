@@ -125,8 +125,8 @@ def _kit_files(project: Project, commit: str) -> None:
         write_mcp(project, commit)
 
 
+def _add_attribute(project: Project) -> None:
     """Add the line for the copies to `.gitattributes` when it is missing (spec 000048).
-    """Add the line of (spec 000048) to `.gitattributes` when a copy needs it, and keep each other line.
 
     Args:
         project: The project.
