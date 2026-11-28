@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import cast
 
 from spezi.agents import AGENTS, BLOCK, CLAUDE, IMPORT, claude_import
-from spezi.changes import delete_file, remove_tree, write_text
+from spezi.changes import MIGRATED, delete_file, remove_tree, write_text
 from spezi.devshell import ENVRC, FLAKE, INPUT, LOCK, envrc, flake_template
 from spezi.kit import (
     CI_FILES,
@@ -139,7 +139,7 @@ def install(project: Project) -> tuple[str, ...]:
         _kit_files(fresh, locked.commit)
     config = fresh.config
     return (
-        *(f"migrated: {d}" for d in dict.fromkeys((*ran, *copied))),
+        *(f"{MIGRATED}{d}" for d in dict.fromkeys((*ran, *copied))),
         *(envrc(fresh.root) if locked is not None and config.on("envrc") else ()),
         *(claude_import(fresh.root) if config.on("claude") else ()),
         *(remove_off(fresh, locked.commit) if locked is not None else ()),

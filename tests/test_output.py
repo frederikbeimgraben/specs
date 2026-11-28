@@ -11,6 +11,9 @@ from pathlib import Path
 
 import pytest
 from conftest import Kit
+from rich.console import Console
+
+from spezi.view import outcome
 
 ANSI = re.compile(r"\x1b\[")
 
@@ -142,3 +145,11 @@ def test_mcp_tools_give_the_plain_results(
     (project / "src").mkdir()
     result = mcp_server.new("F", "app/login", "sign-in", "Sign in", ["src"], "someone")
     assert "A specs/requirements/functional/app/login/000001_sign-in.md" in result
+
+
+def test_a_migration_has_a_blue_mark() -> None:
+    """On a terminal, each migration that ran has its own line with a blue mark (§000081)."""
+    screen = Console(record=True, width=200, force_terminal=True, color_system="standard")
+    screen.print(outcome("updated", ("migrated: move .specs/ below specs/", "add a line")))
+    assert screen.export_text(clear=False) == "✓ updated\n↻ move .specs/ below specs/\nadd a line\n"
+    assert "\x1b[1;34m↻" in screen.export_text(styles=True)
