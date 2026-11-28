@@ -24,13 +24,18 @@ Each command except `mcp` and `lsp` takes `--raw` or `--json`. On a terminal, `i
 from __future__ import annotations
 
 import argparse
+import io
+import os
 import sys
 from collections.abc import Callable, Mapping
 from enum import Enum, auto
 from pathlib import Path
+from typing import TYPE_CHECKING, ClassVar, NoReturn, override
 
-from rich.console import Group, RenderableType
+from rich.console import Console, Group, RenderableType
+from rich.style import StyleType
 from rich.text import Text
+from rich_argparse import RichHelpFormatter
 
 from spezi import data, ide, lsp, queries
 from spezi.ask import Ask, Cancelled, Stop, asker
@@ -45,12 +50,94 @@ from spezi.new import NewError, new
 from spezi.project import KIT_REPO, ConfigError, Project
 from spezi.view import console, done, file_list, report, spec_text, table
 
+if TYPE_CHECKING:
+    from _typeshed import SupportsWrite
+
+
+class _Help(RichHelpFormatter):
+    """The help in the colors of the other output, with the words of argparse (§000076)."""
+
+    styles: ClassVar[dict[str, StyleType]] = {
+        **RichHelpFormatter.styles,
+        "argparse.prog": "bold cyan",
+        "argparse.args": "bold cyan",
+        "argparse.groups": "bold",
+        "argparse.metavar": "cyan",
+    }
+    group_name_formatter: ClassVar[Callable[[str], str]] = str
+    help_markup: ClassVar[bool] = False
+    text_markup: ClassVar[bool] = False
+
+
+def _colored(stream: SupportsWrite[str]) -> bool:
+    """Tell if the help on a stream has color (§000076).
+
+    Args:
+        stream: The stream of the help.
+
+    Returns:
+        True when the stream is a terminal and `NO_COLOR` is not set.
+    """
+    match stream:
+        case io.TextIOBase():
+            return stream.isatty() and "NO_COLOR" not in os.environ
+        case _:
+            return False
+
+
+class UsageError(Exception):
+    """The command line has a wrong argument."""
+
+
+class _Parser(argparse.ArgumentParser):
+    """The parser of the command line.
+
+    It colors its help and its usage only on a terminal (§000076). It stops with
+    `{"error": ...}` when the command line has `--json` (§000080).
+    """
+
+    @override
+    def error(self, message: str) -> NoReturn:
+        """Stop for a wrong argument.
+
+        Args:
+            message: The error of argparse.
+
+        Raises:
+            UsageError: The command line has `--json`.
+        """
+        match "--json" in sys.argv[1:]:
+            case True:
+                raise UsageError(message)
+            case False:
+                super().error(message)
+
+    @override
+    def _get_formatter(self) -> argparse.HelpFormatter:
+        """Return the formatter, with color for each stream.
+
+        Returns:
+            The formatter.
+        """
+        return _Help(prog=self.prog, console=Console(force_terminal=True))
+
+    @override
+    def _print_message(self, message: str, file: SupportsWrite[str] | None = None) -> None:
+        """Write a message, plain when its stream must have no color.
+
+        Args:
+            message: The message, with color.
+            file: The stream, or None for stderr.
+        """
+        stream = file or sys.stderr
+        super()._print_message(
+            message if _colored(stream) else Text.from_ansi(message).plain, stream
+        )
+
 
 def parser() -> argparse.ArgumentParser:
     """Return the parser of the command line."""
-    root = argparse.ArgumentParser(
-        prog="spezi", description="Check and manage the specs of a project."
-    )
+    root = _Parser(prog="spezi", description="Check and manage the specs of a project.")
     commands = root.add_subparsers(dest="command", required=True)
     commands.add_parser("check", help="check the specs; change no file")
     commands.add_parser(
@@ -73,6 +160,13 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "setup-ide", help="write the extension of the language server for an editor"
     ).add_argument("editor", choices=("zed", "code"))
+    for name in ("init", "update", "add"):
+        commands.choices[name].add_argument(
+            "-r",
+            "--recursive",
+            action="store_true",
+            help="copy each transitive upstream without a question",
+        )
     for name in ("init", "update", "add", "configure", "setup-ide"):
         commands.choices[name].add_argument(
             "-y",
@@ -329,14 +423,14 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             return _check(True, mode, log, ("installed", hints), project.root)
         case "init":
             ask = _ask(args, mode)
-            project, commit = init(Path(args.dir), args.forge, ask)
+            project, commit = init(Path(args.dir), args.forge, ask, args.recursive)
             offer_lines(project.root, project.config.features, ask)
             hints = (*init_flake(project.root, commit, project.config.features), *install(project))
             text = f"installed the kit in {project.root}"
             return _check(True, mode, log, (text, hints), project.root)
         case "update":
             project = Project.open()
-            done, ran = update(project, args.repo, args.ref, _ask(args, mode))
+            done, ran = update(project, args.repo, args.ref, _ask(args, mode), args.recursive)
             kit = dict(done).get(KIT_REPO)
             hints = (
                 *(f"migrated: {d}" for d in ran),
@@ -348,7 +442,14 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             return _check(True, mode, log, (text, hints), project.root)
         case "add":
             project = Project.open()
-            commit, ran = add(project, args.repo, args.ref, tuple(args.include), _ask(args, mode))
+            commit, ran = add(
+                project,
+                args.repo,
+                args.ref,
+                tuple(args.include),
+                _ask(args, mode),
+                args.recursive,
+            )
             hints = (*(f"migrated: {d}" for d in ran), *install(Project.open(project.root)))
             return _check(True, mode, log, (f"added at {commit}", hints), project.root)
         case "configure":
@@ -370,7 +471,7 @@ def _dispatch(args: argparse.Namespace, mode: Mode, log: Mapping[Path, Mark]) ->
             path = new(
                 project, args.kind, args.path, args.name, args.title, args.owner, tuple(args.scope)
             )
-            return _message(mode, str(path), log, project.root)
+            return _message(mode, path.relative_to(project.root).as_posix(), log, project.root)
         case "resolve":
             project = Project.open()
             spec = queries.find(project, args.id)
@@ -419,7 +520,11 @@ def main() -> None:
     A command that stops prints `specs: <error>` to stderr, or with `--json` the object
     `{"error": "<error>"}` to stdout (§000080). The exit code is then 1.
     """
-    args = parser().parse_args()
+    try:
+        args = parser().parse_args()
+    except UsageError as error:
+        sys.stdout.write(data.dumps({"error": str(error)}))
+        sys.exit(1)
     try:
         sys.exit(dispatch(args))
     except (

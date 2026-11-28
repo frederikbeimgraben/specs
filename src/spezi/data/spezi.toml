@@ -1,5 +1,9 @@
 # Settings of the spezi command (000078). Each key is optional.
 
+# The full name of this project, <host>/<group>/.../<repo>. A transitive upstream of this name
+# gets no copy (000092). spezi init asks for it.
+# repo = "github.com/<owner>/<repo>"
+
 # github, gitlab or codeberg.
 forge = "{forge}"
 
@@ -38,3 +42,6 @@ envrc = true
 # spezi update resolves ref again, spezi add adds a repository, spezi install changes no ref.
 # include is optional: the folders below specs/ that the copy holds, for example ["style/python/"].
 # Without include, the copy holds all rules. spezi add --include sets it.
+# transitive is optional: the upstreams of this repository that the project also copies, at the
+# commit of its spezi.lock (000092). spezi init, spezi add and spezi update ask for it, and -r
+# takes each one.

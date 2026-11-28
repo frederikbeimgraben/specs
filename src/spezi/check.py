@@ -35,6 +35,7 @@ from spezi.project import (
     source,
 )
 from spezi.sections import DIAGRAMS, SECTION_CHECKS, check_plain, schema_path
+from spezi.transitive import Wanted, conflicts, kept, missing, wanted
 
 KEYS = (
     "id",
@@ -66,6 +67,7 @@ CODE_LONG_REF = re.compile(rf"§((?:{REPO}:)?{LONG_LOCAL})")
 SPEC_SECTION_REF = re.compile(rf"§ ?(?:(?:{REPO}:)?(?:{PREFIXES})/[a-z0-9/-]+/)?{NUMBER}\b")
 FOREIGN_REF = re.compile(rf"(?<![\w/.-])({REPO}):({NUMBER})\b")
 FOREIGN_LONG_REF = re.compile(rf"(?<![\w/.-])({REPO}):({LONG_LOCAL})\b")
+LOCAL_REF = re.compile(rf"(?<![\w/.:§-])({NUMBER})(?![\w-])")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 QUOTED = re.compile(r"'([^'\n]+)'")
 NAMED_REF = re.compile(rf"§[^\s]+|(?<![\w/.-])(?:{REPO}):[A-Za-z0-9/-]+")
@@ -312,7 +314,32 @@ def _check_body(ctx: Context, spec: Spec) -> Errors:
             for repo, number in FOREIGN_REF.findall(text)
             for e in _foreign_error(rel, f"{repo}:{number}", ctx.foreign)
         ),
+        *(
+            e
+            for number in dict.fromkeys(LOCAL_REF.findall(text))
+            for e in _local_error(ctx, rel, number)
+        ),
     )
+
+
+def _local_error(ctx: Context, rel: str, number: str) -> Errors:
+    """Check one reference to a rule of the project (§000047).
+
+    Args:
+        ctx: The context of the check.
+        rel: Where the reference is.
+        number: The number of the rule.
+
+    Returns:
+        The errors.
+    """
+    match ctx.local.get(number):
+        case None:
+            return (f"{rel}: {number} names no rule of the project (000047)",)
+        case spec if spec.status in IN_FORCE:
+            return ()
+        case spec:
+            return (f"{rel}: {number} names a rule with the status {spec.status} (000047)",)
 
 
 def _foreign_error(rel: str, ref: str, foreign: Mapping[str, str]) -> Errors:
@@ -470,10 +497,12 @@ def _upstream_errors(project: Project) -> Errors:
     """
     upstream = project.config.upstream
     copies = project.copies()
+    want = wanted(project)
     return (
         *(
-            f"specs/.upstream/{repo}: no repository of this name in spezi.toml (000048)"
-            for repo in sorted(copies - set(upstream))
+            f"specs/.upstream/{repo}: no repository of this name in spezi.toml or in a list"
+            " transitive (000048)"
+            for repo in sorted(copies - kept(project))
         ),
         *(
             f"spezi.toml: upstream {repo!r} is not <host>/<group>/.../<repo> (000047)"
@@ -497,6 +526,52 @@ def _upstream_errors(project: Project) -> Errors:
             if include and repo in copies
             for e in _include_errors(project, repo, include)
         ),
+        *_transitive_errors(project, want, copies),
+    )
+
+
+def _transitive_errors(
+    project: Project, want: Mapping[str, Wanted], copies: frozenset[str]
+) -> Errors:
+    """Check the copies of the transitive upstreams (§000092).
+
+    Args:
+        project: The project.
+        want: The wanted copy of each transitive upstream without a conflict.
+        copies: The repositories with a copy.
+
+    Returns:
+        The errors.
+    """
+    return (
+        *(
+            f"spezi.toml: transitive {name!r} of {direct!r} is not in"
+            f" specs/.upstream/{direct}/{LOCK_NAME} (000092)"
+            for name, direct in missing(project)
+        ),
+        *(
+            f"spezi.toml: {name!r} has different commits in the {LOCK_NAME} of"
+            f" {' and '.join(map(repr, directs))}; add a table for it to spezi.toml (000092)"
+            for name, directs in sorted(conflicts(project).items())
+        ),
+        *(
+            f"spezi.toml: transitive {name!r} has no copy in specs/.upstream/; run spezi install"
+            " (000092)"
+            for name in sorted(want)
+            if name not in copies
+        ),
+        *(
+            f"specs/.upstream/{name}/{LOCK_NAME}: the copy of a transitive upstream must not"
+            " hold it; run spezi install (000092)"
+            for name in sorted(want)
+            if (project.upstream_dir / name / LOCK_NAME).is_file()
+        ),
+        *(
+            e
+            for name, w in sorted(want.items())
+            if w.include and name in copies
+            for e in _include_errors(project, name, w.include)
+        ),
     )
 
 
@@ -512,15 +587,24 @@ def _lock_errors(project: Project) -> Errors:
     lock = read_lock(project.root)
     upstream = project.config.upstream
     copies = project.copies()
+    want = wanted(project)
     return (
         *(
             f"{LOCK_NAME}: no entry for {repo!r}; run spezi install (000082)"
-            for repo in sorted(upstream)
+            for repo in sorted({*upstream, *want})
             if repo not in lock
         ),
         *(
-            f"{LOCK_NAME}: {repo!r} is not in spezi.toml; run spezi install (000082)"
-            for repo in sorted(set(lock) - set(upstream))
+            f"{LOCK_NAME}: {repo!r} is not in spezi.toml or in a list transitive;"
+            " run spezi install (000082)"
+            for repo in sorted(set(lock) - kept(project))
+        ),
+        *(
+            f"{LOCK_NAME}: {repo!r} does not agree with the {LOCK_NAME} of {', '.join(w.via)};"
+            " run spezi install (000082)"
+            for repo, w in sorted(want.items())
+            if (entry := lock.get(repo)) is not None
+            and (entry.commit, entry.include, entry.via) != (w.commit, w.include, w.via)
         ),
         *(
             f"{LOCK_NAME}: {repo!r} does not agree with ref or include in spezi.toml;"
@@ -566,6 +650,7 @@ def _include_errors(project: Project, repo: str, include: tuple[str, ...]) -> Er
             " spezi.toml; run spezi install (000048)"
             for p in sorted(root.rglob("*"))
             if p.is_file()
+            and p.relative_to(root).as_posix() != LOCK_NAME
             and not any(p.relative_to(root).as_posix().startswith(f"{f}/") for f in folders)
         ),
     )
@@ -601,11 +686,15 @@ def _code_ref_error(ctx: Context, rel: str, ref: str) -> Errors:
     Returns:
         The errors.
     """
-    return (
-        _foreign_error(rel, ref, ctx.foreign)
-        if ":" in ref
-        else (() if ref in ctx.local else (f"{rel}: §{ref} names no spec (000017)",))
-    )
+    match ":" in ref, ctx.local.get(ref):
+        case True, _:
+            return _foreign_error(rel, ref, ctx.foreign)
+        case False, None:
+            return (f"{rel}: §{ref} names no spec (000017)",)
+        case False, spec if spec.status in IN_FORCE:
+            return ()
+        case False, spec:
+            return (f"{rel}: §{ref} names a rule with the status {spec.status} (000047)",)
 
 
 def _code_refs(ctx: Context) -> Errors:
@@ -781,16 +870,17 @@ def _line(text: str, message: str) -> int:
         message: The error without the path.
 
     Returns:
-        The first line with an entry or a reference of the message, else the line of the front
-        matter key at the start of the message, else 1.
+        The first line with an entry or a reference of the message, where the line of the front
+        matter key at the start of the message comes first, else the line of this key, else 1.
     """
     lines = tuple(enumerate(text.splitlines(), 1))
     key = message.split(" ", 1)[0]
+    own = tuple((n, line) for n, line in lines if key in KEYS and line.startswith(f"{key}:"))
     return next(
         (
             n
             for needle in (*QUOTED.findall(message), *NAMED_REF.findall(message))
-            for n, line in lines
+            for n, line in (*own, *lines)
             if needle in line
         ),
         next((n for n, line in lines if key in KEYS and line.startswith(f"{key}:")), 1),

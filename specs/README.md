@@ -23,7 +23,7 @@ specs/
   conventions/
     specs/  content, decisions, format, layout, protocols, references, structures
   workflow/
-    kit/    migrations
+    kit/    migrations, release
     specs/  process
   agents/
     work/  approval, questions
@@ -73,6 +73,7 @@ specs/
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |
 | [C/specs/references/000082](/specs/conventions/specs/references/000082_lock-file.md) | spezi.lock holds the commit and the hash of each copy | approved |
+| [C/specs/references/000092](/specs/conventions/specs/references/000092_transitive-copy.md) | A copy brings the upstreams of its repository | approved |
 | [C/specs/structures/000033](/specs/conventions/specs/structures/000033_whole-structure.md) | A structure spec shows one structure as one diagram | approved |
 | [C/specs/structures/000034](/specs/conventions/specs/structures/000034_mermaid-diagram.md) | The diagram is one Mermaid block of a fixed type | approved |
 | [C/specs/structures/000035](/specs/conventions/specs/structures/000035_elements-table.md) | Each element of the diagram has a row in the element table | approved |
@@ -120,6 +121,7 @@ specs/
 | [U/specs/lifecycle/000041](/specs/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | approved |
 | [U/specs/model/000040](/specs/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
 | [W/kit/migrations/000090](/specs/workflow/kit/migrations/000090_migration-ci.md) | The CI migrates demo projects from each migration | approved |
+| [W/kit/release/000091](/specs/workflow/kit/release/000091_release-workflow.md) | A tag publishes the package and the binaries | approved |
 | [W/specs/process/000001](/specs/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [W/specs/process/000002](/specs/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
 | [W/specs/process/000003](/specs/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |

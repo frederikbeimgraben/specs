@@ -87,7 +87,7 @@ def test_a_command_that_changes_files_gives_all_parts(kit: Kit, project: Path) -
     )
     path = "specs/requirements/functional/app/login/000001_sign-in.md"
     assert made == {
-        "message": str(project / path),
+        "message": path,
         "hints": [],
         "check": None,
         "changed": [{"mark": "A", "path": path}],
@@ -103,7 +103,11 @@ def test_a_stop_gives_an_error_object(kit: Kit, project: Path) -> None:
 
 
 def test_raw_and_json_exclude_each_other(kit: Kit, project: Path) -> None:
-    """`--raw` and `--json` must not go together."""
+    """`--raw` and `--json` must not go together; with `--json` the stop is an error object."""
     result = kit.run(project, "list", "--raw", "--json")
-    assert result.code == 2
-    assert "not allowed" in result.err
+    assert result.code == 1
+    assert result.err == ""
+    assert "not allowed" in json.loads(result.out)["error"]
+    plain = kit.run(project, "list", "--raw", "--bad")
+    assert plain.code == 2
+    assert "unrecognized arguments" in plain.err

@@ -4,12 +4,13 @@ title: spezi init adds the kit to a project
 kind: functional
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
+updated: 2026-11-28
 tests:
   - tests/test_kit.py:test_init_writes_the_kit_files
   - tests/test_kit.py:test_init_ci_runs_on_the_base_branch
   - tests/test_kit.py:test_init_keeps_an_existing_flake
   - tests/test_kit.py:test_init_takes_the_forge_from_the_remote
+  - tests/test_kit.py:test_init_reads_the_forge_from_the_host_only
   - tests/test_kit.py:test_init_stops_when_the_kit_is_there
 implementation:
   - src/spezi/kit.py
@@ -23,16 +24,17 @@ scope:
 
 # spezi init adds the kit to a project
 
-`spezi init [<dir>] [--forge github|gitlab|codeberg] [-y]` must add the kit to the project in
-`<dir>`, or in the current folder. First it must ask the questions of 000085, and it must write
+`spezi init [<dir>] [--forge github|gitlab|codeberg] [-y] [-r]` must add the kit to the project
+in `<dir>`, or in the current folder. First it must ask the questions of 000085, and it must write
 the answers to `spezi.toml`. It must write these files:
 
 | File | Content |
 | --- | --- |
 | `spezi.toml` | The settings, with the answers of 000085 and the `ref` of the kit: the tag of the kit with the highest version, else its default branch, as in 000068. |
-| `spezi.lock` | The commit that this `ref` names, and the hash of the copy of the kit (000082). |
+| `spezi.lock` | The commit that this `ref` names, the hash of the copy of the kit, and the entry of each copy of a transitive upstream (000082). |
 | `specs/` | An empty folder for the rules of the project. |
-| `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit (000048). |
+| `specs/.upstream/github.com/frederikbeimgraben/spezi/` | The rules of the kit at this commit, with its `spezi.lock` (000048). |
+| `specs/.upstream/<repo>/` | The transitive upstreams of the kit that the user chooses, or each with `-r` (000092, 000085). The command must write them as `transitive` to the table of the kit. |
 | `specs/.templates/` | The templates of the kit at this commit. |
 | `.claude/skills/spezi-*` | The skills of the kit. |
 | `.github/workflows/spezi.yml`, `.gitlab/ci/spezi.yml` or `.forgejo/workflows/spezi.yml` | The CI job for the forge, which runs `spezi check` at the commit of the kit. On GitHub and Codeberg, it runs for each pull request and for each push to the branch of `base_ref`, for example `develop` for `origin/develop`. For Codeberg, the job runs on the hosted Forgejo Actions runner `codeberg-small`. |
@@ -59,8 +61,8 @@ it must do the steps of `spezi install` (000083).
 
 Without `--forge`, the command must propose the forge of `git remote origin` (000085). It must
 stop with an error and change no file when `spezi.toml` exists, when the forge is unknown, when
-`.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is the kit, or when this
-program is an older commit of the kit than the commit of the `ref`.
+the switch `ci` is on and `.gitlab-ci.yml` has an `include` that is not a list, when `<dir>` is
+the kit, or when this program is an older commit of the kit than the commit of the `ref`.
 
 Reason: One command gives a project the same start as every other project. The kit never
 changes a `flake.nix` that exists, because it cannot read every form of Nix code, and changes an

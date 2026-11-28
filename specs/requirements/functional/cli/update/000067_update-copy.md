@@ -12,6 +12,7 @@ tests:
   - tests/test_kit.py:test_update_without_arguments_updates_each_repository
   - tests/test_kit.py:test_update_reads_a_ref_without_spaces
   - tests/test_kit.py:test_update_writes_include_once
+  - tests/test_transitive.py:test_update_with_recursive_adds_a_new_transitive_upstream
 implementation:
   - src/spezi/kit.py
   - src/spezi/cli.py
@@ -22,8 +23,8 @@ scope:
 
 # spezi update resolves the refs again and replaces the copies
 
-`spezi update [<repo> [<ref>]] [-y]` must update the copies below `specs/.upstream/` (000048),
-after the questions of 000085:
+`spezi update [<repo> [<ref>]] [-y] [-r]` must update the copies below `specs/.upstream/`
+(000048), after the questions of 000085:
 
 | Form | Effect |
 | --- | --- |
@@ -38,6 +39,13 @@ that `ref` names, and write the `ref`, the commit, `include` and the hash to `sp
 `include` and must keep `include`. Only a folder that the user adds (000085) changes it. The
 kit comes first.
 
+The command must keep `transitive` and copy each of its repositories at the commit of the new
+`spezi.lock` of the direct upstream (000092). For a transitive upstream that the new
+`spezi.lock` names and `transitive` does not hold, it must ask as 000085 tells. With `-r`
+(also `--recursive`), it must copy each such upstream without a question. A repository of
+`transitive` that the new `spezi.lock` does not name must leave `transitive`. Its copy must go
+when no other list `transitive` holds it.
+
 For the kit, the command must also replace the templates, the skills, the CI files of 000066 and
 the entry `spezi` in `.mcp.json`. A template or a skill that the user keeps (000085) must stay.
 The command must write each folder of 000089 again that is in the project. The folder of VS Code
@@ -49,9 +57,9 @@ the shell and run `nix develop`, because a program cannot load its shell again.
 
 The command must stop with an error when `<repo>` is not in `spezi.toml`, when this program is
 an older commit of the kit than the kit commit in `spezi.lock`, when `<repo>` at `<ref>` has no
-folder of `include`, when the kit at `<ref>` has no `specs/.templates/`, or when
-`.gitlab-ci.yml` has an `include` that is not a list. It must then change no file of the
-repository with the error.
+folder of `include`, when the kit at `<ref>` has no `specs/.templates/`, or when the switch
+`ci` is on and `.gitlab-ci.yml` has an `include` that is not a list. It must then change no file
+of the repository with the error.
 
 The command must replace only the parts whose switch in `[features]` is on, and must not change
 `flake.nix` when `flake` is off (000084). Before it copies, the command must run the migrations

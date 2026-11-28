@@ -14,7 +14,7 @@
       ];
       forAll = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
       rev = self.rev or "dirty";
-      version = (builtins.fromTOML (builtins.readFile ./pyproject.toml)).project.version;
+      version = "0.0.0+${self.shortRev or "dirty"}";
       vsix =
         pkgs:
         pkgs.buildNpmPackage {
@@ -51,12 +51,18 @@
           inherit version;
           pyproject = true;
           src = self;
-          build-system = [ pkgs.python313Packages.setuptools ];
+          build-system = [
+            pkgs.python313Packages.setuptools
+            pkgs.python313Packages.setuptools-scm
+          ];
+          env.SETUPTOOLS_SCM_PRETEND_VERSION = version;
           dependencies = with pkgs.python313Packages; [
             jsonschema
             mcp
             pygls
+            pyyaml
             questionary
+            rich-argparse
             rich
             tomlkit
           ];
@@ -94,9 +100,12 @@
               ps.mcp
               ps.pygls
               ps.pytest
+              ps.pyyaml
               ps.questionary
+              ps.rich-argparse
               ps.rich
               ps.tomlkit
+              ps.types-pyyaml
             ]))
             pkgs.ruff
             pkgs.basedpyright
