@@ -48,7 +48,7 @@ specs/
 | [C/specs/content/000026](/specs/conventions/specs/content/000026_product-terms.md) | Product terms stay as the product shows them | approved |
 | [C/specs/decisions/000042](/specs/conventions/specs/decisions/000042_whole-decision.md) | A decision spec records one decision with its alternatives | approved |
 | [C/specs/format/000008](/specs/conventions/specs/format/000008_copy-the-template.md) | A new spec starts as a copy of the template | approved |
-| [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | draft |
+| [C/specs/format/000009](/specs/conventions/specs/format/000009_front-matter.md) | A spec starts with a YAML front matter | approved |
 | [C/specs/format/000010](/specs/conventions/specs/format/000010_status.md) | The status shows the approval | approved |
 | [C/specs/format/000011](/specs/conventions/specs/format/000011_one-rule-per-file.md) | One file holds one rule | approved |
 | [C/specs/format/000012](/specs/conventions/specs/format/000012_rule-id.md) | The rule ID has kind, path and number | approved |
@@ -68,7 +68,7 @@ specs/
 | [C/specs/protocols/000030](/specs/conventions/specs/protocols/000030_breaking-change.md) | A breaking change of a format is a new protocol spec | approved |
 | [C/specs/protocols/000031](/specs/conventions/specs/protocols/000031_code-against-schema.md) | A test checks the output of the code against the schema | approved |
 | [C/specs/protocols/000032](/specs/conventions/specs/protocols/000032_protocols-key.md) | A rule names the formats that it uses | approved |
-| [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | draft |
+| [C/specs/references/000047](/specs/conventions/specs/references/000047_foreign-reference.md) | A reference to a rule of a different repository names the repository | approved |
 | [C/specs/references/000048](/specs/conventions/specs/references/000048_upstream-copy.md) | The rules of a different repository are an unchanged copy | approved |
 | [C/specs/references/000049](/specs/conventions/specs/references/000049_upstream-applies.md) | Each rule of a different repository applies unless a project rule replaces it | approved |
 | [C/specs/references/000050](/specs/conventions/specs/references/000050_no-contradiction.md) | A rule of the project does not contradict a rule of a different repository | approved |
@@ -82,9 +82,9 @@ specs/
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | spezi add adds the copy of a different repository | approved |
 | [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | spezi writes the rules for agents to AGENTS.md | approved |
-| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | draft |
+| [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | approved |
 | [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | spezi configure changes the settings in spezi.toml | approved |
-| [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | draft |
+| [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | approved |
 | [F/cli/install/000083](/specs/requirements/functional/cli/install/000083_install.md) | spezi install brings a project to the state of its settings | approved |
 | [F/cli/list/000072](/specs/requirements/functional/cli/list/000072_list-specs.md) | spezi list prints every rule | approved |
 | [F/cli/lsp/000088](/specs/requirements/functional/cli/lsp/000088_language-server.md) | spezi lsp runs the language server | approved |
@@ -93,16 +93,16 @@ specs/
 | [F/cli/new/000069](/specs/requirements/functional/cli/new/000069_new-spec.md) | spezi new makes a new spec from its template | approved |
 | [F/cli/output/000076](/specs/requirements/functional/cli/output/000076_formatted-output.md) | spezi formats its output for a terminal | approved |
 | [F/cli/output/000077](/specs/requirements/functional/cli/output/000077_changed-files.md) | spezi lists the files that a command changes | approved |
-| [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | spezi prints its data as JSON | draft |
+| [F/cli/output/000080](/specs/requirements/functional/cli/output/000080_json-output.md) | spezi prints its data as JSON | approved |
 | [F/cli/questions/000085](/specs/requirements/functional/cli/questions/000085_questions.md) | init, add and update ask questions on a terminal | approved |
 | [F/cli/remove/000087](/specs/requirements/functional/cli/remove/000087_remove.md) | spezi remove removes the copy of a different repository | approved |
 | [F/cli/resolve/000070](/specs/requirements/functional/cli/resolve/000070_resolve-id.md) | spezi resolve prints the long form of an ID | approved |
 | [F/cli/search/000073](/specs/requirements/functional/cli/search/000073_search-specs.md) | spezi search finds rules by a text | approved |
-| [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | spezi.toml holds the settings of the spezi command | draft |
-| [F/cli/settings/000084](/specs/requirements/functional/cli/settings/000084_feature-switches.md) | spezi.toml switches the optional parts of the kit on and off | draft |
+| [F/cli/settings/000078](/specs/requirements/functional/cli/settings/000078_settings.md) | spezi.toml holds the settings of the spezi command | approved |
+| [F/cli/settings/000084](/specs/requirements/functional/cli/settings/000084_feature-switches.md) | spezi.toml switches the optional parts of the kit on and off | approved |
 | [F/cli/setup-ide/000089](/specs/requirements/functional/cli/setup-ide/000089_setup-ide.md) | spezi setup-ide adds the language server to Zed or VS Code | approved |
 | [F/cli/show/000071](/specs/requirements/functional/cli/show/000071_show-spec.md) | spezi show prints the full text of a spec | approved |
-| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | spezi update resolves the refs again and replaces the copies | draft |
+| [F/cli/update/000067](/specs/requirements/functional/cli/update/000067_update-copy.md) | spezi update resolves the refs again and replaces the copies | approved |
 | [S/python/docs/000062](/specs/style/python/docs/000062_docstrings.md) | Python code is documented in Google-style docstrings | approved |
 | [S/python/functional/000063](/specs/style/python/functional/000063_python-means.md) | Python code uses fixed means for the functional style | approved |
 | [S/python/lint/000064](/specs/style/python/lint/000064_ruff-clean.md) | ruff reports no warning | approved |

@@ -2,7 +2,7 @@
 id: "000066"
 title: spezi init adds the kit to a project
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
