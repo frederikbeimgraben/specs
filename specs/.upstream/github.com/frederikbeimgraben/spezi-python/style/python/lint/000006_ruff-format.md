@@ -1,15 +1,13 @@
 ---
-id: "000075"
+id: "000006"
 title: ruff format changes nothing
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - pyproject.toml
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
-  - pyproject.toml
+  - specs/
 ---
 
 # ruff format changes nothing

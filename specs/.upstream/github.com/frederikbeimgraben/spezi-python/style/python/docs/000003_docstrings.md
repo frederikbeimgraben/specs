@@ -1,16 +1,13 @@
 ---
-id: "000062"
+id: "000003"
 title: Python code is documented in Google-style docstrings
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - pyproject.toml
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
-  - pyproject.toml
+  - specs/
 ---
 
 # Python code is documented in Google-style docstrings

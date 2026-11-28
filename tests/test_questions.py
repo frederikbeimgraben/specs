@@ -63,6 +63,7 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
             ("src", "docs"),
             (".py", ".txt"),
             "example.com/group/project",
+            (),
             "someone",
             ("agents", "ci", "flake"),
             True,
@@ -85,7 +86,7 @@ def test_init_writes_the_answers(kit: Kit, empty: Path) -> None:
 
 def test_init_cancel_changes_no_file(kit: Kit, empty: Path) -> None:
     """An answer no to Run? stops init before it changes a file."""
-    script = Script(["github", PROPOSAL, PROPOSAL, "", PROPOSAL, False])
+    script = Script(["github", PROPOSAL, PROPOSAL, PROPOSAL, "", PROPOSAL, False])
     with inside(kit.env, empty), pytest.raises(Cancelled):
         init(empty, None, script)
     assert not (empty / "spezi.toml").exists()
@@ -106,7 +107,7 @@ def test_update_keeps_a_changed_template(kit: Kit, project: Path) -> None:
     """Update shows the diff of a changed template, and keep keeps the file."""
     path = project / "specs/.templates/TEMPLATE.md"
     path.write_text("my template\n", encoding="utf-8")
-    script = Script(["keep", True])
+    script = Script([(), "keep", True])
     with inside(kit.env, project):
         update(Project.open(project), "kit", None, script)
     assert path.read_text(encoding="utf-8") == "my template\n"
