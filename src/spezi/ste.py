@@ -1,8 +1,8 @@
 """Check the rules of ASD-STE100 in the text of a spec (spec 000093).
 
 The check reads the prose of the body: paragraphs, list items and table cells. It finds sentences
-with more than 25 words (an error), and possible passive voice, two verbs of one group of
-synonyms and more than one instruction in a sentence (warnings).
+with more than 25 words, possible passive voice, two verbs of one group of synonyms and more
+than one instruction in a sentence. Each finding is a warning.
 """
 
 from __future__ import annotations
@@ -31,17 +31,15 @@ SIGNAL = re.compile(r"\b(?:must(?:\s+not)?|do\s+not|never|shall)\b", re.IGNORECA
 
 @dataclass(frozen=True, slots=True)
 class Finding:
-    """One result of the check.
+    """One warning of the check.
 
     Attributes:
         line: The line in the body where the sentence starts, from 1.
         message: The text, with the rule number at the end.
-        warning: True for a warning, False for an error.
     """
 
     line: int
     message: str
-    warning: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -273,22 +271,22 @@ def _sentence_findings(sentence: Sentence) -> Iterable[Finding]:
         sentence: The sentence.
 
     Returns:
-        The error for its length and the warnings for passive voice and instructions.
+        The warnings for its length, for passive voice and for instructions.
     """
     count = _count(sentence.text)
     signals = len(SIGNAL.findall(sentence.text))
     return (
         *(
-            (Finding(sentence.line, f"a sentence has {count} words, more than 25 (000093)", False),)
+            (Finding(sentence.line, f"a sentence has {count} words, more than 25 (000093)"),)
             if count > MAX_WORDS
             else ()
         ),
         *(
-            Finding(sentence.line, f"possible passive voice: '{m.group(0)}' (000093)", True)
+            Finding(sentence.line, f"possible passive voice: '{m.group(0)}' (000093)")
             for m in _passive().finditer(sentence.text)
         ),
         *(
-            (Finding(sentence.line, f"a sentence has {signals} instructions (000093)", True),)
+            (Finding(sentence.line, f"a sentence has {signals} instructions (000093)"),)
             if signals > 1
             else ()
         ),
@@ -330,7 +328,6 @@ def _synonym_findings(all_sentences: tuple[Sentence, ...]) -> Iterable[Finding]:
         Finding(
             line,
             f"one word for one thing: '{written}' and '{places[0][2]}' have one meaning (000093)",
-            True,
         )
         for group in _groups()
         for places in (sorted(p for p in (_first(all_sentences, v) for v in group) if p),)
@@ -339,17 +336,17 @@ def _synonym_findings(all_sentences: tuple[Sentence, ...]) -> Iterable[Finding]:
 
 
 def findings(body: str) -> tuple[Finding, ...]:
-    """Return the errors and the warnings of the rules of ASD-STE100 for one body (spec 000093).
+    """Return the warnings of the rules of ASD-STE100 for one body (spec 000093).
 
     Args:
         body: The Markdown body of a spec.
 
     Returns:
-        The findings, the errors first, each group in the order of the lines.
+        The findings in the order of the lines.
     """
     all_sentences = tuple(s for text in texts(body) for s in sentences(text))
     found = (
         *(f for s in all_sentences for f in _sentence_findings(s)),
         *_synonym_findings(all_sentences),
     )
-    return tuple(sorted(found, key=lambda f: (f.warning, f.line)))
+    return tuple(sorted(found, key=lambda f: f.line))

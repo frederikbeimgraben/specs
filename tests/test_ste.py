@@ -29,32 +29,29 @@ def _rule(project: Path, text: str) -> Path:
     return write_rule(project, "style/code/names", "000100", "names", "Names", "style", text)
 
 
-def _messages(body: str, *, warning: bool) -> tuple[str, ...]:
-    """Return the messages of the errors or of the warnings of a body.
+def _messages(body: str) -> tuple[str, ...]:
+    """Return the messages of the warnings of a body.
 
     Args:
         body: The body.
-        warning: True for the warnings, False for the errors.
 
     Returns:
         The messages.
     """
-    return tuple(f.message for f in findings(body) if f.warning == warning)
+    return tuple(f.message for f in findings(body))
 
 
 def test_ste_finds_a_long_sentence() -> None:
-    """A sentence with more than 25 words is an error at the line where it starts."""
+    """A sentence with more than 25 words is a warning at the line where it starts."""
     found = findings(f"# Title\n\nA name must be short.\n{SHORT}\n\n{LONG}\n")
-    assert [(f.line, f.warning) for f in found] == [(6, False)]
+    assert [f.line for f in found] == [6]
     assert found[0].message == "a sentence has 26 words, more than 25 (000093)"
 
 
 def test_ste_counts_a_sentence_over_two_lines_once() -> None:
     """A sentence that a line break splits counts as one sentence."""
     half = " ".join(["word"] * 13)
-    assert _messages(f"{half}\n{half}.\n", warning=False) == (
-        "a sentence has 26 words, more than 25 (000093)",
-    )
+    assert _messages(f"{half}\n{half}.\n") == ("a sentence has 26 words, more than 25 (000093)",)
 
 
 def test_ste_reads_only_the_prose() -> None:
@@ -71,24 +68,24 @@ def test_ste_reads_each_list_item_and_cell_alone() -> None:
     item = " ".join(["word"] * 15)
     body = f"- {item}\n- {item}\n\n| {item} | {item} |\n| --- | --- |\n| {item} | {item} |\n"
     assert findings(body) == ()
-    assert _messages(f"- {LONG}\n", warning=False)
-    assert _messages(f"| a | {LONG} |\n", warning=False)
+    assert _messages(f"- {LONG}\n")
+    assert _messages(f"| a | {LONG} |\n")
 
 
 def test_ste_keeps_an_abbreviation_in_the_sentence() -> None:
     """An abbreviation of the list does not end a sentence, e.g. only before a capital letter."""
     half = " ".join(["word"] * 13)
-    assert _messages(f"{half} vs. {half}.\n", warning=False)
-    assert _messages(f"{half} e.g. {half}.\n", warning=False)
-    assert not _messages(f"{half} e.g. Word {half}.\n", warning=False)
+    assert _messages(f"{half} vs. {half}.\n")
+    assert _messages(f"{half} e.g. {half}.\n")
+    assert not _messages(f"{half} e.g. Word {half}.\n")
 
 
 def test_ste_warns_on_passive_voice() -> None:
     """A form of be before a participle is a warning."""
-    assert _messages("The file is written by the command.\n", warning=True) == (
+    assert _messages("The file is written by the command.\n") == (
         "possible passive voice: 'is written' (000093)",
     )
-    assert not _messages("The file is short.\n", warning=True)
+    assert not _messages("The file is short.\n")
 
 
 def test_ste_warns_on_two_verbs_of_one_group() -> None:
@@ -101,25 +98,23 @@ def test_ste_warns_on_two_verbs_of_one_group() -> None:
 
 def test_ste_warns_on_two_instructions() -> None:
     """Two signal words in one sentence are a warning. `must not` counts as one."""
-    assert _messages("It must stop and must not write.\n", warning=True) == (
+    assert _messages("It must stop and must not write.\n") == (
         "a sentence has 2 instructions (000093)",
     )
-    assert not _messages("It must not write.\n", warning=True)
+    assert not _messages("It must not write.\n")
 
 
 def test_check_shows_the_findings(kit: Kit, project: Path) -> None:
-    """`spezi check` shows the error and the warning with their lines and counts them."""
+    """`spezi check` shows the warnings with their lines and counts them."""
     _rule(project, f"A name must be short. The name is used by the code.\n\n{LONG}")
     result = kit.run(project, "install", "--raw")
     rel = "specs/style/code/names/000100_names.md"
     lines = result.out.splitlines()
-    assert result.code == 1
-    assert f"{rel}:17: a sentence has 26 words, more than 25 (000093)" in lines
-    assert f"{rel}:15: warning: possible passive voice: 'is used' (000093)" in lines
-    assert lines.index(f"{rel}:15: warning: possible passive voice: 'is used' (000093)") > (
-        lines.index(f"{rel}:17: a sentence has 26 words, more than 25 (000093)")
+    assert result.code == 0, result.out
+    assert lines.index(f"{rel}:15: warning: possible passive voice: 'is used' (000093)") < (
+        lines.index(f"{rel}:17: warning: a sentence has 26 words, more than 25 (000093)")
     )
-    assert lines[-1].endswith(", 1 errors, 1 warnings")
+    assert lines[-1].endswith(", 0 errors, 2 warnings")
 
 
 def test_check_passes_with_only_warnings(kit: Kit, project: Path) -> None:

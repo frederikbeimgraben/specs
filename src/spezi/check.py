@@ -1048,26 +1048,20 @@ def _body_line(spec: Spec) -> int:
     return text[: len(text) - len(spec.body)].count("\n")
 
 
-def ste_findings(project: Project, specs: tuple[Spec, ...]) -> tuple[Errors, Errors]:
-    """Return the errors and the warnings of the rules of ASD-STE100 (spec 000093).
+def ste_findings(project: Project, specs: tuple[Spec, ...]) -> Errors:
+    """Return the warnings of the rules of ASD-STE100 (spec 000093).
 
     Args:
         project: The project.
         specs: The rules of the project.
 
     Returns:
-        The error lines and the warning lines, or nothing with `ste = false`.
+        The warning lines, or nothing with `ste = false`.
     """
-    found = tuple(
-        (where(project, s), _body_line(s), f)
+    return tuple(
+        f"{where(project, s)}:{_body_line(s) + f.line}: warning: {f.message}"
         for s in (specs if project.config.ste else ())
         for f in findings(s.body)
-    )
-    return (
-        tuple(f"{rel}:{start + f.line}: {f.message}" for rel, start, f in found if not f.warning),
-        tuple(
-            f"{rel}:{start + f.line}: warning: {f.message}" for rel, start, f in found if f.warning
-        ),
     )
 
 
@@ -1096,7 +1090,7 @@ def run(project: Project, *, write: bool) -> tuple[Count, Errors, Errors]:
     if write and agents is not None:
         write_text(agents_path, agents)
     raw = {s.short: s.status for s in copied}
-    ste_errors, warnings = ste_findings(project, specs)
+    warnings = ste_findings(project, specs)
     return (
         Count(len(specs), len(copied)),
         tuple(
@@ -1127,7 +1121,6 @@ def run(project: Project, *, write: bool) -> tuple[Count, Errors, Errors]:
                 *_code_refs(ctx),
                 *_markdown_refs(ctx, specs),
                 *_own_refs(ctx),
-                *ste_errors,
             )
         ),
         warnings,

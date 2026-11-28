@@ -37,12 +37,14 @@ The check must read only the prose of the body: paragraphs, list items and table
 not read the front matter, headings, code blocks, inline code and link targets. Each list item
 and each table cell is a separate text.
 
-| Check | Result | Condition |
-| --- | --- | --- |
-| Sentence length | Error | A sentence has more than 25 words. |
-| Passive voice | Warning | `is`, `are`, `was`, `were`, `been` or `being` comes before a word that ends in `-ed` or a participle of the list. |
-| Synonyms | Warning | One rule uses two verbs of one group of the list. The warning is at the first place of the second verb. |
-| Instructions | Warning | One sentence holds two or more of `must`, `do not`, `never` and `shall`. `must not` counts as one. |
+Each check must give a warning:
+
+| Check | Condition |
+| --- | --- |
+| Sentence length | A sentence has more than 25 words. |
+| Passive voice | `is`, `are`, `was`, `were`, `been` or `being` comes before a word that ends in `-ed` or a participle of the list. |
+| Synonyms | One rule uses two verbs of one group of the list. The warning is at the first place of the second verb. |
+| Instructions | One sentence holds two or more of `must`, `do not`, `never` and `shall`. `must not` counts as one. |
 
 A word is a part of the text between spaces with a letter or a digit. A sentence ends after a
 word that ends in `.`, `!` or `?`, also before a closing quote or bracket. An abbreviation of the
@@ -53,11 +55,11 @@ The lists of participles, of verb groups and of abbreviations must be in `src/sp
 They are a copy of the lists of `github.com/danyuchn/asd-ste100-skill`. The folder must hold the
 MIT license of this repository with its source in the file `NOTICE`.
 
-The line of an error or of a warning is the line where the sentence starts. A warning line must
+The line of a warning is the line where the sentence starts. A warning line must
 be `<path>:<line>: warning: <text>`. The warning lines must come after the error lines. A
 warning must not change the exit code (spec 000065).
 
-Reason: The sentence length is a fixed count, so it is an error. The other checks only find
-possible problems, so they are warnings. A person reads a warning and decides.
+Reason: A project with old text must pass the check also after an update of the kit. A program
+finds only possible problems of ASD-STE100. A person reads a warning and decides.
 
 Test: `tests/test_ste.py`.
