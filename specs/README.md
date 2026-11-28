@@ -81,7 +81,7 @@ specs/
 | [C/specs/structures/000038](/specs/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [C/specs/structures/000039](/specs/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
 | [F/cli/add/000068](/specs/requirements/functional/cli/add/000068_add-copy.md) | spezi add adds the copy of a different repository | approved |
-| [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | spezi writes the rules for agents to AGENTS.md | draft |
+| [F/cli/agents/000079](/specs/requirements/functional/cli/agents/000079_agents-file.md) | spezi writes the rules for agents to AGENTS.md | approved |
 | [F/cli/check/000065](/specs/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | approved |
 | [F/cli/configure/000086](/specs/requirements/functional/cli/configure/000086_configure.md) | spezi configure changes the settings in spezi.toml | approved |
 | [F/cli/init/000066](/specs/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | approved |
