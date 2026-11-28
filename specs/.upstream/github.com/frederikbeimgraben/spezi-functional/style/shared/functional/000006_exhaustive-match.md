@@ -1,14 +1,13 @@
 ---
-id: "000057"
+id: "000006"
 title: A branch on one value is an exhaustive match
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
+  - specs/
 ---
 
 # A branch on one value is an exhaustive match

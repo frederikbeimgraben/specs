@@ -1,20 +1,18 @@
 ---
-id: "000059"
+id: "000008"
 title: The exceptions of the functional style are named
 kind: style
 status: approved
 owner: frederikbeimgraben
-updated: 2026-11-27
-implementation:
-  - src/spezi/
+updated: 2026-11-28
+implementation: null
 scope:
-  - src/
+  - specs/
 ---
 
 # The exceptions of the functional style are named
 
-The rules (spec 000052, 000053, 000054, 000055, 000056, 000057, 000058) must not apply to
-these parts:
+The rules 000001 to 000007 must not apply to these parts:
 
 - tests
 - `try`, `with` and `raise`

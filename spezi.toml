@@ -21,3 +21,4 @@ envrc = true
 
 [upstream."github.com/frederikbeimgraben/spezi-python"]
 ref = "main"
+transitive = ["github.com/frederikbeimgraben/spezi-functional"]
