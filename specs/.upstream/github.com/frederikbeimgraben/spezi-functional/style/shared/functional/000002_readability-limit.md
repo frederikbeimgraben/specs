@@ -1,6 +1,6 @@
 ---
 id: "000002"
-title: Readability limits the single expression
+title: An expression is at most three levels deep
 kind: style
 status: approved
 owner: frederikbeimgraben
@@ -10,9 +10,9 @@ scope:
   - specs/
 ---
 
-# Readability limits the single expression
+# An expression is at most three levels deep
 
-Code must split an expression that is deeper than three levels or longer than 8 lines. The
-parts must become named locals or a named helper function.
+An expression must be at most three levels deep. Code must split a deeper expression into
+named locals or a named helper function.
 
-Reason: The goal of 000001 is code that is easier to read, not one long expression.
+Reason: The goal of (spec 000001) is code that is easier to read, not one long expression.

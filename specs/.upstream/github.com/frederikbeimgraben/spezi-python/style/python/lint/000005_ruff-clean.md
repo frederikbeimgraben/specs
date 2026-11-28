@@ -12,10 +12,8 @@ scope:
 
 # ruff reports no warning
 
-`ruff check` must report 0 warnings with the rule selection in `pyproject.toml`. The selection
-must be an explicit list of rules. Code must not turn off a rule with `# noqa`, except for a
-rule that the code cannot obey, with the rule code in the comment.
+`ruff check` must report 0 warnings with the rule selection in `pyproject.toml`.
 
-Reason: An explicit list stays the same when a new ruff version changes its default rules.
+Reason: Each warning of ruff is a violation of a rule (spec 000028).
 
 Test: `ruff check`.

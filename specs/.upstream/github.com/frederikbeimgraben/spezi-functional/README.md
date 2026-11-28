@@ -3,10 +3,10 @@
 The binding rules of this project. The kind folders of `specs/` hold the rules
 of the project, `specs/.upstream/` the rules of different repositories and
 `specs/.templates/` the templates. The command `spezi install` writes this
-file. Do not change it by hand (000007).
+file. Do not change it by hand (spec github.com/frederikbeimgraben/spezi:000007).
 
 A new spec starts with
-`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` (000008).
+`spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>` (spec github.com/frederikbeimgraben/spezi:000008).
 
 ## Tree
 
@@ -23,17 +23,23 @@ specs/
 | ID | Title | Status |
 | --- | --- | --- |
 | [S/shared/functional/000001](/specs/style/shared/functional/000001_body-shape.md) | A function body has one shape | approved |
-| [S/shared/functional/000002](/specs/style/shared/functional/000002_readability-limit.md) | Readability limits the single expression | approved |
+| [S/shared/functional/000002](/specs/style/shared/functional/000002_readability-limit.md) | An expression is at most three levels deep | approved |
 | [S/shared/functional/000003](/specs/style/shared/functional/000003_bind-once.md) | A local is bound once | approved |
 | [S/shared/functional/000004](/specs/style/shared/functional/000004_no-mutation.md) | A value is not mutated | approved |
 | [S/shared/functional/000005](/specs/style/shared/functional/000005_comprehensions.md) | Comprehensions instead of loops | approved |
-| [S/shared/functional/000006](/specs/style/shared/functional/000006_exhaustive-match.md) | A branch on one value is an exhaustive match | approved |
-| [S/shared/functional/000007](/specs/style/shared/functional/000007_frozen-data.md) | Data types are frozen by default | approved |
+| [S/shared/functional/000006](/specs/style/shared/functional/000006_exhaustive-match.md) | A match is exhaustive | approved |
+| [S/shared/functional/000007](/specs/style/shared/functional/000007_frozen-data.md) | A data type is immutable | approved |
 | [S/shared/functional/000008](/specs/style/shared/functional/000008_exceptions.md) | The exceptions of the functional style are named | approved |
+| [S/shared/functional/000009](/specs/style/shared/functional/000009_readability-length.md) | An expression has at most 8 lines | approved |
+| [S/shared/functional/000010](/specs/style/shared/functional/000010_effect-loop.md) | A loop that only causes effects is a for statement | approved |
+| [S/shared/functional/000011](/specs/style/shared/functional/000011_match-from-three.md) | A branch with three or more outcomes is a match | approved |
+| [S/shared/functional/000012](/specs/style/shared/functional/000012_two-outcomes.md) | A branch with two outcomes is a conditional expression | approved |
+| [S/shared/functional/000013](/specs/style/shared/functional/000013_flat-conditional.md) | A conditional expression is nested at most one level | approved |
+| [S/shared/functional/000014](/specs/style/shared/functional/000014_frozen-fields.md) | The collection fields of a data type are immutable | approved |
 
 ## Upstream
 
-The rules of different repositories that apply to this project (000049).
+The rules of different repositories that apply to this project (spec github.com/frederikbeimgraben/spezi:000049).
 
 | ID | Title | Status |
 | --- | --- | --- |
@@ -60,7 +66,7 @@ The rules of different repositories that apply to this project (000049).
 | [github.com/frederikbeimgraben/spezi:C/specs/format/000014](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/format/000014_moved-rule.md) | A moved rule keeps its number | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/format/000015](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/format/000015_labels.md) | Labels in a rule are fixed | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/format/000016](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/format/000016_file-name.md) | The file name is number and name | approved |
-| [github.com/frederikbeimgraben/spezi:C/specs/format/000017](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/format/000017_section-sign-reference.md) | Code refers to a rule with the § sign | approved |
+| [github.com/frederikbeimgraben/spezi:C/specs/format/000017](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/format/000017_spec-reference.md) | Code refers to a rule with (spec <number>) | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/layout/000004](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/layout/000004_tree.md) | The tree sorts by kind, then by area and topic | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/layout/000005](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/layout/000005_folder-names.md) | Folder names are lower case kebab case | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/layout/000006](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/layout/000006_one-place.md) | A rule is written in one place | approved |
@@ -85,41 +91,8 @@ The rules of different repositories that apply to this project (000049).
 | [github.com/frederikbeimgraben/spezi:C/specs/structures/000037](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/structures/000037_diagram-size.md) | A diagram has at most 25 elements | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/structures/000038](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/structures/000038_diagram-follows-code.md) | A change of the structure changes the diagram | approved |
 | [github.com/frederikbeimgraben/spezi:C/specs/structures/000039](/specs/.upstream/github.com/frederikbeimgraben/spezi/conventions/specs/structures/000039_structures-key.md) | A rule names the structures that it uses | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/add/000068](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/add/000068_add-copy.md) | spezi add adds the copy of a different repository | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/agents/000079](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/agents/000079_agents-file.md) | spezi writes the rules for agents to AGENTS.md | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/check/000065](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/check/000065_check-specs.md) | spezi check checks the specs | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/configure/000086](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/configure/000086_configure.md) | spezi configure changes the settings in spezi.toml | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/init/000066](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/init/000066_install-kit.md) | spezi init adds the kit to a project | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/install/000083](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/install/000083_install.md) | spezi install brings a project to the state of its settings | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/list/000072](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/list/000072_list-specs.md) | spezi list prints every rule | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/lsp/000088](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/lsp/000088_language-server.md) | spezi lsp runs the language server | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/mcp/000074](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/mcp/000074_mcp-server.md) | spezi mcp runs the MCP server | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/migrate/000081](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/migrate/000081_migrations.md) | spezi migrates a project and its copies to a new kit | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/new/000069](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/new/000069_new-spec.md) | spezi new makes a new spec from its template | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/output/000076](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/output/000076_formatted-output.md) | spezi formats its output for a terminal | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/output/000077](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/output/000077_changed-files.md) | spezi lists the files that a command changes | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/output/000080](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/output/000080_json-output.md) | spezi prints its data as JSON | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/questions/000085](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/questions/000085_questions.md) | init, add and update ask questions on a terminal | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/remove/000087](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/remove/000087_remove.md) | spezi remove removes the copy of a different repository | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/resolve/000070](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/resolve/000070_resolve-id.md) | spezi resolve prints the long form of an ID | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/search/000073](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/search/000073_search-specs.md) | spezi search finds rules by a text | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/settings/000078](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/settings/000078_settings.md) | spezi.toml holds the settings of the spezi command | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/settings/000084](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/settings/000084_feature-switches.md) | spezi.toml switches the optional parts of the kit on and off | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/setup-ide/000089](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/setup-ide/000089_setup-ide.md) | spezi setup-ide adds the language server to Zed or VS Code | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/show/000071](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/show/000071_show-spec.md) | spezi show prints the full text of a spec | approved |
-| [github.com/frederikbeimgraben/spezi:F/cli/update/000067](/specs/.upstream/github.com/frederikbeimgraben/spezi/requirements/functional/cli/update/000067_update-copy.md) | spezi update resolves the refs again and replaces the copies | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000052](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000052_body-shape.md) | A function body has one shape | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000053](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000053_readability-limit.md) | Readability limits the single expression | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000054](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000054_bind-once.md) | A local is bound once | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000055](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000055_no-mutation.md) | A value is not mutated | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000056](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000056_comprehensions.md) | Comprehensions instead of loops | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000057](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000057_exhaustive-match.md) | A branch on one value is an exhaustive match | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000058](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000058_frozen-data.md) | Data types are frozen by default | approved |
-| [github.com/frederikbeimgraben/spezi:S/shared/functional/000059](/specs/.upstream/github.com/frederikbeimgraben/spezi/style/shared/functional/000059_exceptions.md) | The exceptions of the functional style are named | approved |
 | [github.com/frederikbeimgraben/spezi:U/specs/lifecycle/000041](/specs/.upstream/github.com/frederikbeimgraben/spezi/structures/specs/lifecycle/000041_status-life-cycle.md) | The status of a spec moves from draft to approved, replaced or removed | approved |
 | [github.com/frederikbeimgraben/spezi:U/specs/model/000040](/specs/.upstream/github.com/frederikbeimgraben/spezi/structures/specs/model/000040_spec-model.md) | A spec has a front matter, a body and links to other specs | approved |
-| [github.com/frederikbeimgraben/spezi:W/kit/migrations/000090](/specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/kit/migrations/000090_migration-ci.md) | The CI migrates demo projects from each migration | approved |
-| [github.com/frederikbeimgraben/spezi:W/kit/release/000091](/specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/kit/release/000091_release-workflow.md) | A tag publishes the package and the binaries | approved |
 | [github.com/frederikbeimgraben/spezi:W/specs/process/000001](/specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/specs/process/000001_precedence.md) | A spec wins over other guidance | approved |
 | [github.com/frederikbeimgraben/spezi:W/specs/process/000002](/specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/specs/process/000002_spec-first.md) | A change request starts as a spec | approved |
 | [github.com/frederikbeimgraben/spezi:W/specs/process/000003](/specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/specs/process/000003_change-process.md) | A change goes through a pull request | approved |

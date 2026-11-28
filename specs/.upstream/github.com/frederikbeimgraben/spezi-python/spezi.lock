@@ -2,12 +2,12 @@
 
 [upstream."github.com/frederikbeimgraben/spezi"]
 ref = "main"
-commit = "ddb8d7ca1687fbe5a50005e9eb7904d61b332874"
+commit = "8164a507e28484685f32971784dce6bac15e58b1"
 include = []
-hash = "sha256-sRRdMEVwtOnYFyZpNkMygFSxbfMB4ZPz5LtTkgaYMWM="
+hash = "sha256-8Z69I5UsEvOxbDDvU+gQhsOE7cdYRvOTCmyK5OqpK70="
 
 [upstream."github.com/frederikbeimgraben/spezi-functional"]
 ref = "main"
-commit = "3a2540b05154fed195594ed990477422e6e56caa"
+commit = "08b895ab40ec449ec9e58564d97f735608dd249a"
 include = []
-hash = "sha256-YuQLMMhyvyTMX6t3bUdISk6T4y8jPvxGssVCk85lCHA="
+hash = "sha256-0DL6E7cs2UzbM3ghlzvdSf/oR5pr/s5WhcTQirvsh5o="

@@ -2,12 +2,12 @@
 
 [upstream."github.com/frederikbeimgraben/spezi-functional"]
 via = ["github.com/frederikbeimgraben/spezi-python"]
-commit = "3a2540b05154fed195594ed990477422e6e56caa"
+commit = "08b895ab40ec449ec9e58564d97f735608dd249a"
 include = []
-hash = "sha256-TOWy2HO2J78tZimfGR+J5pIqq/nArK/oHxila01XQV8="
+hash = "sha256-5CnWv3IqAnI4GYBvqZWWYNJuN/nW06NxxqIlTfAlfEA="
 
 [upstream."github.com/frederikbeimgraben/spezi-python"]
 ref = "main"
-commit = "5c0516a1fe1beea6b96c53f561fe137186db71c5"
+commit = "bd0bfc41d595d2f11e218912f522957144b4f4e2"
 include = []
-hash = "sha256-FKCBeCO+jcY7H21nklp4gffMmu2bBxCbnajI3b1BAZg="
+hash = "sha256-ouDYUPD7HzQZiq4QqbYYMCI1m/TW41d1h5D8s4KM1V0="

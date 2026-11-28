@@ -12,9 +12,11 @@ scope:
 
 # A function body has one shape
 
-A function body must have this shape: guard checks that raise an error, then locals, then one
-`return` of an expression or one `match` with one `return` in each case. The best body is
-only one `return` of one expression.
+A function body must have these parts, in this order:
+
+1. Guard checks that raise an error.
+2. Locals.
+3. One `return` of an expression, or one `match` with one `return` in each case.
 
 Reason: A body of this shape has one path to its result. A reader and a type checker see each
-outcome.
+outcome. The best body is only one `return` of one expression.

@@ -1,6 +1,6 @@
 ---
 id: "000007"
-title: Data types are frozen by default
+title: A data type is immutable
 kind: style
 status: approved
 owner: frederikbeimgraben
@@ -10,9 +10,8 @@ scope:
   - specs/
 ---
 
-# Data types are frozen by default
+# A data type is immutable
 
-A data type must be immutable unless a write needs it. Its collection fields must be
-immutable collections too.
+A data type must be immutable.
 
-Reason: 000004 needs data that cannot change.
+Reason: (spec 000004) needs data that cannot change.
