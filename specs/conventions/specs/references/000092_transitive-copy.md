@@ -2,7 +2,7 @@
 id: "000092"
 title: A copy brings the upstreams of its repository
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:

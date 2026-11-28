@@ -2,7 +2,7 @@
 id: "000047"
 title: A reference to a rule of a different repository names the repository
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 implementation:

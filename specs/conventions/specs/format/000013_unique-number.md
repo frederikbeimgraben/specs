@@ -2,7 +2,7 @@
 id: "000013"
 title: The number is the identity of a rule
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 implementation:

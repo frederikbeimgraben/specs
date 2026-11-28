@@ -2,7 +2,7 @@
 id: "000033"
 title: A structure spec shows one structure as one diagram
 kind: convention
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 implementation:

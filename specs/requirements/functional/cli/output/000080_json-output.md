@@ -2,7 +2,7 @@
 id: "000080"
 title: spezi prints its data as JSON
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:

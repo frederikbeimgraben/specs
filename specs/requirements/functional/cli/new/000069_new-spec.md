@@ -2,7 +2,7 @@
 id: "000069"
 title: spezi new makes a new spec from its template
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
@@ -20,9 +20,9 @@ scope:
 # spezi new makes a new spec from its template
 
 `spezi new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` must copy
-the template of `<kind>` from `specs/.templates/` to `specs/<kind
-folder>/<area>/<topic>/<number>_<name>.md` and print the path. `<kind>` is the kind or its
-letter (spec 000004). The number must be the highest number of `specs/` and of `base_ref` plus
+the template of `<kind>` from `specs/.templates/` to
+`specs/<kind folder>/<area>/<topic>/<number>_<name>.md` and print the path. `<kind>` is the kind
+or its letter (spec 000004). The number must be the highest number of `specs/` and of `base_ref` plus
 one (spec 000013). The command must set `id`, `title`, `kind`, `owner`, `updated`, the `#` title
 and `scope`. `--scope` is required, one time for each path, and each path must exist. The owner
 must come from `--owner`, else from `git config <forge>.user`. The command must stop with an

@@ -2,7 +2,7 @@
 id: "000086"
 title: spezi configure changes the settings in spezi.toml
 kind: functional
-status: draft
+status: approved
 owner: frederikbeimgraben
 updated: 2026-11-28
 tests:
