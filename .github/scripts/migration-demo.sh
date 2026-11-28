@@ -19,7 +19,16 @@ case $demo in
     git -C "$dir" init -q
     git -C "$dir" remote add origin https://github.com/example/demo
     commit empty
-    (cd "$dir" && nix run "git+file://$kit?rev=$start" -- init --forge github --raw)
+    # init takes the kit at its highest tag, else at its default branch. A local clone with the
+    # start commit as main and without tags gives init the kit at the start commit.
+    source=$(mktemp -d)
+    git clone -q --no-checkout --no-tags "$kit" "$source"
+    git -C "$source" checkout -q -B main "$start"
+    git -C "$source" tag -l | xargs -r git -C "$source" tag -d >/dev/null
+    (cd "$dir" && GIT_CONFIG_COUNT=2 \
+      GIT_CONFIG_KEY_0="url.$source.insteadOf" GIT_CONFIG_VALUE_0=https://github.com/frederikbeimgraben/spezi.git \
+      GIT_CONFIG_KEY_1="url.$source.insteadOf" GIT_CONFIG_VALUE_1=https://github.com/frederikbeimgraben/specs.git \
+      nix run "git+file://$kit?rev=$start" -- init --forge github --raw)
     ;;
   *)
     echo "unknown demo $demo; use kit or init" >&2
