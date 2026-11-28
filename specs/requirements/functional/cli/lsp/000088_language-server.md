@@ -1,6 +1,6 @@
 ---
 id: "000088"
-title: specs lsp runs the language server
+title: spezi lsp runs the language server
 kind: functional
 status: approved
 owner: frederikbeimgraben
@@ -13,22 +13,22 @@ tests:
   - tests/test_lsp.py:test_the_link_marks_the_reference_in_the_code
   - tests/test_lsp.py:test_the_server_writes_no_file
 implementation:
-  - src/specs_kit/lsp.py
-  - src/specs_kit/check.py
-  - src/specs_kit/cli.py
+  - src/spezi/lsp.py
+  - src/spezi/check.py
+  - src/spezi/cli.py
 scope:
-  - src/specs_kit/
+  - src/spezi/
 ---
 
-# specs lsp runs the language server
+# spezi lsp runs the language server
 
-`specs lsp` must run a language server on stdin and stdout. The server must use the root of
+`spezi lsp` must run a language server on stdin and stdout. The server must use the root of
 the workspace as the root of the project. It must serve the specs below `specs/` and the files
 of `code_dirs` with the suffixes of `code_suffixes` (000078).
 
-The server must show each error of `specs check` (000065) as a diagnostic with the severity
+The server must show each error of `spezi check` (000065) as a diagnostic with the severity
 error, at the line of the error. An error without a line must go to line 1 of its file. An
-error of a folder or of a missing file must go to line 1 of `specs.toml`, with its path in the
+error of a folder or of a missing file must go to line 1 of `spezi.toml`, with its path in the
 text. The server must check the project:
 
 1. When the client starts it: the whole project, from the files on the disk.

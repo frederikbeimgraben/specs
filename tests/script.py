@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from specs_kit.ask import Check
+from spezi.ask import Check
 
 PROPOSAL = object()
 

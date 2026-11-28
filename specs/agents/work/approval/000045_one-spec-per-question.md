@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - .claude/skills/spec-approve/SKILL.md
+  - .claude/skills/spezi-approve/SKILL.md
 scope:
   - specs/
 ---

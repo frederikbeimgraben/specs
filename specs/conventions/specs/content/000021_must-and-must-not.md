@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
+  - src/spezi/check.py
 scope:
   - specs/
 ---
@@ -18,4 +18,4 @@ that the rule depends on.
 
 Reason: One fixed word shows what is binding and what is a fact.
 
-Test: `specs check` finds a draft or approved rule without `must`.
+Test: `spezi check` finds a draft or approved rule without `must`.

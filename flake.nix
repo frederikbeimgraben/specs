@@ -1,5 +1,5 @@
 {
-  description = "The specs command: check and manage the specs of a project";
+  description = "The spezi command: check and manage the specs of a project";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -18,10 +18,10 @@
       vsix =
         pkgs:
         pkgs.buildNpmPackage {
-          pname = "specs-vscode";
+          pname = "spezi-vscode";
           inherit version;
           src = ./editors/code;
-          npmDepsHash = "sha256-kbBblIG6mSFtEdlQuKp4vRsmWMeUt4ZcJjTuCnTC2mA=";
+          npmDepsHash = "sha256-QnFcSREAPCSW9q8rf6KJd76DblQvhKHoU7YKTRvasu8=";
           dontNpmBuild = true;
           nativeBuildInputs = [
             pkgs.esbuild
@@ -33,12 +33,12 @@
             tsc -p .
             esbuild src/extension.ts --bundle --minify --platform=node --format=cjs \
               --external:vscode --outfile=out/extension.js
-            vsce package --no-dependencies --skip-license --out specs.vsix
+            vsce package --no-dependencies --skip-license --out spezi.vsix
             runHook postBuild
           '';
           installPhase = ''
             runHook preInstall
-            install -Dm644 specs.vsix $out/specs.vsix
+            install -Dm644 spezi.vsix $out/spezi.vsix
             runHook postInstall
           '';
         };
@@ -47,7 +47,7 @@
       packages = forAll (pkgs: {
         vsix = vsix pkgs;
         default = pkgs.python313Packages.buildPythonApplication {
-          pname = "specs";
+          pname = "spezi-kit";
           inherit version;
           pyproject = true;
           src = self;
@@ -62,20 +62,20 @@
           ];
           makeWrapperArgs = [
             "--set"
-            "SPECS_KIT_SOURCE"
+            "SPEZI_KIT_SOURCE"
             "${self}"
             "--set"
-            "SPECS_KIT_REV"
+            "SPEZI_KIT_REV"
             rev
             "--set"
-            "SPECS_VSIX"
-            "${vsix pkgs}/specs.vsix"
+            "SPEZI_VSIX"
+            "${vsix pkgs}/spezi.vsix"
             "--prefix"
             "PATH"
             ":"
             (pkgs.lib.makeBinPath [ pkgs.git ])
           ];
-          meta.mainProgram = "specs";
+          meta.mainProgram = "spezi";
         };
       });
 

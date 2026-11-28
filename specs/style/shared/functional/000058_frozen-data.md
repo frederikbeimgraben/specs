@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
-  - src/specs_kit/
+  - src/spezi/
 scope:
   - src/
 ---

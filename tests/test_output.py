@@ -28,7 +28,7 @@ def _on_terminal(kit: Kit, cwd: Path, *args: str) -> str:
     """
     main, side = pty.openpty()
     with subprocess.Popen(
-        (sys.executable, "-m", "specs_kit", *args),
+        (sys.executable, "-m", "spezi", *args),
         cwd=cwd,
         env={**kit.env, "COLUMNS": "200", "TERM": "xterm-256color"},
         stdout=side,
@@ -68,7 +68,7 @@ def test_changed_files_are_sorted_and_relative(kit: Kit, empty: Path) -> None:
     ]
     paths = [line[2:] for line in lines]
     assert paths == sorted(paths, key=lambda p: Path(p).parts)
-    assert "A specs.toml" in lines
+    assert "A spezi.toml" in lines
     assert all(not p.startswith("/") for p in paths)
 
 
@@ -92,7 +92,7 @@ def test_mcp_tools_give_the_plain_results(
     for key, value in kit.env.items():
         monkeypatch.setenv(key, value)
     monkeypatch.chdir(project)
-    from specs_kit import mcp_server
+    from spezi import mcp_server
 
     (project / "specs" / "README.md").write_text("changed\n", encoding="utf-8")
     assert "the index is not current" in mcp_server.check()

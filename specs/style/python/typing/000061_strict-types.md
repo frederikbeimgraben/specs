@@ -7,7 +7,7 @@ owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
   - pyproject.toml
-  - src/specs_kit/
+  - src/spezi/
 scope:
   - src/
   - pyproject.toml

@@ -1,0 +1,16 @@
+name: spezi
+
+on:
+  pull_request:
+  push:
+    branches: [{branch}]
+
+jobs:
+  spezi:
+    runs-on: codeberg-small
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: https://github.com/cachix/install-nix-action@v31
+      - run: nix run github:frederikbeimgraben/spezi/{ref} -- check

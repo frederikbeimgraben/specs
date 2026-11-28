@@ -12,7 +12,7 @@ commit() { git -C "$dir" -c user.name=ci -c user.email=ci@example.invalid commit
 case $demo in
   kit)
     git -C "$kit" worktree add -q --detach "$dir" "$start"
-    repo=$(sed -n 's/^KIT_REPO = "\(.*\)"$/\1/p' "$dir/src/specs_kit/project.py")
+    repo=$(sed -n 's/^KIT_REPO = "\(.*\)"$/\1/p' "$dir"/src/*/project.py)
     printf '\n[upstream."%s"]\nref = "%s"\n' "$repo" "$start" >> "$dir/specs.toml"
     ;;
   init)

@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-26
 implementation:
-  - src/specs_kit/check.py
+  - src/spezi/check.py
 scope:
   - specs/
 ---
@@ -21,5 +21,5 @@ spec (000042). A reference must not point to a replaced rule.
 Reason: A new rule of the different repository applies after the next update. The project rule
 that replaces it holds the reason, and the owner approves it like each other rule.
 
-Test: `specs check` checks that each entry of `replaces` exists in the copy and that
+Test: `spezi check` checks that each entry of `replaces` exists in the copy and that
 no reference points to a replaced rule.

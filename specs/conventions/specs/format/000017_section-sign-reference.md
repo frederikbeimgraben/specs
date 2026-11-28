@@ -6,8 +6,8 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
-  - src/specs_kit/check.py
-  - specs.toml
+  - src/spezi/check.py
+  - spezi.toml
 scope:
   - specs/
 ---
@@ -15,13 +15,13 @@ scope:
 # Code refers to a rule with the § sign
 
 A docstring or a code comment must refer to a rule with `§` and the short form of 000047,
-without a space, for example `§000024` or `§github.com/frederikbeimgraben/specs:000012`. A
+without a space, for example `§000024` or `§github.com/frederikbeimgraben/spezi:000012`. A
 spec, a commit message or a pull request text must refer to a rule by its number, without `§`,
 for example `000024`.
 
-`code_dirs` in `specs.toml` names the folders that hold the code.
+`code_dirs` in `spezi.toml` names the folders that hold the code.
 
 Reason: One search for `§` finds every place in the code that implements a rule.
 
-Test: `specs check`: every `§` reference in `code_dirs` uses the short form and names a spec
+Test: `spezi check`: every `§` reference in `code_dirs` uses the short form and names a spec
 that exists, and no spec has a `§` before a rule number.

@@ -7,14 +7,14 @@ from pathlib import Path
 
 from conftest import Kit
 
-LONG = "github.com/frederikbeimgraben/specs:W/specs/process/000001"
+LONG = "github.com/frederikbeimgraben/spezi:W/specs/process/000001"
 PATH = (
-    "specs/.upstream/github.com/frederikbeimgraben/specs/workflow/specs/process/"
+    "specs/.upstream/github.com/frederikbeimgraben/spezi/workflow/specs/process/"
     "000001_precedence.md"
 )
 RULE = {
     "kind": "W",
-    "id": "github.com/frederikbeimgraben/specs:000001",
+    "id": "github.com/frederikbeimgraben/spezi:000001",
     "long": LONG,
     "status": "approved",
     "title": "A spec wins over other guidance",
@@ -64,7 +64,7 @@ def test_check_gives_errors_as_objects(kit: Kit, project: Path) -> None:
     assert {
         "file": "specs/README.md",
         "line": 1,
-        "message": "the index is not current; run specs install",
+        "message": "the index is not current; run spezi install",
         "rule": "000007",
     } in checked["errors"]
 

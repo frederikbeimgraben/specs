@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-KIT_URL = "https://github.com/frederikbeimgraben/specs"
+KIT_URL = "https://github.com/frederikbeimgraben/spezi"
 RULES_REPO = "example.com/team/rules"
 RULES_URL = f"https://{RULES_REPO}"
 FLAKE = "{ outputs = _: { }; }\n"
@@ -140,7 +140,7 @@ class Kit:
             The result.
         """
         done = subprocess.run(
-            (sys.executable, "-m", "specs_kit", *args),
+            (sys.executable, "-m", "spezi", *args),
             cwd=cwd,
             env=dict(self.env),
             capture_output=True,
@@ -227,8 +227,8 @@ def kit(tmp_path_factory: pytest.TempPathFactory) -> Kit:
     rules_rev = _commit_all(rules, env)
     full = {
         **env,
-        "SPECS_KIT_SOURCE": str(source),
-        "SPECS_KIT_REV": rev,
+        "SPEZI_KIT_SOURCE": str(source),
+        "SPEZI_KIT_REV": rev,
         "GIT_CONFIG_COUNT": "2",
         "GIT_CONFIG_KEY_0": f"url.{source}.insteadOf",
         "GIT_CONFIG_VALUE_0": f"{KIT_URL}.git",

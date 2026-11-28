@@ -14,23 +14,23 @@ tests:
   - tests/test_questions.py:test_update_stops_for_a_changed_template_without_a_terminal
   - tests/test_questions.py:test_update_stops_for_a_removed_rule_without_a_terminal
 implementation:
-  - src/specs_kit/ask.py
-  - src/specs_kit/kit.py
-  - src/specs_kit/review.py
-  - src/specs_kit/cli.py
+  - src/spezi/ask.py
+  - src/spezi/kit.py
+  - src/spezi/review.py
+  - src/spezi/cli.py
 scope:
-  - src/specs_kit/
+  - src/spezi/
 ---
 
 # init, add and update ask questions on a terminal
 
-When stdin and stdout are a terminal, `specs init`, `specs add` and `specs update` must ask
+When stdin and stdout are a terminal, `spezi init`, `spezi add` and `spezi update` must ask
 the questions of the tables below. Each question must show its proposal. A value that the
 command line gives replaces its question. With `-y` (also `--yes` or `--non-interactive`), with
 `--json`, or without a terminal, each question must take its proposal. A question that has a
 risk must then stop the command with an error. Ctrl+C must stop the command with an error.
 
-`specs init`:
+`spezi init`:
 
 | Question | Proposal |
 | --- | --- |
@@ -42,7 +42,7 @@ risk must then stop the command with an error. Ctrl+C must stop the command with
 | `[features]`, a checklist of the switches of 000084 | Each switch on. `claude` without `agents` asks again. |
 | For an `.envrc` without `use flake` and a `CLAUDE.md` without `@AGENTS.md`: add the line? | No |
 
-`specs add`:
+`spezi add`:
 
 | Question | Proposal |
 | --- | --- |
@@ -50,22 +50,22 @@ risk must then stop the command with an error. Ctrl+C must stop the command with
 | `<ref>`, when it is not given: one of the 10 tags with the highest version, the default branch, or a typed ref | The tag with the highest version (000068) |
 | The folders to copy, when `--include` is not given: a checklist of the kind folders and their direct folders | All folders. All folders give no `include`. |
 
-`specs update`:
+`spezi update`:
 
 | Question | Proposal |
 | --- | --- |
-| `<ref>`, only when it is not given and the repository has a tag with a higher version than its `ref`: the choices of `specs add` | The `ref` of `specs.toml` |
+| `<ref>`, only when it is not given and the repository has a tag with a higher version than its `ref`: the choices of `spezi add` | The `ref` of `spezi.toml` |
 | For a repository with `include`: the folders of the new version that the old version does not have and `include` does not hold | No folder. A chosen folder goes to `include`. |
 | A project rule in force names a rule of the repository in `replaces` or in its text, and the new version replaces or removes that rule: update anyway? | No, with a risk. The question lists each such reference. |
-| For the kit: a template or a skill is not the same as in the kit at the commit of `specs.lock` and not the same as in the new kit: overwrite, keep or cancel? | A risk. The question shows the diff from the file of the project to the file of the new kit. `keep` keeps the file of the project. |
+| For the kit: a template or a skill is not the same as in the kit at the commit of `spezi.lock` and not the same as in the new kit: overwrite, keep or cancel? | A risk. The question shows the diff from the file of the project to the file of the new kit. `keep` keeps the file of the project. |
 
-Before the copy of each repository, `specs init`, `specs add` and `specs update` must show a
-summary and ask `Run?`, with the proposal yes. The summary of `specs init` must show the
-answers. The summary of `specs add` and `specs update` must show the old and the new `ref`, the
+Before the copy of each repository, `spezi init`, `spezi add` and `spezi update` must show a
+summary and ask `Run?`, with the proposal yes. The summary of `spezi init` must show the
+answers. The summary of `spezi add` and `spezi update` must show the old and the new `ref`, the
 new commit, and each new, changed and removed rule as `A`, `M` or `D` with its number and its
 title. When the user answers no, or cancels, the command must stop with an error before it
-changes the copy of this repository. A repository that `specs update` updated before stays
-updated. `specs init` must not change a file before the answer to `Run?`.
+changes the copy of this repository. A repository that `spezi update` updated before stays
+updated. `spezi init` must not change a file before the answer to `Run?`.
 
 Reason: A person sees and chooses each setting and each version before a command changes the
 project, and a script or an agent gets the same result as before without questions. A change

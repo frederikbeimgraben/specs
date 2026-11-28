@@ -1,6 +1,6 @@
 ---
 id: "000077"
-title: specs lists the files that a command changes
+title: spezi lists the files that a command changes
 kind: functional
 status: approved
 owner: frederikbeimgraben
@@ -10,20 +10,20 @@ tests:
   - tests/test_output.py:test_changed_files_are_sorted_and_relative
   - tests/test_output.py:test_a_write_with_the_same_content_is_no_change
 implementation:
-  - src/specs_kit/changes.py
-  - src/specs_kit/cli.py
-  - src/specs_kit/view.py
-  - src/specs_kit/mcp_server.py
+  - src/spezi/changes.py
+  - src/spezi/cli.py
+  - src/spezi/view.py
+  - src/spezi/mcp_server.py
 scope:
-  - src/specs_kit/
+  - src/spezi/
 ---
 
-# specs lists the files that a command changes
+# spezi lists the files that a command changes
 
-Each command of `specs` that changes files (`init`, `install`, `update`, `add`, `configure`,
+Each command of `spezi` that changes files (`init`, `install`, `update`, `add`, `configure`,
 `remove` and `new`) must list each file that it created, changed or deleted, one file on each
 line, as in `git status --short`. The list must come after the message and the hints, and
-before the report of `specs check`, so that the report is at the end. A command without a check
+before the report of `spezi check`, so that the report is at the end. A command without a check
 must end with the list:
 
 | Mark | Change | Color on a terminal |

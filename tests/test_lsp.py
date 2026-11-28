@@ -36,7 +36,7 @@ async def _session(
     def _published(params: types.PublishDiagnosticsParams) -> None:
         seen[params.uri] = list(params.diagnostics)
 
-    await client.start_io(sys.executable, "-m", "specs_kit", "lsp", cwd=project, env=dict(kit.env))
+    await client.start_io(sys.executable, "-m", "spezi", "lsp", cwd=project, env=dict(kit.env))
     await client.initialize_async(
         types.InitializeParams(
             capabilities=types.ClientCapabilities(

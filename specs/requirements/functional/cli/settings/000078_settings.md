@@ -1,6 +1,6 @@
 ---
 id: "000078"
-title: specs.toml holds the settings of the specs command
+title: spezi.toml holds the settings of the spezi command
 kind: functional
 status: approved
 owner: frederikbeimgraben
@@ -8,16 +8,16 @@ updated: 2026-11-27
 tests:
   - tests/test_settings.py:test_a_bad_setting_stops_each_command
 implementation:
-  - src/specs_kit/project.py
-  - src/specs_kit/data/specs.toml
+  - src/spezi/project.py
+  - src/spezi/data/spezi.toml
 scope:
-  - src/specs_kit/
-  - specs.toml
+  - src/spezi/
+  - spezi.toml
 ---
 
-# specs.toml holds the settings of the specs command
+# spezi.toml holds the settings of the spezi command
 
-`specs` must read its settings from `specs.toml` in the root of the project. Each key is
+`spezi` must read its settings from `spezi.toml` in the root of the project. Each key is
 optional and must have this type and default:
 
 | Key | Type | Default | Meaning |
@@ -30,9 +30,9 @@ optional and must have this type and default:
 | `[features]` | table | each switch `true` | The switches of the optional parts of the kit (000084). |
 | `[upstream."<repo>"]` | table | none | One table for each copy, with `ref` (string: a tag, a branch or a commit) and the optional `include` (list of strings) (000048, 000082). |
 
-The template `src/specs_kit/data/specs.toml` must hold each key with its default and a comment.
-When `specs.toml` is no valid TOML, or a key has a different type, each command must stop with
-one line `specs: specs.toml: <error>` and the exit code 1.
+The template `src/spezi/data/spezi.toml` must hold each key with its default and a comment.
+When `spezi.toml` is no valid TOML, or a key has a different type, each command must stop with
+one line `specs: spezi.toml: <error>` and the exit code 1.
 
 Reason: One table tells every key, and a wrong type stops the command before it reads the wrong
 folders.

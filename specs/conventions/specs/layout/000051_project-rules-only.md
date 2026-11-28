@@ -6,7 +6,7 @@ status: approved
 owner: frederikbeimgraben
 updated: 2026-11-27
 implementation:
-  - src/specs_kit/project.py
+  - src/spezi/project.py
 scope:
   - specs/
 ---
@@ -22,10 +22,10 @@ the kit must be in these places of `specs/`:
 | `specs/.upstream/` | The copies of the rules of different repositories (000048). |
 | `specs/.templates/` | The templates for a new spec (000008). |
 
-The settings must be in `specs.toml` in the root of the repository.
+The settings must be in `spezi.toml` in the root of the repository.
 
 Reason: All files of the specs are in one folder. The hidden folders keep the files of the kit,
-which change with `specs update`, out of the way of a reader of the rules.
+which change with `spezi update`, out of the way of a reader of the rules.
 
-Test: `specs check` fails for a file in `specs/` that is not below a kind folder, not below a
+Test: `spezi check` fails for a file in `specs/` that is not below a kind folder, not below a
 hidden folder and is not `README.md`.

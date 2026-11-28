@@ -1,4 +1,4 @@
-"""Tests of `specs.toml` (§000078) and of the block in `AGENTS.md` (§000079)."""
+"""Tests of `spezi.toml` (§000078) and of the block in `AGENTS.md` (§000079)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from conftest import RULES_REPO, Kit
 
-BEGIN = "<!-- specs:begin (written by specs install, do not edit) -->"
+BEGIN = "<!-- spezi:begin (written by spezi install, do not edit) -->"
 
 
 @pytest.mark.parametrize(
@@ -15,21 +15,21 @@ BEGIN = "<!-- specs:begin (written by specs install, do not edit) -->"
     [
         ("code_dirs = []", 'code_dirs = "src"', "code_dirs"),
         ("max_elements = 25", "max_elements = 0", "max_elements"),
-        ('forge = "github"', "forge = [", "specs.toml"),
+        ('forge = "github"', "forge = [", "spezi.toml"),
     ],
 )
 def test_a_bad_setting_stops_each_command(
     kit: Kit, project: Path, old: str, new: str, message: str
 ) -> None:
     """A wrong type or no valid TOML stops the command with one line and exit code 1."""
-    path = project / "specs.toml"
+    path = project / "spezi.toml"
     text = path.read_text(encoding="utf-8")
     assert old in text
     path.write_text(text.replace(old, new), encoding="utf-8")
     for args in (("check", "--raw"), ("list", "--raw")):
         result = kit.run(project, *args)
         assert result.code == 1
-        assert result.err.startswith("specs: specs.toml: ")
+        assert result.err.startswith("spezi: spezi.toml: ")
         assert message in result.err
         assert result.err.count("\n") == 1
 
@@ -39,8 +39,8 @@ def test_init_writes_agents_and_claude(kit: Kit, project: Path) -> None:
     agents = (project / "AGENTS.md").read_text(encoding="utf-8")
     assert (project / "CLAUDE.md").read_text(encoding="utf-8") == "@AGENTS.md\n"
     assert agents.startswith(BEGIN)
-    assert "specs:A/work/questions/000043" in agents
-    assert "specs:W/specs/process/000001" in agents
+    assert "spezi:A/work/questions/000043" in agents
+    assert "spezi:W/specs/process/000001" in agents
     assert ":S/" not in agents and ":F/" not in agents
 
 

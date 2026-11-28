@@ -1,7 +1,8 @@
-# specs
+# Spezi
 
 A starter kit for specs: the binding rules of a software project, one rule in one Markdown file.
-The repository is a Nix flake. Its command `specs` checks and manages the specs of a project.
+The repository is a Nix flake. Its command `spezi` checks and manages the specs of a project.
+The command `specs` is a second name of the same command.
 
 ## What it does
 
@@ -35,54 +36,54 @@ The repository is a Nix flake. Its command `specs` checks and manages the specs 
 | `specs/` | The rules of the project in the kind folders, and `README.md`, the index (000051). |
 | `specs/.upstream/<host>/<group>/.../<repo>/` | The rules of a different repository, for example of this kit (000048). |
 | `specs/.templates/` | The templates for a new spec (000008). |
-| `specs.toml` | The settings, with the switches of the optional parts in `[features]` (000078, 000084). |
-| `specs.lock` | The commit and the hash of each copy below `specs/.upstream/` (000082). |
-| `.claude/skills/spec-*` | Skills for agents. |
-| `.mcp.json` | The MCP server `specs`. |
-| `.github/workflows/specs.yml`, `.gitlab/ci/specs.yml` (included from `.gitlab-ci.yml`) or `.forgejo/workflows/specs.yml` | The CI job. |
-| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `specs install`, and the import `@AGENTS.md` (000079). |
-| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `specs` at the commit of the kit (000066). |
+| `spezi.toml` | The settings, with the switches of the optional parts in `[features]` (000078, 000084). |
+| `spezi.lock` | The commit and the hash of each copy below `specs/.upstream/` (000082). |
+| `.claude/skills/spezi-*` | Skills for agents. |
+| `.mcp.json` | The MCP server `spezi`. |
+| `.github/workflows/spezi.yml`, `.gitlab/ci/spezi.yml` (included from `.gitlab-ci.yml`) or `.forgejo/workflows/spezi.yml` | The CI job. |
+| `AGENTS.md`, `CLAUDE.md` | The rules for agents, written by `spezi install`, and the import `@AGENTS.md` (000079). |
+| `flake.nix`, `flake.lock`, `.envrc` | The devShell with the command `spezi` at the commit of the kit (000066). |
 
 ## Commands
 
 ```sh
-nix run github:frederikbeimgraben/specs/<commit> -- <command>
+nix run github:frederikbeimgraben/spezi/<commit> -- <command>
 ```
 
 | Command | Effect |
 | --- | --- |
 | `check` | Checks the specs and the `§` references. It changes no file. |
-| `install` | Loads each copy that does not agree with `specs.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (000083). |
+| `install` | Loads each copy that does not agree with `spezi.lock`, writes each missing file of the kit, the index and `AGENTS.md`, then checks. It changes no version (000083). |
 | `init [<dir>] [--forge github\|gitlab\|codeberg]` | Asks for the settings, then adds the kit to a project, and a devShell with the command when the project has no `flake.nix`. |
-| `update [<repo> [<ref>]]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `specs.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `specs` in `flake.nix`. |
+| `update [<repo> [<ref>]]` | Resolves the `ref` of each repository, or of one, again and replaces its copy. With `<ref>`, it first sets `ref` in `spezi.toml`. `<repo>` can be `kit`. For the kit, it also replaces the templates, the skills, the CI file, the MCP server entry and the input `spezi` in `flake.nix`. |
 | `add [<repo> [<ref>]] [--include <folder>]...` | Adds the copy of the rules of a different repository, at `<ref>` or at its tag with the highest version. |
-| `configure [<key> <value>]` | Changes `specs.toml` in a menu, or sets one key such as `features.mcp false`, then installs (000086). |
+| `configure [<key> <value>]` | Changes `spezi.toml` in a menu, or sets one key such as `features.mcp false`, then installs (000086). |
 | `remove <repo>` | Removes the copy of a different repository, then installs (000087). |
 | `new <kind> <area>/<topic> <name> "<title>" --scope <path>... [--owner <login>]` | Makes a new spec from its template, with the next number and the paths of `scope`. |
 | `resolve <id>` | Prints the long form of an ID, for example `C/specs/format/000012` for `000012`. |
 | `show <id>` | Prints the full text of a spec. |
 | `list` | Lists every rule. |
 | `search <text>` | Lists the rules that hold a text. |
-| `setup-ide zed\|code` | Writes the extension of the language server for Zed or VS Code to `.zed/specs/` or `.vscode/specs/` (000089). |
+| `setup-ide zed\|code` | Writes the extension of the language server for Zed or VS Code to `.zed/spezi/` or `.vscode/spezi/` (000089). |
 | `lsp` | Runs the language server on stdin and stdout. It shows the errors of the check at their line, and the rule of a reference in a hover (000088). |
 | `mcp` | Runs the MCP server on stdin and stdout. It has the tools `check`, `install`, `resolve`, `show`, `list`, `search`, `new`, `configure` and `remove`. |
 
 On a terminal, `init`, `add`, `update` and `configure` ask questions. `-y` takes the proposals
 instead, as does a run without a terminal (000085).
 
-A project runs the command at the commit of the kit in `specs.lock`. `init` and `update` write
-this commit into the CI file, into `.mcp.json` and into the input `specs` of `flake.nix`.
-With direnv, the devShell loads the new command after `specs update`.
+A project runs the command at the commit of the kit in `spezi.lock`. `init` and `update` write
+this commit into the CI file, into `.mcp.json` and into the input `spezi` of `flake.nix`.
+With direnv, the devShell loads the new command after `spezi update`.
 
 ## Add the kit to a project
 
 ```sh
 cd <project-dir>
-nix run github:frederikbeimgraben/specs -- init
+nix run github:frederikbeimgraben/spezi -- init
 ```
 
 A project numbers its own rules from `000001`. For a project that has its own specs, follow the
-skill [spec-adopt](.claude/skills/spec-adopt/SKILL.md).
+skill [spezi-adopt](.claude/skills/spezi-adopt/SKILL.md).
 
 ## Contents of this repository
 
@@ -93,7 +94,7 @@ skill [spec-adopt](.claude/skills/spec-adopt/SKILL.md).
 | `specs/agents/` | The rules for agents. |
 | `specs/style/` | The code style, by language. |
 | `specs/structures/` | Two example structure specs. |
-| `src/specs_kit/` | The command `specs`. |
+| `src/spezi/` | The command `spezi`. |
 | `flake.nix` | The Nix flake with the package, the app and a dev shell. |
 
 All text in this kit follows ASD-STE100 Simplified Technical English (000025).
